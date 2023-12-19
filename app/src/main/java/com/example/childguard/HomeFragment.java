@@ -1,14 +1,18 @@
 package com.example.childguard;
 
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 
 /**
@@ -70,17 +74,20 @@ public class HomeFragment extends Fragment {
         super.onResume();
         Log.d("HomeFragment", "onResume: called");
         TextView situationTextView = getView().findViewById(R.id.situation);
-        updateInCarStatus(situationTextView);
+        FrameLayout situation_bg=getView().findViewById(R.id.situation_bg);
+        updateInCarStatus(situationTextView,situation_bg);
     }
 
-    public void updateInCarStatus(TextView situationTextView) {
+    public void updateInCarStatus(TextView situationTextView,FrameLayout situation_bg) {
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("default", 0);
 
         Log.d("HomeFragment", "updateInCarStatus: " + sharedPreferences.getBoolean("inCar", false));
         if (sharedPreferences.getBoolean("inCar", false)) {
             situationTextView.setText("\n降車状態");
+            situation_bg.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
         } else {
             situationTextView.setText("\n乗車状態");
+            situation_bg.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
         }
     }
 }
