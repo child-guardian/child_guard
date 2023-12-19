@@ -9,6 +9,7 @@
     tools:context=".HomeFragment">
 
     <FrameLayout
+        android:id="@+id/situation_bg"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@drawable/frame_style"
@@ -26,6 +27,7 @@
             android:textColor="@color/black"
             android:textAlignment="center"/>
         <TextView
+            android:id="@+id/situation"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:layout_marginTop="10dp"
