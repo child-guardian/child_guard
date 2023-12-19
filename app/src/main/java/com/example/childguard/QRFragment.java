@@ -5,6 +5,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,6 +68,19 @@ public class QRFragment extends Fragment {
 
         Button cameraButton = view.findViewById(R.id.camera);
 
+        // Init shared preferences
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("default", 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        cameraButton.setOnClickListener(v -> {
+            Log.d("QRFragment", "onClick: called");
+            if (!sharedPreferences.getBoolean("inCar", false)) {
+                editor.putBoolean("inCar", true);
+            } else {
+                editor.putBoolean("inCar", false);
+            }
+            editor.apply();
+        });
 
         return view;
     }

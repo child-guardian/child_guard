@@ -1,12 +1,15 @@
 package com.example.childguard;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -60,5 +63,24 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_home, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("HomeFragment", "onResume: called");
+        TextView situationTextView = getView().findViewById(R.id.situation);
+        updateInCarStatus(situationTextView);
+    }
+
+    public void updateInCarStatus(TextView situationTextView) {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("default", 0);
+
+        Log.d("HomeFragment", "updateInCarStatus: " + sharedPreferences.getBoolean("inCar", false));
+        if (sharedPreferences.getBoolean("inCar", false)) {
+            situationTextView.setText("\n降車状態");
+        } else {
+            situationTextView.setText("\n乗車状態");
+        }
     }
 }
