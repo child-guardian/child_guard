@@ -1,12 +1,19 @@
 package com.example.childguard;
 
+import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
+import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -60,5 +67,27 @@ public class HomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_home, container, false);
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("HomeFragment", "onResume: called");
+        TextView situationTextView = getView().findViewById(R.id.situation);
+        FrameLayout situation_bg=getView().findViewById(R.id.situation_bg);
+        updateInCarStatus(situationTextView,situation_bg);
+    }
+
+    public void updateInCarStatus(TextView situationTextView,FrameLayout situation_bg) {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("default", 0);
+
+        Log.d("HomeFragment", "updateInCarStatus: " + sharedPreferences.getBoolean("inCar", false));
+        if (sharedPreferences.getBoolean("inCar", false)) {
+            situationTextView.setText("\n降車状態");
+            situation_bg.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
+        } else {
+            situationTextView.setText("\n乗車状態");
+            situation_bg.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
+        }
     }
 }

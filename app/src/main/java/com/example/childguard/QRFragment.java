@@ -1,12 +1,15 @@
 package com.example.childguard;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -53,12 +56,33 @@ public class QRFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_qr, container, false);
+        View view = inflater.inflate(R.layout.fragment_qr, container, false);
+
+        Button cameraButton = view.findViewById(R.id.camera);
+
+        // Init shared preferences
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("default", 0);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        cameraButton.setOnClickListener(v -> {
+            Log.d("QRFragment", "onClick: called");
+            if (!sharedPreferences.getBoolean("inCar", false)) {
+                editor.putBoolean("inCar", true);
+            } else {
+                editor.putBoolean("inCar", false);
+            }
+            editor.apply();
+        });
+
+        return view;
     }
+
 }
