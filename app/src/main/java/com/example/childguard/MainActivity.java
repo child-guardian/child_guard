@@ -1,8 +1,16 @@
 package com.example.childguard;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.os.Vibrator;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
@@ -11,6 +19,16 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //通知のやつ↓
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+
+        NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "サンプルアプリ", importance);
+        channel.setDescription("説明・説明　ここに通知の説明を書くことができる");
+
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+        //通知のやつ↑
 
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.nav_view);
@@ -33,5 +51,30 @@ public class MainActivity extends AppCompatActivity {
             return true;
 
         });
+    }
+
+    //↓通知のやつ
+    public void notifyTest() {
+        ((Vibrator)getSystemService(Context.VIBRATOR_SERVICE)).vibrate(1000);
+        NotificationCompat.Builder builder = new NotificationCompat
+                .Builder(this, "CHANNEL_ID")
+                .setSmallIcon(android.R.drawable.ic_menu_info_details)
+                .setContentTitle("タイトル")
+                .setContentText("メッセージ・メッセージ")
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            return;
+        }
+        notificationManager.notify(R.string.app_name, builder.build());
     }
 }
