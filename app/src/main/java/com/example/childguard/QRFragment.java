@@ -11,6 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link QRFragment#newInstance} factory method to
@@ -74,12 +76,7 @@ public class QRFragment extends Fragment {
 
         cameraButton.setOnClickListener(v -> {
             Log.d("QRFragment", "onClick: called");
-            if (!sharedPreferences.getBoolean("inCar", false)) {
-                editor.putBoolean("inCar", true);
-            } else {
-                editor.putBoolean("inCar", false);
-            }
-            editor.apply();
+            new IntentIntegrator(getActivity()).initiateScan();
         });
 
         return view;
