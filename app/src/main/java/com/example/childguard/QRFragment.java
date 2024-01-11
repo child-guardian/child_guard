@@ -1,8 +1,11 @@
 package com.example.childguard;
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.fragment.app.Fragment;
 
 import android.util.Log;
@@ -10,8 +13,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -62,6 +69,26 @@ public class QRFragment extends Fragment {
 
     }
 
+    private final ActivityResultLauncher<ScanOptions> fragmentLauncher = registerForActivityResult(new ScanContract(),
+            result -> {
+                    //QRコードからデータを読み取れたかの確認
+                if(result.getContents() == null) {
+                    Toast.makeText(getContext(), "Cancelled from fragment", Toast.LENGTH_LONG).show();
+                } else {
+                    //共有プリファレンス全体の準備
+                    SharedPreferences sharedPreferences = getActivity().getSharedPreferences("default", 0);
+                    //共有プリファレンス書き込みの準備
+                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                    //共有プリファレンスにURLの書き込み
+                    editor.putString(result.getContents(),"");
+                    //確定処理
+                    editor.apply();
+                    Intent intent=new Intent(getActivity(),UrlPageActivity.class);
+                    startActivity(intent);
+                }
+            });
+
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -70,16 +97,13 @@ public class QRFragment extends Fragment {
 
         Button cameraButton = view.findViewById(R.id.camera);
 
-        // Init shared preferences
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("default", 0);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
         cameraButton.setOnClickListener(v -> {
             Log.d("QRFragment", "onClick: called");
-            new IntentIntegrator(getActivity()).initiateScan();
+            //QRリーダ起動
+            fragmentLauncher.launch(new ScanOptions());
         });
 
         return view;
     }
-
 }
+
