@@ -27,7 +27,7 @@ import com.journeyapps.barcodescanner.ScanOptions;
  */
 public class QRFragment extends Fragment {
     //QRコードから受け取ったURLの受け渡しの宣言
-   OnDataPass dataPass;
+//   OnDataPass dataPass;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -71,17 +71,18 @@ public class QRFragment extends Fragment {
     }
 
     //FragmentからActivityへデータの受け渡しをするためのInterface
-    public interface OnDataPass{
-        void onDataPass(String urlPass);
-    }
+//    public interface OnDataPass{
+//        void onDataPass(String urlPass);
+//    }
     private final ActivityResultLauncher<ScanOptions> fragmentLauncher = registerForActivityResult(new ScanContract(),
             result -> {
                     //QRコードからデータを読み取れたかの確認
                 if(result.getContents() == null) {
                     Toast.makeText(getContext(), "Cancelled from fragment", Toast.LENGTH_LONG).show();
                 } else {
-                    dataPass.onDataPass(result.getContents());
+//                    dataPass.onDataPass(result.getContents());
                     //画面遷移
+                    Toast.makeText(getContext(), result.getContents(), Toast.LENGTH_SHORT).show();
                     Intent intent=new Intent(getActivity(),UrlPageActivity.class);
                     startActivity(intent);
                 }
