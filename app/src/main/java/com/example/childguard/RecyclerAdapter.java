@@ -12,77 +12,49 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 
-public class RecyclerAdapter extends RecyclerView.Adapter<ItemViewHolder> {
+public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemViewHolder> {
 
-    ArrayList<String> arrayListDN=new ArrayList<>();
-    ArrayList<String> arrayListDA=new ArrayList<>();
-    //RecyclerAdapterのコンストラクタ
-    public RecyclerAdapter(ArrayList<String[]> arrayList) {
-        for (String[] deviceInfo:arrayList) {
-            this.arrayListDN.add(deviceInfo[0]);
-            Log.d("c",deviceInfo[0]);
-        }
-        for (String[] deviceInfo:arrayList) {
-            this.arrayListDA.add(deviceInfo[1]);
-            Log.d("c",deviceInfo[1]);
-        }
+    ArrayList<String[]> deviceList;
+
+    // Constructor
+    public RecyclerAdapter(ArrayList<String[]> deviceList) {
+        Log.d("RecyclerAdapter", "Constructor");
+        // Init
+        this.deviceList = deviceList;
     }
 
-    //新しいViewHolderを生成すると呼び出される
     @NonNull
     @Override
-    public ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
-
-
-        //recycler_row.xmlをactivity_main.xmlの部品にする
-        View view = LayoutInflater.from(parent.getContext())
-                .inflate(R.layout.recycler_row, parent, false);
-
-        //新しいViewHolderを作成
-        //ItemViewHolderクラスを呼び出す
-        ItemViewHolder holder = new ItemViewHolder(view);
-
-        //クリックイベントを登録
-        holder.itemView.setOnClickListener(v -> {
-
-            int position = holder.getAdapterPosition();
-            Toast.makeText(v.getContext(),arrayListDA.get(position),Toast.LENGTH_SHORT).show();
-
-
-        });
-
-        //生成したViewHolderを戻す
-        return holder;
+    public RecyclerAdapter.ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        Log.d("RecyclerAdapter", "onCreateViewHolder");
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        View itemView = inflater.inflate(R.layout.recycler_row, parent, false);
+        return new ItemViewHolder(itemView);
     }
 
-    //1行分のレイアウトの詳細設定
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        //指定された位置の値を取得
-        holder.getTextView().setText(arrayListDN.get(position));
+        Log.d("RecyclerAdapter", "onBindViewHolder");
+        holder.textView.setText(deviceList.get(position)[0]);
+        holder.textView.setOnClickListener( v -> {
+            Toast.makeText(v.getContext(), deviceList.get(position)[1], Toast.LENGTH_SHORT).show();
+        });
     }
 
-    //ArrayListのデータ件数を取得
     @Override
     public int getItemCount() {
-        return arrayListDN.size();
+        Log.d("RecyclerAdapter", "getItemCount");
+        return deviceList.size();
     }
+
+    static class ItemViewHolder extends RecyclerView.ViewHolder {
+        TextView textView;
+
+        public ItemViewHolder(@NonNull View itemView) {
+            super(itemView);
+            textView = itemView.findViewById(R.id.textView1);
+        }
+    }
+
 }
 
-//RecyclerView.ViewHolderクラスを継承
-class ItemViewHolder extends RecyclerView.ViewHolder {
-    private final TextView textView;
-
-    //ItemViewHolderのコンストラクタ
-    public ItemViewHolder(View view) {
-        super(view);
-        //ViewHolderのビューにテキストを定義する
-        textView = view.findViewById(R.id.textView1);
-    }
-
-    //テキストの値を取得
-    public TextView getTextView() {
-        return textView;
-    }
-}
