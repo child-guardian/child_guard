@@ -1,5 +1,6 @@
 package com.example.childguard;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
@@ -7,6 +8,8 @@ import androidx.core.app.NotificationManagerCompat;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -14,11 +17,19 @@ import android.os.Vibrator;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.Random;
+import java.util.UUID;
+
 public class MainActivity extends AppCompatActivity {
+
+    BluetoothManager bluetoothManager;
+    BluetoothAdapter bluetoothAdapter;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         //通知のやつ↓
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
@@ -76,5 +87,12 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         notificationManager.notify(R.string.app_name, builder.build());
+
+
+    }
+    //Bluetooth_setupの戻るボタン
+    public void setupBackButton(boolean enableBackButton){
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setDisplayHomeAsUpEnabled(enableBackButton);
     }
 }
