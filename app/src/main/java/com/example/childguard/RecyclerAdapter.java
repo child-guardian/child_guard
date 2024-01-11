@@ -18,15 +18,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
 
     // Constructor
     public RecyclerAdapter(ArrayList<String[]> deviceList) {
-        Log.d("RecyclerAdapter", "Constructor");
         // Init
+        Log.d("RecyclerAdapter", "Constructor called");
         this.deviceList = deviceList;
     }
 
     @NonNull
     @Override
     public RecyclerAdapter.ItemViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Log.d("RecyclerAdapter", "onCreateViewHolder");
         LayoutInflater inflater = LayoutInflater.from(parent.getContext());
         View itemView = inflater.inflate(R.layout.recycler_row, parent, false);
         return new ItemViewHolder(itemView);
@@ -34,7 +33,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
 
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
-        Log.d("RecyclerAdapter", "onBindViewHolder");
         holder.textView.setText(deviceList.get(position)[0]);
         holder.textView.setOnClickListener( v -> {
             Toast.makeText(v.getContext(), deviceList.get(position)[1], Toast.LENGTH_SHORT).show();
@@ -43,7 +41,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
 
     @Override
     public int getItemCount() {
-        Log.d("RecyclerAdapter", "getItemCount");
         return deviceList.size();
     }
 
