@@ -17,6 +17,9 @@ import android.os.Vibrator;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.util.Random;
+import java.util.UUID;
+
 public class MainActivity extends AppCompatActivity {
 
     BluetoothManager bluetoothManager;
@@ -26,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
 
         //通知のやつ↓
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
