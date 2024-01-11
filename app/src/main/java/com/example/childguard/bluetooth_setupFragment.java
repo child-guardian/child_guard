@@ -133,7 +133,7 @@ public class bluetooth_setupFragment extends Fragment {
             for (String[] s : arrayList) {
                 Log.d("b", s[0]);
             }
-            Log.d(" ", String.valueOf(arrayList.size())z);
+            Log.d(" ", String.valueOf(arrayList.size()));
             RecyclerAdapter adapter = new RecyclerAdapter(arrayList);
 
             //④RecyclerViewとAdapterの結び付け
