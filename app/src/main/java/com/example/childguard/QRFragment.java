@@ -26,7 +26,8 @@ import com.journeyapps.barcodescanner.ScanOptions;
  * create an instance of this fragment.
  */
 public class QRFragment extends Fragment {
-
+    //QRコードから受け取ったURLの受け渡しの宣言
+   OnDataPass dataPass;
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
@@ -69,25 +70,23 @@ public class QRFragment extends Fragment {
 
     }
 
+    //FragmentからActivityへデータの受け渡しをするためのInterface
+    public interface OnDataPass{
+        void onDataPass(String urlPass);
+    }
     private final ActivityResultLauncher<ScanOptions> fragmentLauncher = registerForActivityResult(new ScanContract(),
             result -> {
                     //QRコードからデータを読み取れたかの確認
                 if(result.getContents() == null) {
                     Toast.makeText(getContext(), "Cancelled from fragment", Toast.LENGTH_LONG).show();
                 } else {
-                    //共有プリファレンス全体の準備
-                    SharedPreferences sharedPreferences = getActivity().getSharedPreferences("default", 0);
-                    //共有プリファレンス書き込みの準備
-                    SharedPreferences.Editor editor = sharedPreferences.edit();
-                    //共有プリファレンスにURLの書き込み
-                    editor.putString(result.getContents(),"");
-                    //確定処理
-                    editor.apply();
+                    dataPass.onDataPass(result.getContents());
+                    //画面遷移
                     Intent intent=new Intent(getActivity(),UrlPageActivity.class);
                     startActivity(intent);
                 }
-            });
 
+            });
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
