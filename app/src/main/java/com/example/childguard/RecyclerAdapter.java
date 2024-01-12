@@ -36,6 +36,17 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
         holder.textView.setText(deviceList.get(position)[0]);
         holder.textView.setOnClickListener( v -> {
             Toast.makeText(v.getContext(), deviceList.get(position)[1], Toast.LENGTH_SHORT).show();
+
+            // アラートダイアログを表示
+            new androidx.appcompat.app.AlertDialog.Builder(v.getContext())
+                    .setTitle("登録")
+                    .setMessage("このデバイスを登録しますか？")
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        // OK button pressed
+                        Toast.makeText(v.getContext(), "OK button clicked", Toast.LENGTH_SHORT).show();
+                    })
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show();
         });
     }
 
