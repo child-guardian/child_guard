@@ -1,5 +1,7 @@
 package com.example.childguard;
 
+import android.content.Context;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -16,11 +18,14 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
 
     ArrayList<String[]> deviceList;
 
+    Context applicationContext;
+
     // Constructor
-    public RecyclerAdapter(ArrayList<String[]> deviceList) {
+    public RecyclerAdapter(ArrayList<String[]> deviceList, Context applicationContext) {
         // Init
         Log.d("RecyclerAdapter", "Constructor called");
         this.deviceList = deviceList;
+        this.applicationContext = applicationContext;
     }
 
     @NonNull
@@ -35,7 +40,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         holder.textView.setText(deviceList.get(position)[0]);
         holder.textView.setOnClickListener( v -> {
-            Toast.makeText(v.getContext(), deviceList.get(position)[1], Toast.LENGTH_SHORT).show();
 
             // アラートダイアログを表示
             new androidx.appcompat.app.AlertDialog.Builder(v.getContext())
@@ -44,6 +48,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
                     .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                         // OK button pressed
                         Toast.makeText(v.getContext(), "OK button clicked", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(v.getContext(), deviceList.get(position)[1], Toast.LENGTH_SHORT).show();
+                        PreferenceManager.getDefaultSharedPreferences(this.applicationContext).edit().putString("bluetooth_device1", deviceList.get(position)[1]).apply();
                     })
                     .setNegativeButton(android.R.string.cancel, null)
                     .show();

@@ -16,6 +16,8 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.print.PrintHelper;
 
+import android.preference.PreferenceManager;
+import android.text.PrecomputedText;
 import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,6 +27,7 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.WriterException;
@@ -99,6 +102,10 @@ public class HomeFragment extends Fragment {
             public void onClick(View v) {
                 replaceFragment(new bluetooth_setupFragment());
             }
+        });
+
+        view.findViewById(R.id.bt_debug).setOnClickListener( v -> {
+            Toast.makeText(getContext(), PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext()).getString("bluetooth_device1", "none"), Toast.LENGTH_SHORT).show();
         });
         return view;
     }
