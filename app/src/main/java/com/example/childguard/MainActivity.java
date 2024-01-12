@@ -67,7 +67,9 @@ public class MainActivity extends AppCompatActivity {
 
     //↓通知のやつ
     public void notifyMain() {
+        //↓通知をする際に起動するバイブレーション
         ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(1000);
+        //↓通知の詳細設定的な奴
         NotificationCompat.Builder builder = new NotificationCompat
                 .Builder(this, "CHANNEL_ID")
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
