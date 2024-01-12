@@ -74,22 +74,16 @@ public class QRFragment extends Fragment {
 
     }
 
-    //FragmentからActivityへデータの受け渡しをするためのInterface
-//    public interface OnDataPass{
-//        void onDataPass(String urlPass);
-//    }
     private final ActivityResultLauncher<ScanOptions> fragmentLauncher = registerForActivityResult(new ScanContract(),
             result -> {
-                    //QRコードからデータを読み取れたかの確認
-                if(result.getContents() == null) {
-                    Toast.makeText(getContext(), "Cancelled from fragment", Toast.LENGTH_LONG).show();
+                    //result.getContents()でURLを入手
+                    //読み取ったQRコードがChiled Guard用サイトのドメインを含むかの判定
+                if(!((result.getContents()).contains("https://practicefirestore1-8808c.web.app/"))) {
+                    Toast.makeText(getContext(), "Chiled Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
                 } else {
-//                    dataPass.onDataPass(result.getContents());
-                    //画面遷移
+                    //URLの表示
                     Toast.makeText(getContext(), result.getContents(), Toast.LENGTH_SHORT).show();
-//                    Intent intent=new Intent(getActivity(),UrlPageActivity.class);
-//                    startActivity(intent);
-
+                    //ブラウザを起動し、URL先のサイトを開く
                     CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
                     CustomTabsIntent customTabsIntent = builder.build();
                     customTabsIntent.launchUrl(requireContext(), Uri.parse(result.getContents()));
