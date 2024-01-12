@@ -34,8 +34,9 @@ public class MainActivity extends AppCompatActivity {
         //通知のやつ↓
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
 
-        NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "サンプルアプリ", importance);
-        channel.setDescription("説明・説明　ここに通知の説明を書くことができる");
+        NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
+        //説明・説明　ここに通知の説明を書くことができる↓
+        channel.setDescription("第3者からの通報を検知しました");
 
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
@@ -65,13 +66,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     //↓通知のやつ
-    public void notifyTest() {
+    public void notifyMain() {
         ((Vibrator)getSystemService(Context.VIBRATOR_SERVICE)).vibrate(1000);
         NotificationCompat.Builder builder = new NotificationCompat
                 .Builder(this, "CHANNEL_ID")
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
-                .setContentTitle("タイトル")
-                .setContentText("メッセージ・メッセージ")
+                .setContentTitle("通報検知")
+                .setContentText("子供の置き去りを検知しました。")
                 .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
