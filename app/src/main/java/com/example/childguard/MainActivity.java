@@ -6,6 +6,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
@@ -17,6 +18,9 @@ import android.os.Vibrator;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
 import java.util.UUID;
 
@@ -24,6 +28,13 @@ public class MainActivity extends AppCompatActivity {
 
     BluetoothManager bluetoothManager;
     BluetoothAdapter bluetoothAdapter;
+
+    //↓日付を取得するやつ
+    public static String getNowDate() {
+        @SuppressLint("SimpleDateFormat") final DateFormat df = new SimpleDateFormat("yyy/MM/dd HH:mm:ss");
+        final Date date = new Date(System.currentTimeMillis());
+        return df.format(date);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
