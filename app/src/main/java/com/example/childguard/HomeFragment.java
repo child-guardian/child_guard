@@ -1,7 +1,12 @@
 package com.example.childguard;
 
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
@@ -9,14 +14,21 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.print.PrintHelper;
 
+import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.journeyapps.barcodescanner.BarcodeEncoder;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -69,12 +81,20 @@ public class HomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        //bluetooth設定ボタンの処理
         View view=inflater.inflate(R.layout.fragment_home,container,false);
         MainActivity activity = (MainActivity) getActivity();
-
-        Button bt1=view.findViewById(R.id.Bluetooth_setup);
+        //QRコード印刷の処理
+        Button bt1=view.findViewById(R.id.QRprinting);
         bt1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                replaceFragment(new QrPrintFragment());
+
+           }
+        });
+        //bluetooth設定ボタンの処理
+        Button bt2=view.findViewById(R.id.Bluetooth_setup);
+        bt2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 replaceFragment(new bluetooth_setupFragment());
