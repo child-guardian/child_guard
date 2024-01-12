@@ -67,7 +67,7 @@ public class MainActivity extends AppCompatActivity {
 
     //↓通知のやつ
     public void notifyMain() {
-        ((Vibrator)getSystemService(Context.VIBRATOR_SERVICE)).vibrate(1000);
+        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(1000);
         NotificationCompat.Builder builder = new NotificationCompat
                 .Builder(this, "CHANNEL_ID")
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
@@ -91,8 +91,9 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+
     //Bluetooth_setupの戻るボタン
-    public void setupBackButton(boolean enableBackButton){
+    public void setupBackButton(boolean enableBackButton) {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(enableBackButton);
     }
