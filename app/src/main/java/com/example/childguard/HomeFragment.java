@@ -1,34 +1,31 @@
 package com.example.childguard;
 
+import static android.content.ContentValues.TAG;
+
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-
-import androidx.core.content.res.ResourcesCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
-import androidx.print.PrintHelper;
-
-import android.util.AndroidRuntimeException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
-import com.journeyapps.barcodescanner.BarcodeEncoder;
+import androidx.annotation.NonNull;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -36,6 +33,8 @@ import com.journeyapps.barcodescanner.BarcodeEncoder;
  * create an instance of this fragment.
  */
 public class HomeFragment extends Fragment {
+
+    FirebaseFirestore db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -80,20 +79,58 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        //    Log.d("HomeFlagment_cnt", "aaaaa");
         // Inflate the layout for this fragment
-        View view=inflater.inflate(R.layout.fragment_home,container,false);
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
         MainActivity activity = (MainActivity) getActivity();
+        //共有プリファレンス 全体の準備
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         //QRコード印刷の処理
-        Button bt1=view.findViewById(R.id.QRprinting);
+        Button bt1 = view.findViewById(R.id.QRprinting);
         bt1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                replaceFragment(new QrPrintFragment());
+                //初回起動かを保存する変数
+                int i = Integer.parseInt(preferences.getString("kidoukaisuu", "1"));
+                //ボタン変数の宣言
+                Button parent = view.findViewById(R.id.QRprinting);
+                Button born = view.findViewById(R.id.QRprinting);
+                if (i == 1) {//QRコード印刷を初めて押したときにFireBaseへの登録を行う
+                    String QRYomitorisya = parent.getText().toString();//変数に文字列を代入
+                    String valueBorn = born.getText().toString();//変数に文字列を代入
+                    Map<String, String> user = new HashMap<>();//mapの宣言
 
-           }
+                    Log.d("HomeFragment", "onClick is called");
+
+                    //mapに入れる
+                    user.put("parent", QRYomitorisya);
+                    user.put("born", valueBorn);
+                    //新しいドキュメントにIDを作って追加
+                    db.collection("users")
+                            .add(user)
+                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                                @Override
+                                public void onSuccess(DocumentReference documentReference) {
+                                    Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                                }
+                            })
+                            .addOnFailureListener(new OnFailureListener() {
+                                @Override
+                                public void onFailure(@NonNull Exception e) {//エラー処理
+                                    Log.w(TAG, "Error adding document", e);
+                                }
+
+                            });
+
+                }
+                SharedPreferences.Editor e = preferences.edit();
+                e.putString("kidoukiroku", "2");
+                e.apply();
+                replaceFragment(new QrPrintFragment());
+            }
         });
         //bluetooth設定ボタンの処理
-        Button bt2=view.findViewById(R.id.Bluetooth_setup);
+        Button bt2 = view.findViewById(R.id.Bluetooth_setup);
         bt2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -108,11 +145,11 @@ public class HomeFragment extends Fragment {
         super.onResume();
         Log.d("HomeFragment", "onResume: called");
         TextView situationTextView = getView().findViewById(R.id.situation);
-        FrameLayout situation_bg=getView().findViewById(R.id.situation_bg);
-        updateInCarStatus(situationTextView,situation_bg);
+        FrameLayout situation_bg = getView().findViewById(R.id.situation_bg);
+        updateInCarStatus(situationTextView, situation_bg);
     }
 
-    public void updateInCarStatus(TextView situationTextView,FrameLayout situation_bg) {
+    public void updateInCarStatus(TextView situationTextView, FrameLayout situation_bg) {
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("default", 0);
 
         Log.d("HomeFragment", "updateInCarStatus: " + sharedPreferences.getBoolean("inCar", false));
@@ -125,8 +162,9 @@ public class HomeFragment extends Fragment {
         }
 
     }
+
     //画面遷移メソッド
-    private void replaceFragment(Fragment fragment){
+    private void replaceFragment(Fragment fragment) {
         // フラグメントマネージャーの取得
         FragmentManager manager = getParentFragmentManager(); // アクティビティではgetSupportFragmentManager()?
         // フラグメントトランザクションの開始
