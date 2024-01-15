@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.content.res.ResourcesCompat;
@@ -91,41 +92,52 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 //初回起動かを保存する変数
-                int i = Integer.parseInt(preferences.getString("kidoukaisuu", "1"));
+//                int i = Integer.parseInt(preferences.getString("kidoukaisuu", "1"));
+                boolean alreadySaved = preferences.getBoolean("alreadySaved", false);
                 //ボタン変数の宣言
                 Button parent = view.findViewById(R.id.QRprinting);
                 Button born = view.findViewById(R.id.QRprinting);
-                if (i == 1) {//QRコード印刷を初めて押したときにFireBaseへの登録を行う
-                    String QRYomitorisya = parent.getText().toString();//変数に文字列を代入
-                    String valueBorn = born.getText().toString();//変数に文字列を代入
-                    Map<String, String> user = new HashMap<>();//mapの宣言
+                if (alreadySaved) {
+                    Log.d("HomeFragment", "already printed");
+                    return;
+                } else Log.d("HomeFragment", "not printed yet"); // debug
 
-                    Log.d("HomeFragment", "onClick is called");
+                String valueParent = parent.getText().toString();//変数に文字列を代入
+                String valueBorn = born.getText().toString();//変数に文字列を代入
+                Map<String, String> user = new HashMap<>();//mapの宣言
 
-                    //mapに入れる
-                    user.put("parent", QRYomitorisya);
-                    user.put("born", valueBorn);
-                    //新しいドキュメントにIDを作って追加
-                    db.collection("users")
-                            .add(user)
-                            .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                                @Override
-                                public void onSuccess(DocumentReference documentReference) {
-                                    Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                                }
-                            })
-                            .addOnFailureListener(new OnFailureListener() {
-                                @Override
-                                public void onFailure(@NonNull Exception e) {//エラー処理
-                                    Log.w(TAG, "Error adding document", e);
-                                }
+                Log.d("HomeFragment", "onClick is called");
 
-                            });
+                //mapに入れる
+                user.put("parent", valueParent);
+                user.put("born", valueBorn);
+                //新しいドキュメントにIDを作って追加
+                db.collection("users")
+                        .add(user)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                //成功したら
+                                Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                                SharedPreferences.Editor e = preferences.edit();
+                                e.putBoolean("alreadySaved", true);
+                                e.apply();
+                                //画面遷移
+                                replaceFragment(new QrPrintFragment());
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                //失敗したら
+                                Log.w(TAG, "Error adding document", e);
+                            }
+                        });
 
-                }
-                SharedPreferences.Editor e = preferences.edit();
-                e.putString("kidoukiroku", "2");
-                e.apply();
+//
+//                SharedPreferences.Editor e = preferences.edit();
+//                e.putString("kidoukiroku", "2");
+//                e.apply();
                 replaceFragment(new QrPrintFragment());
             }
         });
