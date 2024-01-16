@@ -98,7 +98,7 @@ public class HomeFragment extends Fragment {
                 Button parent = view.findViewById(R.id.QRprinting);
                 Button born = view.findViewById(R.id.QRprinting);
                 //falseのときにFirebaseへの登録
-                if (!alreadySaved) {
+                if (alreadySaved) {
                     Log.d("HomeFragment", "already printed");
                    //画面遷移＆ID受け渡し
                     Toast.makeText(getActivity(),"再印刷",Toast.LENGTH_SHORT).show();
@@ -127,7 +127,7 @@ public class HomeFragment extends Fragment {
                                 Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
                                 SharedPreferences.Editor e = preferences.edit();
                                 // キー"alreadySaved"の値をtrueにする
-                                e.putBoolean("alreadySaved", false);
+                                e.putBoolean("alreadySaved", true);
                                 //確定処理
                                 e.apply();
                                 //画面遷移＆ID受け渡し
