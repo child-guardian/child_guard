@@ -15,19 +15,19 @@ public class QR extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_qr);
-
-        findViewById(R.id.camera).setOnClickListener(
-                v -> {
-                    if(get_on.equals(tv.getText().toString())){
-                        tv.setText(get_off);
-                        findViewById(R.id.situation_bg).setBackgroundColor(Color.parseColor("#dcdcdc"));
-                    }
-                    else {
-                        tv.setText(get_on);
-                        findViewById(R.id.situation_bg).setBackgroundColor(Color.parseColor("#ff4500"));
-                    }
-                }
-        );
+        //多分いらないコード
+//        findViewById(R.id.camera).setOnClickListener(
+//                v -> {
+//                    if(get_on.equals(tv.getText().toString())){
+//                        tv.setText(get_off);
+//                        findViewById(R.id.situation_bg).setBackgroundColor(Color.parseColor("#dcdcdc"));
+//                    }
+//                    else {
+//                        tv.setText(get_on);
+//                        findViewById(R.id.situation_bg).setBackgroundColor(Color.parseColor("#ff4500"));
+//                    }
+//                }
+//        );
     }
 
 }

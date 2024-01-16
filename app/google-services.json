@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "814788024795",
+    "project_id": "practicefirestore1-8808c",
+    "storage_bucket": "practicefirestore1-8808c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:814788024795:android:79602ef613cc9860c76ffe",
+        "android_client_info": {
+          "package_name": "com.example.childguard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVpoftIYGZwiPRpuI56hoV8ifA2rbZGb4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:814788024795:android:7c572a838331bba1c76ffe",
+        "android_client_info": {
+          "package_name": "com.example.connecttointernet"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVpoftIYGZwiPRpuI56hoV8ifA2rbZGb4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:814788024795:android:67c86939b6350f02c76ffe",
+        "android_client_info": {
+          "package_name": "com.example.practicefirestore1"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAVpoftIYGZwiPRpuI56hoV8ifA2rbZGb4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
