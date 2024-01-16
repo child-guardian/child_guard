@@ -97,13 +97,10 @@ public class QRFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_qr, container, false);
 
-        Button cameraButton = view.findViewById(R.id.camera);
 
-        cameraButton.setOnClickListener(v -> {
             Log.d("QRFragment", "onClick: called");
             //QRリーダ起動
             fragmentLauncher.launch(new ScanOptions());
-        });
 
         return view;
     }

@@ -3,6 +3,7 @@ package com.example.childguard;
 import static android.content.ContentValues.TAG;
 
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -11,6 +12,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -34,7 +36,6 @@ import java.util.Map;
  * create an instance of this fragment.
  */
 public class HomeFragment extends Fragment {
-
     FirebaseFirestore db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
 
     // TODO: Rename parameter arguments, choose names that match
@@ -43,7 +44,7 @@ public class HomeFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
+    private String str_key;
     private String mParam2;
 
     public HomeFragment() {
@@ -72,7 +73,7 @@ public class HomeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
+            // mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
@@ -92,13 +93,17 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 //初回起動かを保存する変数
-//                int i = Integer.parseInt(preferences.getString("kidoukaisuu", "1"));
                 boolean alreadySaved = preferences.getBoolean("alreadySaved", false);
                 //ボタン変数の宣言
                 Button parent = view.findViewById(R.id.QRprinting);
                 Button born = view.findViewById(R.id.QRprinting);
-                if (alreadySaved) {
+                //falseのときにFirebaseへの登録
+                if (!alreadySaved) {
                     Log.d("HomeFragment", "already printed");
+                   //画面遷移＆ID受け渡し
+                    Toast.makeText(getActivity(),"再印刷",Toast.LENGTH_SHORT).show();
+                    QrPrintFragment qrPrintFragment = new QrPrintFragment();
+                    replaceFragment(qrPrintFragment);
                     return;
                 } else Log.d("HomeFragment", "not printed yet"); // debug
 
@@ -118,12 +123,23 @@ public class HomeFragment extends Fragment {
                             @Override
                             public void onSuccess(DocumentReference documentReference) {
                                 //成功したら
+                                //documentReference.getId()でID取得
                                 Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
                                 SharedPreferences.Editor e = preferences.edit();
-                                e.putBoolean("alreadySaved", true);
+                                // キー"alreadySaved"の値をtrueにする
+                                e.putBoolean("alreadySaved", false);
+                                //確定処理
                                 e.apply();
-                                //画面遷移
-                                replaceFragment(new QrPrintFragment());
+                                //画面遷移＆ID受け渡し
+                                str_key = "" + documentReference.getId();
+                                Toast.makeText(getActivity(),"初回登録",Toast.LENGTH_SHORT).show();
+                                QrPrintFragment qrPrintFragment = new QrPrintFragment();
+                                Bundle bundle = new Bundle();
+                                bundle.putString("STR_KEY",str_key);
+                                //値を書き込む
+                                qrPrintFragment.setArguments(bundle);
+                                replaceFragment(qrPrintFragment);
+
                             }
                         })
                         .addOnFailureListener(new OnFailureListener() {
@@ -134,11 +150,7 @@ public class HomeFragment extends Fragment {
                             }
                         });
 
-//
-//                SharedPreferences.Editor e = preferences.edit();
-//                e.putString("kidoukiroku", "2");
-//                e.apply();
-                replaceFragment(new QrPrintFragment());
+
             }
         });
         //bluetooth設定ボタンの処理
@@ -160,7 +172,6 @@ public class HomeFragment extends Fragment {
         FrameLayout situation_bg = getView().findViewById(R.id.situation_bg);
         updateInCarStatus(situationTextView, situation_bg);
     }
-
     public void updateInCarStatus(TextView situationTextView, FrameLayout situation_bg) {
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("default", 0);
 

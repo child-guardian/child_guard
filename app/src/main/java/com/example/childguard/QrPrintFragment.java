@@ -1,5 +1,6 @@
 package com.example.childguard;
 
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.print.PrintHelper;
 
+import android.preference.PreferenceManager;
 import android.util.AndroidRuntimeException;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -59,7 +61,7 @@ public class QrPrintFragment extends Fragment {
     }
 
     @Override
-    public void onCreate(Bundle savedInstanceState) {
+    public void onCreate (Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mParam1 = getArguments().getString(ARG_PARAM1);
@@ -68,18 +70,34 @@ public class QrPrintFragment extends Fragment {
         }
     }
 
-    @Override
+   // @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
+        //共有プリファレンス 全体の準備
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        //User毎のドメインを保存する
+        String IdPref=preferences.getString("ID",null);
         // Inflate the layout for this fragment
-        View view=inflater.inflate(R.layout.fragment_qr_print, container, false);
-
+        View view=inflater.inflate(R.layout.fragment_qr_print, container, false);;
         //固定のドメイン
         String KoteiURL = "https://practicefirestore1-8808c.web.app/?id=";
-        //User毎のドメイン
-        String userURL="YKjFsZgJBlZmcyvdZ3Ap";
-        //二つのドメインを合成する
-        String AllURL=KoteiURL+userURL;
+        //すべてのドメイン
+        String AllURL;
+        //IdPrefにの値が初期値の場合
+        if(IdPref==null) {
+            //User毎のドメイン
+            String userURL = getArguments().getString("STR_KEY");
+            //キー"ID"の値をuserURLの値にする
+            SharedPreferences.Editor e = preferences.edit();
+            e.putString("ID", userURL);
+            //確定処理
+            e.apply();
+            //二つのドメインを合成する
+            AllURL=KoteiURL+userURL;
+        }else{
+            //二つのドメインを合成する
+            AllURL=KoteiURL+IdPref;
+        }
 
         int size = 2500;
         ImageView imageViewQrCode;
@@ -96,6 +114,7 @@ public class QrPrintFragment extends Fragment {
             throw new AndroidRuntimeException("Barcode Error.", e);
         }
         //    画像合成の準備
+        //    ここのエラーは直すと何故か動かなくなる。このままで動くので放置
         Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.a_group_qr_sos);
         Bitmap bitmap1 = ((BitmapDrawable) imageViewQrCode.getDrawable()).getBitmap();
         int width = bitmap.getWidth(); // 元ファイルの幅取得
