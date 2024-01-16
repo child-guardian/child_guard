@@ -104,6 +104,7 @@ public class HomeFragment extends Fragment {
             }
         });
 
+        //デバック用ボタン
         view.findViewById(R.id.bt_debug).setOnClickListener( v -> {
             Toast.makeText(getContext(), PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext()).getString("bluetooth_device1", "none"), Toast.LENGTH_SHORT).show();
         });

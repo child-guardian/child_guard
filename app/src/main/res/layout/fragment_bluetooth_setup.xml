@@ -10,17 +10,28 @@
 
 
     <!-- TODO: Update blank fragment layout -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="登録可能デバイス"
+        />
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerView1"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:scrollbars="vertical"/>
 
     <TextView
-        android:id="@+id/click_device"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-
+        android:text="登録済みデバイス"
         />
+    <TextView
+        android:id="@+id/registered_device"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="50dp"/>
+
+
 
 </LinearLayout>
