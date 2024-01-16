@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
     BluetoothAdapter bluetoothAdapter;
 
     public static final String TAG = "InspirationQuote";
-    private DocumentReference mDocRef = FirebaseFirestore.getInstance().document("users/q6t702C8nsXyehckByrr");//現在の位置を取得
+    private DocumentReference mDocRef = FirebaseFirestore.getInstance().document("users/rrVGKi77MAemxvPZrktm");//現在の位置を取得
     boolean flg = false;
 
     //↓日付を取得するやつ
