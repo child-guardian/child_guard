@@ -154,28 +154,15 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
-//    @Override
-//    public void onResume() {
-//        super.onResume();
-//        Log.d("HomeFragment", "onResume: called");
-//        Cargettingonandoff();
-//        TextView situationTextView = getView().findViewById(R.id.situation);
-//        FrameLayout situation_bg = getView().findViewById(R.id.situation_bg);
-//        updateInCarStatus(situationTextView, situation_bg);
-   // }
-//    public void updateInCarStatus(TextView situationTextView, FrameLayout situation_bg) {
-//        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("default", 0);
-//
-//        Log.d("HomeFragment", "updateInCarStatus: " + sharedPreferences.getBoolean("inCar", false));
-//        if (sharedPreferences.getBoolean("inCar", false)) {
-//            situationTextView.setText("\n降車状態");
-//            situation_bg.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
-//        } else {
-//            situationTextView.setText("\n乗車状態");
-//            situation_bg.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
-//        }
-//
-//    }
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d("HomeFragment", "onResume: called");
+        Bundle args = getArguments();
+        if (args != null) {//argsの中に値が入っている。
+                Cargettingonandoff();//メソッドCargettingonandoff()を実行
+    }
+    }
 
     //画面遷移メソッド
     private void replaceFragment(Fragment fragment) {
@@ -190,31 +177,31 @@ public class HomeFragment extends Fragment {
         // フラグメントトランザクションをコミット
         transaction.commit();
     }
-//    public void Cargettingonandoff() {
-//        //共有プリファレンス 全体の準備
-//        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-//        //車の乗り降りを管理するtrue=乗車、false=降車
-//        boolean zyoukouzyoutai = preferences.getBoolean("car", false);
-//        SharedPreferences.Editor e = preferences.edit();
-//        String get_on = "\n乗車状態";
-//        String get_off = "\n降車状態";
-//        TextView tv = getView().findViewById(R.id.situation);
-//        FrameLayout fl = getView().findViewById(R.id.situation_bg);
-//
-//        if (zyoukouzyoutai == true) {   //乗降状態の判定
-//            //降車状態にする
-//            fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
-//            tv.setText(get_off);
-//            e.putBoolean("car", false);
-//            e.apply();
-//        } else {
-//            //乗車状態にする
-//            fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
-//            tv.setText(get_on);
-//            e.putBoolean("car", true);
-//            e.apply();
-//        }
-//
-//
-//    }
+    public void Cargettingonandoff() {
+        //共有プリファレンス 全体の準備
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        //車の乗り降りを管理するtrue=乗車、false=降車
+        boolean zyoukouzyoutai = preferences.getBoolean("car", false);
+        SharedPreferences.Editor e = preferences.edit();
+        String get_on = "\n乗車状態";
+        String get_off = "\n降車状態";
+        TextView tv = getView().findViewById(R.id.situation);
+        FrameLayout fl = getView().findViewById(R.id.situation_bg);
+
+        if (zyoukouzyoutai == true) {   //乗降状態の判定
+            //降車状態にする
+            fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
+            tv.setText(get_off);
+            e.putBoolean("car", false);
+            e.apply();
+        } else {
+            //乗車状態にする
+            fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
+            tv.setText(get_on);
+            e.putBoolean("car", true);
+            e.apply();
+        }
+
+
+    }
 }

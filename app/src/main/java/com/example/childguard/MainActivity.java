@@ -111,7 +111,14 @@ public class MainActivity extends AppCompatActivity {
                         notifyMain();
                     } else {
                         Log.w(TAG, "Got an exceptiion!", e);
-                        Cargettingonandoff();
+                        HomeFragment fragment = new HomeFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putBoolean("親",true);
+                        fragment.setArguments(bundle);
+                        getSupportFragmentManager()
+                                .beginTransaction()
+                                .add(android.R.id.content, fragment)
+                                .commit();
                     }
 
                 }
@@ -153,34 +160,5 @@ public class MainActivity extends AppCompatActivity {
     public void setupBackButton(boolean enableBackButton) {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(enableBackButton);
-    }
-
-    public void Cargettingonandoff() {
-        //共有プリファレンス 全体の準備
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-        //車の乗り降りを管理するtrue=乗車、false=降車
-        boolean zyoukouzyoutai = preferences.getBoolean("car", false);
-        SharedPreferences.Editor e = preferences.edit();
-        String get_on = "\n乗車状態";
-        String get_off = "\n降車状態";
-        setContentView(R.layout.fragment_home);
-        TextView tv = findViewById(R.id.situation);
-        FrameLayout fl = findViewById(R.id.situation_bg);
-
-        if (zyoukouzyoutai == true) {   //乗降状態の判定
-            //降車状態にする
-            fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
-            tv.setText(get_off);
-            e.putBoolean("car", false);
-            e.apply();
-        } else {
-            //乗車状態にする
-            fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
-            tv.setText(get_on);
-            e.putBoolean("car", true);
-            e.apply();
-        }
-
-
     }
 }
