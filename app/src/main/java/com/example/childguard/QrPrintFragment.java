@@ -9,6 +9,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.print.PrintHelper;
 
 import android.preference.PreferenceManager;
@@ -132,7 +134,20 @@ public class QrPrintFragment extends Fragment {
         printHelper.setColorMode(PrintHelper.COLOR_MODE_COLOR);
         printHelper.setScaleMode(PrintHelper.SCALE_MODE_FIT);
         printHelper.printBitmap("job_name", QRGazou);
-
+        HomeFragment homeFragment=new HomeFragment();
+        replaceFragment(homeFragment);
         return view;
+    }
+    private void replaceFragment(Fragment fragment) {
+        // フラグメントマネージャーの取得
+        FragmentManager manager = getParentFragmentManager(); // アクティビティではgetSupportFragmentManager()?
+        // フラグメントトランザクションの開始
+        FragmentTransaction transaction = manager.beginTransaction();
+        // レイアウトをfragmentに置き換え（追加）
+        transaction.replace(R.id.fragmentContainerView, fragment);
+        // 置き換えのトランザクションをバックスタックに保存する
+        transaction.addToBackStack(null);
+        // フラグメントトランザクションをコミット
+        transaction.commit();
     }
 }
