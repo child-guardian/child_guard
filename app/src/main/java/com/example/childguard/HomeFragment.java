@@ -5,7 +5,15 @@ import static android.content.ContentValues.TAG;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.print.PrintHelper;
+
 import android.preference.PreferenceManager;
+import android.text.PrecomputedText;
+import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -160,6 +168,11 @@ public class HomeFragment extends Fragment {
             public void onClick(View v) {
                 replaceFragment(new bluetooth_setupFragment());
             }
+        });
+
+        //デバック用ボタン
+        view.findViewById(R.id.bt_debug).setOnClickListener( v -> {
+            Toast.makeText(getContext(), PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext()).getString("bluetooth_device1", "none"), Toast.LENGTH_SHORT).show();
         });
         return view;
     }

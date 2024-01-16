@@ -103,6 +103,16 @@
                 android:textColor="@color/white"
                 android:textSize="40dp" />
 
+            <Button
+                android:id="@+id/bt_debug"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="#778899"
+                android:text="Bluetooth設定"
+                android:textColor="@color/white"
+                android:textSize="40dp" />
+
+
             <FrameLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -1,5 +1,6 @@
 package com.example.childguard;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -15,11 +16,13 @@ import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -100,9 +103,9 @@ public class bluetooth_setupFragment extends Fragment {
         }
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
 
-        RecyclerView recyclerView = view.findViewById(R.id.recyclerView1);
+        RecyclerView recyclerView1 = view.findViewById(R.id.recyclerView1);
         //RecyclerViewのサイズを固定
-        recyclerView.setHasFixedSize(true);
+        recyclerView1.setHasFixedSize(true);
 
         //RecyclerViewに区切り線を入れる
 //        RecyclerView.ItemDecoration itemDecoration =
@@ -111,7 +114,8 @@ public class bluetooth_setupFragment extends Fragment {
 
         //レイアウトマネージャを設
         RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(getContext());
-        recyclerView.setLayoutManager(layoutManager);
+        recyclerView1.setLayoutManager(layoutManager);
+        //recyclerView2.setLayoutManager(layoutManager);
 
         //①リスト構造(String型の可変長の配列)を宣言
         ArrayList<String[]> arrayList = new ArrayList<>();
@@ -134,14 +138,21 @@ public class bluetooth_setupFragment extends Fragment {
                 Log.d("b", s[0]);
             }
             Log.d(" ", String.valueOf(arrayList.size()));
-            RecyclerAdapter adapter = new RecyclerAdapter(arrayList);
+            RecyclerAdapter adapter = new RecyclerAdapter(arrayList, requireActivity().getApplicationContext(), view);
+
 
             //④RecyclerViewとAdapterの結び付け
-            recyclerView.setAdapter(adapter);
+            recyclerView1.setAdapter(adapter);
+            TextView textView=view.findViewById(R.id.registered_device);
+            textView.setText(PreferenceManager.getDefaultSharedPreferences(requireActivity().getApplicationContext()).getString("bluetooth_device_name","none"));
+
+
+
         }
 
         return view;
 
     }
+
 
 }
