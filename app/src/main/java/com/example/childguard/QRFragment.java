@@ -9,6 +9,8 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -101,8 +103,22 @@ public class QRFragment extends Fragment {
             Log.d("QRFragment", "onClick: called");
             //QRリーダ起動
             fragmentLauncher.launch(new ScanOptions());
-
+            HomeFragment homeFragment=new HomeFragment();
+            replaceFragment(homeFragment);
         return view;
+    }
+    //画面遷移メソッド
+    private void replaceFragment(Fragment fragment) {
+        // フラグメントマネージャーの取得
+        FragmentManager manager = getParentFragmentManager(); // アクティビティではgetSupportFragmentManager()?
+        // フラグメントトランザクションの開始
+        FragmentTransaction transaction = manager.beginTransaction();
+        // レイアウトをfragmentに置き換え（追加）
+        transaction.replace(R.id.fragmentContainerView, fragment);
+        // 置き換えのトランザクションをバックスタックに保存する
+        transaction.addToBackStack(null);
+        // フラグメントトランザクションをコミット
+        transaction.commit();
     }
 }
 

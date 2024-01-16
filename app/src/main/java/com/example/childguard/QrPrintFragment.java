@@ -138,6 +138,7 @@ public class QrPrintFragment extends Fragment {
         replaceFragment(homeFragment);
         return view;
     }
+      //画面遷移メソッド
     private void replaceFragment(Fragment fragment) {
         // フラグメントマネージャーの取得
         FragmentManager manager = getParentFragmentManager(); // アクティビティではgetSupportFragmentManager()?
