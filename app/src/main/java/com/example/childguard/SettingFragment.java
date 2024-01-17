@@ -36,4 +36,14 @@ public class SettingFragment extends Fragment {
         // Inflate the layout for this fragment
         return inflater.inflate(R.layout.fragment_setting, container, false);
     }
+
+    @Override
+    public void onViewCreated(View view, Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+
+        view.findViewById(R.id.button_bluetooth_setting).setOnClickListener( v -> {
+            getParentFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, bluetooth_setupFragment.newInstance("test", "test")).commit();
+        });
+
+    }
 }
