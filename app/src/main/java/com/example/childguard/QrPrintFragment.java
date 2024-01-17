@@ -1,5 +1,7 @@
 package com.example.childguard;
 
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -75,10 +77,10 @@ public class QrPrintFragment extends Fragment {
    // @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        //共有プリファレンス 全体の準備
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        //共有プリファレンス全体の準備
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("app_situation", MODE_PRIVATE);
         //User毎のドメインを保存する
-        String IdPref=preferences.getString("ID",null);
+        String IdPref=sharedPreferences.getString("ID",null);
         // Inflate the layout for this fragment
         View view=inflater.inflate(R.layout.fragment_qr_print, container, false);;
         //固定のドメイン
@@ -90,7 +92,7 @@ public class QrPrintFragment extends Fragment {
             //User毎のドメイン
             String userURL = getArguments().getString("STR_KEY");
             //キー"ID"の値をuserURLの値にする
-            SharedPreferences.Editor e = preferences.edit();
+            SharedPreferences.Editor e = sharedPreferences.edit();
             e.putString("ID", userURL);
             //確定処理
             e.apply();

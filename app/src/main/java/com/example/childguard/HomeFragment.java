@@ -1,6 +1,7 @@
 package com.example.childguard;
 
 import static android.content.ContentValues.TAG;
+import static android.content.Context.MODE_PRIVATE;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -83,21 +84,21 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         MainActivity activity = (MainActivity) getActivity();
-        //共有プリファレンス 全体の準備
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        //共有プリファレンス全体の準備
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("app_situation", MODE_PRIVATE);
         //QRコード印刷の処理
         Button bt1 = view.findViewById(R.id.QRprinting);
         bt1.setOnClickListener(v -> {
             //初回起動かを保存する変数
-            boolean alreadySaved = preferences.getBoolean("alreadySaved", false);
+            boolean alreadySaved = sharedPreferences.getBoolean("alreadySaved", false);
             //ボタン変数の宣言
             Button parent = view.findViewById(R.id.QRprinting);
             Button born = view.findViewById(R.id.QRprinting);
             //falseのときにFirebaseへの登録
             if (alreadySaved) {
                 Log.d("HomeFragment", "already printed");
-               //画面遷移＆ID受け渡し
-                Toast.makeText(getActivity(),"再印刷",Toast.LENGTH_SHORT).show();
+                //画面遷移＆ID受け渡し
+                Toast.makeText(getActivity(), "再印刷", Toast.LENGTH_SHORT).show();
                 QrPrintFragment qrPrintFragment = new QrPrintFragment();
                 replaceFragment(qrPrintFragment);
                 return;
@@ -121,17 +122,17 @@ public class HomeFragment extends Fragment {
                             //成功したら
                             //documentReference.getId()でID取得
                             Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                            SharedPreferences.Editor e = preferences.edit();
+                            SharedPreferences.Editor e = sharedPreferences.edit();
                             // キー"alreadySaved"の値をtrueにする
                             e.putBoolean("alreadySaved", true);
                             //確定処理
                             e.apply();
                             //画面遷移＆ID受け渡し
                             str_key = "" + documentReference.getId();
-                            Toast.makeText(getActivity(),"初回登録",Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "初回登録", Toast.LENGTH_SHORT).show();
                             QrPrintFragment qrPrintFragment = new QrPrintFragment();
                             Bundle bundle = new Bundle();
-                            bundle.putString("STR_KEY",str_key);
+                            bundle.putString("STR_KEY", str_key);
                             //値を書き込む
                             qrPrintFragment.setArguments(bundle);
                             replaceFragment(qrPrintFragment);
@@ -158,10 +159,7 @@ public class HomeFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d("HomeFragment", "onResume: called");
-        Bundle args = getArguments();
-        if (args != null) {//argsの中に値が入っている。
-                Cargettingonandoff();//メソッドCargettingonandoff()を実行
-    }
+        Cargettingonandoff();//メソッドCargettingonandoff()を実行
     }
 
     //画面遷移メソッド
@@ -177,12 +175,13 @@ public class HomeFragment extends Fragment {
         // フラグメントトランザクションをコミット
         transaction.commit();
     }
+
     public void Cargettingonandoff() {
-        //共有プリファレンス 全体の準備
-        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        //共有プリファレンス全体の準備
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("app_situation", MODE_PRIVATE);
         //車の乗り降りを管理するtrue=乗車、false=降車
-        boolean zyoukouzyoutai = preferences.getBoolean("car", false);
-        SharedPreferences.Editor e = preferences.edit();
+        Boolean zyoukouzyoutai = sharedPreferences.getBoolean("car", false);
+        SharedPreferences.Editor e = sharedPreferences.edit();
         String get_on = "\n乗車状態";
         String get_off = "\n降車状態";
         TextView tv = getView().findViewById(R.id.situation);
@@ -192,14 +191,11 @@ public class HomeFragment extends Fragment {
             //降車状態にする
             fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
             tv.setText(get_off);
-            e.putBoolean("car", false);
-            e.apply();
+
         } else {
             //乗車状態にする
             fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
             tv.setText(get_on);
-            e.putBoolean("car", true);
-            e.apply();
         }
 
 
