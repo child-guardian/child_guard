@@ -86,10 +86,6 @@ public class MainActivity extends AppCompatActivity {
                         .replace(findViewById(R.id.fragmentContainerView).getId(), this.homeFragment)
                         .addToBackStack(null)
                         .commit();
-            } else if (v.getItemId() == findViewById(R.id.navigation_QR).getId()) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(findViewById(R.id.fragmentContainerView).getId(), QRFragment.newInstance("test", "tset"))
-                        .commit();
             } else if (v.getItemId() == findViewById(R.id.navigation_notification).getId()) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(findViewById(R.id.fragmentContainerView).getId(), NotificationFragment.newInstance("test", "test"))
