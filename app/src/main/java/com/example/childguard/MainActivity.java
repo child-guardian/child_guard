@@ -118,6 +118,10 @@ public class MainActivity extends AppCompatActivity {
                 getSupportFragmentManager().beginTransaction()
                         .replace(findViewById(R.id.fragmentContainerView).getId(), NotificationFragment.newInstance("test", "test"))
                         .commit();
+            } else if (v.getItemId() == findViewById(R.id.navigation_settings).getId()) {
+                getSupportFragmentManager().beginTransaction()
+                        .replace(findViewById(R.id.fragmentContainerView).getId(), SettingFragment.newInstance())
+                        .commit();
             }
             return true;
         });
