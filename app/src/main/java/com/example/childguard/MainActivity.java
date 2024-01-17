@@ -1,7 +1,11 @@
 package com.example.childguard;
 
+import static java.security.AccessController.getContext;
+
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -19,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 
@@ -49,11 +54,17 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 public class MainActivity extends AppCompatActivity {
 
     BluetoothManager bluetoothManager;
     BluetoothAdapter bluetoothAdapter;
+
+    DocumentReference mDocRef;
 
     private HomeFragment homeFragment;
 
@@ -67,6 +78,25 @@ public class MainActivity extends AppCompatActivity {
         final Date date = new Date(System.currentTimeMillis());
         return df.format(date);
     }
+
+    private final ActivityResultLauncher<ScanOptions> QrLauncher = registerForActivityResult(
+            new ScanContract(),
+            result -> {
+                String contents = result.getContents();
+                if (contents == null) {
+                    Toast.makeText(this, "QRコードが読み取れませんでした", Toast.LENGTH_LONG).show();
+                } else if (!contents.contains("https://practicefirestore1-8808c.web.app/")) {
+                    Toast.makeText(this, "Chiled Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
+                } else {
+                    //URLの表示
+                    Toast.makeText(this, contents, Toast.LENGTH_SHORT).show();
+                    //ブラウザを起動し、URL先のサイトを開く
+                    CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                    CustomTabsIntent customTabsIntent = builder.build();
+                    customTabsIntent.launchUrl(this, Uri.parse(contents));
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,20 +112,33 @@ public class MainActivity extends AppCompatActivity {
 
         {
             if (v.getItemId() == findViewById(R.id.navigation_home).getId()) {
+                findViewById(R.id.fab_scan_qr_code).setVisibility(FrameLayout.VISIBLE);
                 getSupportFragmentManager().beginTransaction()
                         .replace(findViewById(R.id.fragmentContainerView).getId(), this.homeFragment)
                         .addToBackStack(null)
                         .commit();
-            } else if (v.getItemId() == findViewById(R.id.navigation_QR).getId()) {
-                getSupportFragmentManager().beginTransaction()
-                        .replace(findViewById(R.id.fragmentContainerView).getId(), QRFragment.newInstance("test", "tset"))
-                        .commit();
             } else if (v.getItemId() == findViewById(R.id.navigation_notification).getId()) {
+                findViewById(R.id.fab_scan_qr_code).setVisibility(FrameLayout.VISIBLE);
                 getSupportFragmentManager().beginTransaction()
                         .replace(findViewById(R.id.fragmentContainerView).getId(), NotificationFragment.newInstance("test", "test"))
+                        .addToBackStack(null)
+                        .commit();
+            } else if (v.getItemId() == findViewById(R.id.navigation_settings).getId()) {
+                findViewById(R.id.fab_scan_qr_code).setVisibility(FrameLayout.GONE);
+                getSupportFragmentManager().beginTransaction()
+                        .replace(findViewById(R.id.fragmentContainerView).getId(), SettingFragment.newInstance())
+                        .addToBackStack(null)
                         .commit();
             }
             return true;
+        });
+
+        findViewById(R.id.fab_scan_qr_code).setOnClickListener(v -> {
+            Log.d("QRFragment", "onClick: called");
+            //QRリーダ起動
+            ScanOptions options = new ScanOptions();
+            options.setPrompt("QRコードを読み取ってください");
+            QrLauncher.launch(options);
         });
 
         //Bluetooth検知機能
@@ -116,13 +159,16 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        Log.d("onResume", "called");
+        Log.d("onResume", "mDocRef is null");
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
         String IdPref = sharedPreferences.getString("ID", null);
         if (IdPref == null) {
             Log.d("onResume", "ID not initialized.");
             return;
         }
-        DocumentReference mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
+        mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
+        this.flg = false;
         initNotification(mDocRef);
 
         super.onResume();
@@ -164,11 +210,13 @@ public class MainActivity extends AppCompatActivity {
                             E.putBoolean("car", true);
                             E.apply();
                         }
-
-                        HomeFragment fragment = new HomeFragment();
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
-
-                        homeFragment.onEvent(!isInCar);
+                        // SupportFragmentManagerが現在表示しているFragmentを取得
+                        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
+                        if (fragment instanceof HomeFragment) {
+                            ((HomeFragment) fragment).onEvent(!isInCar);
+                        } else {
+                            Log.d("nt", "HomeFragment is not visible");
+                        }
                     }
                 }
                 flg = true;
