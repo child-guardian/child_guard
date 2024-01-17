@@ -117,10 +117,12 @@ public class MainActivity extends AppCompatActivity {
             } else if (v.getItemId() == findViewById(R.id.navigation_notification).getId()) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(findViewById(R.id.fragmentContainerView).getId(), NotificationFragment.newInstance("test", "test"))
+                        .addToBackStack(null)
                         .commit();
             } else if (v.getItemId() == findViewById(R.id.navigation_settings).getId()) {
                 getSupportFragmentManager().beginTransaction()
                         .replace(findViewById(R.id.fragmentContainerView).getId(), SettingFragment.newInstance())
+                        .addToBackStack(null)
                         .commit();
             }
             return true;
