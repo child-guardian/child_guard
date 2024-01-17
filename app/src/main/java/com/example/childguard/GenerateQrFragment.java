@@ -8,22 +8,18 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.material.appbar.MaterialToolbar;
-
-import java.util.Objects;
-
 /**
  * A simple {@link Fragment} subclass.
- * Use the {@link GeneratedQrFragment#newInstance} factory method to
+ * Use the {@link GenerateQrFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class GeneratedQrFragment extends Fragment {
+public class GenerateQrFragment extends Fragment {
 
-    public GeneratedQrFragment() {
+    public GenerateQrFragment() {
         // Required empty public constructor
     }
-    public static GeneratedQrFragment newInstance() {
-        GeneratedQrFragment fragment = new GeneratedQrFragment();
+    public static GenerateQrFragment newInstance() {
+        GenerateQrFragment fragment = new GenerateQrFragment();
         Bundle args = new Bundle();
         fragment.setArguments(args);
         return fragment;
@@ -38,13 +34,13 @@ public class GeneratedQrFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_generated_qr, container, false);
+        return inflater.inflate(R.layout.fragment_generate_qr, container, false);
     }
 
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        MaterialToolbar toolbar = view.findViewById(R.id.toolbar);
-        toolbar.back
+
+
 
     }
 }
