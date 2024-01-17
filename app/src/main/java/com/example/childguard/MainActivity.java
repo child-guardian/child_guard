@@ -160,6 +160,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        super.onResume();
         Log.d("onResume", "called");
         Log.d("onResume", "mDocRef is null");
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
@@ -171,7 +172,6 @@ public class MainActivity extends AppCompatActivity {
             this.flg = false;
             initNotification(mDocRef);
         }
-        super.onResume();
     }
 
     private void initNotification(DocumentReference mDocRef) {
