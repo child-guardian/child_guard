@@ -82,7 +82,8 @@ public class QRFragment extends Fragment {
                     //読み取ったQRコードがChiled Guard用サイトのドメインを含むかの判定
                 if(!((result.getContents()).contains("https://practicefirestore1-8808c.web.app/"))) {
                     Toast.makeText(getContext(), "Chiled Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
-                } else {
+                }
+                else {
                     //URLの表示
                     Toast.makeText(getContext(), result.getContents(), Toast.LENGTH_SHORT).show();
                     //ブラウザを起動し、URL先のサイトを開く

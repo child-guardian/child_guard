@@ -3,9 +3,25 @@ package com.example.childguard;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.MODE_PRIVATE;
 
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.os.Bundle;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.res.ResourcesCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.print.PrintHelper;
+
 import android.preference.PreferenceManager;
+import android.text.PrecomputedText;
+import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,6 +44,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -151,10 +168,20 @@ public class HomeFragment extends Fragment {
         });
         //bluetooth設定ボタンの処理
         Button bt2 = view.findViewById(R.id.Bluetooth_setup);
-        bt2.setOnClickListener(v -> replaceFragment(new bluetooth_setupFragment()));
+        bt2.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                replaceFragment(new bluetooth_setupFragment());
+            }
+        });
+
+        //デバック用ボタン
+        view.findViewById(R.id.bt_debug).setOnClickListener( v -> {
+            Toast.makeText(getContext(), PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext()).getString("bluetooth_device_id", "none"), Toast.LENGTH_SHORT).show();
+        });
+
         return view;
     }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -201,3 +228,4 @@ public class HomeFragment extends Fragment {
 
     }
 }
+
