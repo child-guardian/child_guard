@@ -14,9 +14,11 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Vibrator;
 
@@ -30,10 +32,12 @@ import java.util.UUID;
 
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -50,7 +54,7 @@ public class MainActivity extends AppCompatActivity {
     BluetoothAdapter bluetoothAdapter;
 
     public static final String TAG = "InspirationQuote";
-    private DocumentReference mDocRef = FirebaseFirestore.getInstance().document("users/q6t702C8nsXyehckByrr");//現在の位置を取得
+
     boolean flg = false;
 
     //↓日付を取得するやつ
@@ -89,32 +93,76 @@ public class MainActivity extends AppCompatActivity {
 
 
         });
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
+        String IdPref = sharedPreferences.getString("ID", null);
+        if (IdPref == null) {
+            Log.d("onResume", "ID not initialized.");
+            return;
+        }
+        DocumentReference mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
+        initNotification(mDocRef);
+    }
+
+    private void initNotification(DocumentReference mDocRef) {
+
+        // Init pref
+        SharedPreferences sharedPreferences = getSharedPreferences("app_situation",MODE_PRIVATE);
+
         mDocRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                Log.d("nt","イベント開始");
+                Log.d("nt", "イベント開始");
+                //共有プリファレンス 書き込みの準備
+                SharedPreferences.Editor E=sharedPreferences.edit();
+                //車の乗り降りを管理するtrue=乗車、false=降車
+                boolean zyoukouzyoutai = sharedPreferences.getBoolean("car", false);
                 if (flg && documentSnapshot != null && documentSnapshot.exists()) {
 
                     String parent = documentSnapshot.getString("parent");
-                    Log.d("nt","レスポンスを検知しました1");
-                    if (parent.equals("s")) {
+                    Log.d("nt", "レスポンスを検知しました1");
 
-                        //通知のやつ↓
-                        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+                    if (parent.equals("s")) {//FireBaseの更新情報が"S"のとき＝サイト上で第三者ボタンが押されたとき
+                        if(zyoukouzyoutai==false) {//いたずら防止
+                            //通知のやつ↓
 
-                        NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
-                        //説明・説明　ここに通知の説明を書くことができる↓
-                        channel.setDescription("第3者からの通報を検知しました");
+                            int importance = NotificationManager.IMPORTANCE_DEFAULT;
 
-                        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-                        notificationManager.createNotificationChannel(channel);
-                        //通知のやつ↑
-                        Log.d("nt","レスポンスを検知しました2");
+                            NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
+                            //説明・説明　ここに通知の説明を書くことができる↓
+                            channel.setDescription("第3者からの通報を検知しました");
 
+                            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+                            notificationManager.createNotificationChannel(channel);
+                            //通知のやつ↑
+                            Log.d("nt", "レスポンスを検知しました2");
 
-                        notifyMain();
-                    } else if (e != null) {
+                            notifyMain();
+
+                        }
+                    } else {
+                        if(zyoukouzyoutai==true){//乗降状態の判定
+                            E.putBoolean("car", false);//降車状態にする
+                            E.apply();//確定処理
+                        }else{
+                            E.putBoolean("car", true);//乗車状態にする
+                            E.apply();//確定処理
+                        }
                         Log.w(TAG, "Got an exceptiion!", e);
+                        //HomeFragmentへ遷移する
+                        HomeFragment fragment = new HomeFragment();
+                        Bundle bundle = new Bundle();
+                        bundle.putBoolean("親",zyoukouzyoutai);
+                        fragment.setArguments(bundle);
+                        getSupportFragmentManager()
+                                .beginTransaction()
+                                .add(android.R.id.content, fragment)
+                                .commit();
                     }
 
                 }
