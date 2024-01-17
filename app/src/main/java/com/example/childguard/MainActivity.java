@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -165,12 +166,11 @@ public class MainActivity extends AppCompatActivity {
         String IdPref = sharedPreferences.getString("ID", null);
         if (IdPref == null) {
             Log.d("onResume", "ID not initialized.");
-            return;
+        } else {
+            mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
+            this.flg = false;
+            initNotification(mDocRef);
         }
-        mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
-        this.flg = false;
-        initNotification(mDocRef);
-
         super.onResume();
     }
 
@@ -203,13 +203,8 @@ public class MainActivity extends AppCompatActivity {
                             notifyMain();
                         }
                     } else {
-                        if (isInCar) {
-                            E.putBoolean("car", false);
-                            E.apply();
-                        } else {
-                            E.putBoolean("car", true);
-                            E.apply();
-                        }
+                        E.putBoolean("car", !isInCar);
+                        E.apply();
                         // SupportFragmentManagerが現在表示しているFragmentを取得
                         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
                         if (fragment instanceof HomeFragment) {
