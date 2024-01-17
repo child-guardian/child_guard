@@ -3,16 +3,9 @@ package com.example.childguard;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.MODE_PRIVATE;
 
-import android.bluetooth.BluetoothDevice;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -20,8 +13,6 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.print.PrintHelper;
 
 import android.preference.PreferenceManager;
-import android.text.PrecomputedText;
-import android.util.AndroidRuntimeException;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,10 +23,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -51,7 +38,7 @@ import java.util.Objects;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements OnEventListener{
     FirebaseFirestore db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
 
     // TODO: Rename parameter arguments, choose names that match
@@ -62,6 +49,7 @@ public class HomeFragment extends Fragment {
     // TODO: Rename and change types of parameters
     private String str_key;
     private String mParam2;
+
 
     public HomeFragment() {
         // Required empty public constructor
@@ -116,55 +104,62 @@ public class HomeFragment extends Fragment {
                 Log.d("HomeFragment", "already printed");
                 //画面遷移＆ID受け渡し
                 Toast.makeText(getActivity(), "再印刷", Toast.LENGTH_SHORT).show();
-                QrPrintFragment qrPrintFragment = new QrPrintFragment();
-                replaceFragment(qrPrintFragment);
+                QrUtils qrUtils = new QrUtils();
+                PrintHelper printHelper = new PrintHelper(requireContext());
+                printHelper.setScaleMode(PrintHelper.SCALE_MODE_FIT);
+                printHelper.printBitmap("QRコード", qrUtils.setContext(getContext()).getBitmap(sharedPreferences.getString("ID", "placeholder")), new PrintHelper.OnPrintFinishCallback() {
+                    @Override
+                    public void onFinish() {
+                        Toast.makeText(getContext(), "印刷完了", Toast.LENGTH_SHORT).show();
+                    }
+                });
                 return;
-            } else Log.d("HomeFragment", "not printed yet"); // debug
+            } else {
+                String valueParent = parent.getText().toString();//変数に文字列を代入
+                String valueBorn = born.getText().toString();//変数に文字列を代入
+                Map<String, String> user = new HashMap<>();//mapの宣言
 
-            String valueParent = parent.getText().toString();//変数に文字列を代入
-            String valueBorn = born.getText().toString();//変数に文字列を代入
-            Map<String, String> user = new HashMap<>();//mapの宣言
+                Log.d("HomeFragment", "onClick is called");
 
-            Log.d("HomeFragment", "onClick is called");
-
-            //mapに入れる
-            user.put("parent", valueParent);
-            user.put("born", valueBorn);
-            //新しいドキュメントにIDを作って追加
-            db.collection("users")
-                    .add(user)
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
-                        @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            //成功したら
-                            //documentReference.getId()でID取得
-                            Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
-                            SharedPreferences.Editor e = sharedPreferences.edit();
-                            // キー"alreadySaved"の値をtrueにする
-                            e.putBoolean("alreadySaved", true);
-                            //確定処理
-                            e.apply();
-                            //画面遷移＆ID受け渡し
-                            str_key = "" + documentReference.getId();
-                            Toast.makeText(getActivity(), "初回登録", Toast.LENGTH_SHORT).show();
-                            QrPrintFragment qrPrintFragment = new QrPrintFragment();
-                            Bundle bundle = new Bundle();
-                            bundle.putString("STR_KEY", str_key);
-                            //値を書き込む
-                            qrPrintFragment.setArguments(bundle);
-                            replaceFragment(qrPrintFragment);
-
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            //失敗したら
-                            Log.w(TAG, "Error adding document", e);
-                        }
-                    });
-
-
+                //mapに入れる
+                user.put("parent", valueParent);
+                user.put("born", valueBorn);
+                //新しいドキュメントにIDを作って追加
+                db.collection("users")
+                        .add(user)
+                        .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                            @Override
+                            public void onSuccess(DocumentReference documentReference) {
+                                //成功したら
+                                //documentReference.getId()でID取得
+                                Log.d(TAG, "DocumentSnapshot added with ID: " + documentReference.getId());
+                                SharedPreferences.Editor e = sharedPreferences.edit();
+                                // キー"alreadySaved"の値をtrueにする
+                                e.putBoolean("alreadySaved", true);
+                                //確定処理
+                                e.apply();
+                                //画面遷移＆ID受け渡し
+                                str_key = "" + documentReference.getId();
+                                Toast.makeText(getActivity(), "初回登録", Toast.LENGTH_SHORT).show();
+                                QrUtils qrUtils = new QrUtils();
+                                PrintHelper printHelper = new PrintHelper(requireContext());
+                                printHelper.setScaleMode(PrintHelper.SCALE_MODE_FIT);
+                                printHelper.printBitmap("QRコード", qrUtils.setContext(getContext()).getBitmap(documentReference.getId()), new PrintHelper.OnPrintFinishCallback() {
+                                    @Override
+                                    public void onFinish() {
+                                        Toast.makeText(getContext(), "印刷完了", Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                //失敗したら
+                                Log.w(TAG, "Error adding document", e);
+                            }
+                        });
+                }
         });
         //bluetooth設定ボタンの処理
         Button bt2 = view.findViewById(R.id.Bluetooth_setup);
@@ -182,11 +177,13 @@ public class HomeFragment extends Fragment {
 
         return view;
     }
+
+
     @Override
     public void onResume() {
         super.onResume();
         Log.d("HomeFragment", "onResume: called");
-        Cargettingonandoff();//メソッドCargettingonandoff()を実行
+        updateUiState(getActivity().getSharedPreferences("app_situation", MODE_PRIVATE).getBoolean("car", false));
     }
 
     //画面遷移メソッド
@@ -203,29 +200,35 @@ public class HomeFragment extends Fragment {
         transaction.commit();
     }
 
-    public void Cargettingonandoff() {
-        //共有プリファレンス全体の準備
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("app_situation", MODE_PRIVATE);
-        //車の乗り降りを管理するtrue=乗車、false=降車
-        Boolean zyoukouzyoutai = sharedPreferences.getBoolean("car", false);
-        SharedPreferences.Editor e = sharedPreferences.edit();
+    private void updateUiState(boolean state) {
+        Log.d("HomeFragment", "updateUiState: called");
+        // Init
+        TextView tv;
+        FrameLayout fl;
+        try {
+            tv = requireView().findViewById(R.id.situation);
+            fl = getView().findViewById(R.id.situation_bg);
+        } catch (NullPointerException e) {
+            Log.d("HomeFragment", "updateUiState: view is null");
+            return;
+        }
         String get_on = "\n乗車状態";
         String get_off = "\n降車状態";
-        TextView tv = getView().findViewById(R.id.situation);
-        FrameLayout fl = getView().findViewById(R.id.situation_bg);
-
-        if (zyoukouzyoutai == true) {   //乗降状態の判定
-            //降車状態にする
-            fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
-            tv.setText(get_off);
-
-        } else {
+        if (state) {
             //乗車状態にする
             fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
             tv.setText(get_on);
+        } else {
+            //降車状態にする
+            fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
+            tv.setText(get_off);
         }
+    }
 
-
+    @Override
+    public void onEvent(boolean state) {
+        Log.d("HomeFragment", "onEvent: called");
+        updateUiState(state);
     }
 }
 

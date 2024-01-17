@@ -137,7 +137,7 @@ public class QrPrintFragment extends Fragment {
         printHelper.setScaleMode(PrintHelper.SCALE_MODE_FIT);
         printHelper.printBitmap("job_name", QRGazou);
         HomeFragment homeFragment=new HomeFragment();
-        replaceFragment(homeFragment);
+//        replaceFragment(homeFragment);
         return view;
     }
       //画面遷移メソッド

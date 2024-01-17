@@ -78,20 +78,21 @@ public class QRFragment extends Fragment {
 
     private final ActivityResultLauncher<ScanOptions> fragmentLauncher = registerForActivityResult(new ScanContract(),
             result -> {
-                    //result.getContents()でURLを入手
-                    //読み取ったQRコードがChiled Guard用サイトのドメインを含むかの判定
-                if(!((result.getContents()).contains("https://practicefirestore1-8808c.web.app/"))) {
+                String contents = result.getContents();
+                if (contents == null) {
+                    Toast.makeText(getContext(), "QRコードが読み取れませんでした", Toast.LENGTH_LONG).show();
+                } else if (!contents.contains("https://practicefirestore1-8808c.web.app/")) {
                     Toast.makeText(getContext(), "Chiled Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
-                }
-                else {
+                } else {
                     //URLの表示
-                    Toast.makeText(getContext(), result.getContents(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), contents, Toast.LENGTH_SHORT).show();
                     //ブラウザを起動し、URL先のサイトを開く
                     CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
                     CustomTabsIntent customTabsIntent = builder.build();
-                    customTabsIntent.launchUrl(requireContext(), Uri.parse(result.getContents()));
+                    customTabsIntent.launchUrl(requireContext(), Uri.parse(contents));
                 }
 
+                getParentFragmentManager().popBackStack();
             });
 
     @Override
@@ -101,11 +102,10 @@ public class QRFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_qr, container, false);
 
 
-            Log.d("QRFragment", "onClick: called");
-            //QRリーダ起動
-            fragmentLauncher.launch(new ScanOptions());
-            HomeFragment homeFragment=new HomeFragment();
-            replaceFragment(homeFragment);
+        Log.d("QRFragment", "onClick: called");
+        //QRリーダ起動
+        fragmentLauncher.launch(new ScanOptions());
+
         return view;
     }
     //画面遷移メソッド

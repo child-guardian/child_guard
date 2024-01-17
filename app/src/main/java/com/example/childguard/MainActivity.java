@@ -41,6 +41,8 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
@@ -52,6 +54,8 @@ public class MainActivity extends AppCompatActivity {
 
     BluetoothManager bluetoothManager;
     BluetoothAdapter bluetoothAdapter;
+
+    private HomeFragment homeFragment;
 
     public static final String TAG = "InspirationQuote";
 
@@ -72,12 +76,15 @@ public class MainActivity extends AppCompatActivity {
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.nav_view);
 
+        this.homeFragment = HomeFragment.newInstance("test", "tset");
+
         bottomNavigationView.setOnNavigationItemSelectedListener(v ->
 
         {
             if (v.getItemId() == findViewById(R.id.navigation_home).getId()) {
                 getSupportFragmentManager().beginTransaction()
-                        .replace(findViewById(R.id.fragmentContainerView).getId(), HomeFragment.newInstance("test", "tset"))
+                        .replace(findViewById(R.id.fragmentContainerView).getId(), this.homeFragment)
+                        .addToBackStack(null)
                         .commit();
             } else if (v.getItemId() == findViewById(R.id.navigation_QR).getId()) {
                 getSupportFragmentManager().beginTransaction()
@@ -88,10 +95,7 @@ public class MainActivity extends AppCompatActivity {
                         .replace(findViewById(R.id.fragmentContainerView).getId(), NotificationFragment.newInstance("test", "test"))
                         .commit();
             }
-
             return true;
-
-
         });
 
         //Bluetooth検知機能
@@ -119,7 +123,7 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         DocumentReference mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
-//        initNotification(mDocRef);
+        initNotification(mDocRef);
 
         super.onResume();
     }
@@ -136,50 +140,36 @@ public class MainActivity extends AppCompatActivity {
                 //共有プリファレンス 書き込みの準備
                 SharedPreferences.Editor E=sharedPreferences.edit();
                 //車の乗り降りを管理するtrue=乗車、false=降車
-                boolean zyoukouzyoutai = sharedPreferences.getBoolean("car", false);
+                boolean isInCar = sharedPreferences.getBoolean("car", false);
                 if (flg && documentSnapshot != null && documentSnapshot.exists()) {
 
                     String parent = documentSnapshot.getString("parent");
                     Log.d("nt", "レスポンスを検知しました1");
 
                     if (parent.equals("s")) {//FireBaseの更新情報が"S"のとき＝サイト上で第三者ボタンが押されたとき
-                        if(zyoukouzyoutai==false) {//いたずら防止
-                            //通知のやつ↓
-
+                        if (isInCar) {
                             int importance = NotificationManager.IMPORTANCE_DEFAULT;
-
                             NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
-                            //説明・説明　ここに通知の説明を書くことができる↓
                             channel.setDescription("第3者からの通報を検知しました");
-
                             NotificationManager notificationManager = getSystemService(NotificationManager.class);
                             notificationManager.createNotificationChannel(channel);
-                            //通知のやつ↑
                             Log.d("nt", "レスポンスを検知しました2");
-
                             notifyMain();
-
                         }
                     } else {
-                        if(zyoukouzyoutai==true){//乗降状態の判定
-                            E.putBoolean("car", false);//降車状態にする
-                            E.apply();//確定処理
-                        }else{
-                            E.putBoolean("car", true);//乗車状態にする
-                            E.apply();//確定処理
+                        if (isInCar) {
+                            E.putBoolean("car", false);
+                            E.apply();
+                        } else {
+                            E.putBoolean("car", true);
+                            E.apply();
                         }
-                        Log.w(TAG, "Got an exceptiion!", e);
-                        //HomeFragmentへ遷移する
-                        HomeFragment fragment = new HomeFragment();
-                        Bundle bundle = new Bundle();
-                        bundle.putBoolean("親",zyoukouzyoutai);
-                        fragment.setArguments(bundle);
-                        getSupportFragmentManager()
-                                .beginTransaction()
-                                .add(android.R.id.content, fragment)
-                                .commit();
-                    }
 
+                        HomeFragment fragment = new HomeFragment();
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
+
+                        homeFragment.onEvent(!isInCar);
+                    }
                 }
                 flg = true;
             }
@@ -258,4 +248,6 @@ public class MainActivity extends AppCompatActivity {
         ActionBar actionBar = getSupportActionBar();
         actionBar.setDisplayHomeAsUpEnabled(enableBackButton);
     }
+
 }
+
