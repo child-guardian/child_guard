@@ -160,21 +160,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         Log.d("onResume", "called");
-        if (mDocRef == null) {
-            Log.d("onResume", "mDocRef is null");
-            SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-            String IdPref = sharedPreferences.getString("ID", null);
-            if (IdPref == null) {
-                Log.d("onResume", "ID not initialized.");
-                return;
-            }
-            mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
-            initNotification(mDocRef);
+        Log.d("onResume", "mDocRef is null");
+        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
+        String IdPref = sharedPreferences.getString("ID", null);
+        if (IdPref == null) {
+            Log.d("onResume", "ID not initialized.");
+            return;
         }
-
-        if (mDocRef.getId().equals(null)) {
-            Log.d("onResume", "mDocRef.getId() is null");
-        }
+        mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
+        this.flg = false;
+        initNotification(mDocRef);
 
         super.onResume();
     }
@@ -218,7 +213,9 @@ public class MainActivity extends AppCompatActivity {
                         // SupportFragmentManagerが現在表示しているFragmentを取得
                         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
                         if (fragment instanceof HomeFragment) {
-                            ((HomeFragment) fragment).updateUiState(!isInCar);
+                            ((HomeFragment) fragment).onEvent(!isInCar);
+                        } else {
+                            Log.d("nt", "HomeFragment is not visible");
                         }
                     }
                 }
