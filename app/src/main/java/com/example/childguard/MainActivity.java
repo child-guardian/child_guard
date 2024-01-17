@@ -1,7 +1,11 @@
 package com.example.childguard;
 
+import static java.security.AccessController.getContext;
+
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
@@ -19,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
 
@@ -49,6 +54,10 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.FirebaseFirestoreException;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+import com.journeyapps.barcodescanner.ScanContract;
+import com.journeyapps.barcodescanner.ScanOptions;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -67,6 +76,24 @@ public class MainActivity extends AppCompatActivity {
         final Date date = new Date(System.currentTimeMillis());
         return df.format(date);
     }
+
+    private final ActivityResultLauncher<ScanOptions> QrLauncher = registerForActivityResult(
+            new ScanContract(),
+            result -> {
+                if (result != null) {
+                    String url = result.getContents();
+                    Log.d("QRFragment", "onActivityResult: " + url);
+                    if (url != null) {
+                        Uri uri = Uri.parse(url);
+                        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                        CustomTabsIntent customTabsIntent = builder.build();
+                        customTabsIntent.launchUrl(this, uri);
+                    }
+                } else {
+                    Log.d("QRFragment", "onActivityResult: null");
+                }
+            }
+    );
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -92,6 +119,14 @@ public class MainActivity extends AppCompatActivity {
                         .commit();
             }
             return true;
+        });
+
+        findViewById(R.id.fab_scan_qr_code).setOnClickListener(v -> {
+            Log.d("QRFragment", "onClick: called");
+            //QRリーダ起動
+            ScanOptions options = new ScanOptions();
+            options.setPrompt("QRコードを読み取ってください");
+            QrLauncher.launch(options);
         });
 
         //Bluetooth検知機能
