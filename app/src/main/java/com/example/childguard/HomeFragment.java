@@ -118,7 +118,6 @@ public class HomeFragment extends Fragment implements OnEventListener{
     public void onResume() {
         super.onResume();
         Log.d("HomeFragment", "onResume: called");
-        updateUiState(getActivity().getSharedPreferences("app_situation", MODE_PRIVATE).getBoolean("car", false));
     }
 
     //画面遷移メソッド
