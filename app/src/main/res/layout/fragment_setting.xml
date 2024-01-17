@@ -4,18 +4,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".SettingFragment" >
+    tools:context=".SettingFragment"
+    android:padding="16dp">
 
     <Button
         android:id="@+id/button_print_qr"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="QRコード印刷" />
+        android:text="QRコード印刷"
+        android:layout_marginVertical="8dp"/>
 
     <Button
         android:id="@+id/button_bluetooth_setting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Bluetooth設定" />
+        android:text="Bluetooth設定"
+        android:layout_marginVertical="8dp"/>
 
 </LinearLayout>
