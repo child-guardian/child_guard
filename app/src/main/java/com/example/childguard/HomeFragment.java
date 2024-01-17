@@ -207,9 +207,12 @@ public class HomeFragment extends Fragment implements OnEventListener{
         FrameLayout fl;
         try {
             tv = requireView().findViewById(R.id.situation);
-            fl = getView().findViewById(R.id.situation_bg);
+            fl = requireView().findViewById(R.id.situation_bg);
         } catch (NullPointerException e) {
             Log.d("HomeFragment", "updateUiState: view is null");
+            return;
+        } catch (Exception e) {
+            Log.d("HomeFragment", "updateUiState: unknown error");
             return;
         }
         String get_on = "\n乗車状態";
