@@ -86,15 +86,17 @@ public class MainActivity extends AppCompatActivity {
                 String contents = result.getContents();
                 if (contents == null) {
                     Toast.makeText(this, "QRコードが読み取れませんでした", Toast.LENGTH_LONG).show();
-                } else if (!contents.contains("https://practicefirestore1-8808c.web.app/")) {
-                    Toast.makeText(this, "Chiled Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
                 } else {
-                    //URLの表示
-                    Toast.makeText(this, contents, Toast.LENGTH_SHORT).show();
-                    //ブラウザを起動し、URL先のサイトを開く
-                    CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-                    CustomTabsIntent customTabsIntent = builder.build();
-                    customTabsIntent.launchUrl(this, Uri.parse(contents));
+                    if (!contents.contains("https://practicefirestore1-8808c.web.app/")) {
+                        Toast.makeText(this, "Chiled Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
+                    } else {
+                        //URLの表示
+                        Toast.makeText(this, contents, Toast.LENGTH_SHORT).show();
+                        //ブラウザを起動し、URL先のサイトを開く
+                        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                        CustomTabsIntent customTabsIntent = builder.build();
+                        customTabsIntent.launchUrl(this, Uri.parse(contents));
+                    }
                 }
             }
     );
