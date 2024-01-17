@@ -23,6 +23,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -85,15 +86,17 @@ public class MainActivity extends AppCompatActivity {
                 String contents = result.getContents();
                 if (contents == null) {
                     Toast.makeText(this, "QRコードが読み取れませんでした", Toast.LENGTH_LONG).show();
-                } else if (!contents.contains("https://practicefirestore1-8808c.web.app/")) {
-                    Toast.makeText(this, "Chiled Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
                 } else {
-                    //URLの表示
-                    Toast.makeText(this, contents, Toast.LENGTH_SHORT).show();
-                    //ブラウザを起動し、URL先のサイトを開く
-                    CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-                    CustomTabsIntent customTabsIntent = builder.build();
-                    customTabsIntent.launchUrl(this, Uri.parse(contents));
+                    if (!contents.contains("https://practicefirestore1-8808c.web.app/")) {
+                        Toast.makeText(this, "Chiled Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
+                    } else {
+                        //URLの表示
+                        Toast.makeText(this, contents, Toast.LENGTH_SHORT).show();
+                        //ブラウザを起動し、URL先のサイトを開く
+                        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                        CustomTabsIntent customTabsIntent = builder.build();
+                        customTabsIntent.launchUrl(this, Uri.parse(contents));
+                    }
                 }
             }
     );
@@ -134,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.fab_scan_qr_code).setOnClickListener(v -> {
-            Log.d("QRFragment", "onClick: called");
+            Log.d("MainActivity/Fab", "onClick: called");
             //QRリーダ起動
             ScanOptions options = new ScanOptions();
             options.setPrompt("QRコードを読み取ってください");
@@ -159,19 +162,18 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        super.onResume();
         Log.d("onResume", "called");
         Log.d("onResume", "mDocRef is null");
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
         String IdPref = sharedPreferences.getString("ID", null);
         if (IdPref == null) {
             Log.d("onResume", "ID not initialized.");
-            return;
+        } else {
+            mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
+            this.flg = false;
+            initNotification(mDocRef);
         }
-        mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
-        this.flg = false;
-        initNotification(mDocRef);
-
-        super.onResume();
     }
 
     private void initNotification(DocumentReference mDocRef) {
@@ -192,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
                     String parent = documentSnapshot.getString("parent");
                     Log.d("nt", "レスポンスを検知しました1");
 
+                    assert parent != null;
                     if (parent.equals("s")) {//FireBaseの更新情報が"S"のとき＝サイト上で第三者ボタンが押されたとき
                         if (isInCar) {
                             int importance = NotificationManager.IMPORTANCE_DEFAULT;
@@ -203,13 +206,8 @@ public class MainActivity extends AppCompatActivity {
                             notifyMain();
                         }
                     } else {
-                        if (isInCar) {
-                            E.putBoolean("car", false);
-                            E.apply();
-                        } else {
-                            E.putBoolean("car", true);
-                            E.apply();
-                        }
+                        E.putBoolean("car", !isInCar);
+                        E.apply();
                         // SupportFragmentManagerが現在表示しているFragmentを取得
                         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
                         if (fragment instanceof HomeFragment) {
@@ -291,14 +289,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        Intent intent = new Intent(getApplication(), TestService.class);
-        startService(intent);
-
-
-    }
+//    @Override
+//    public void onStop() {
+//        super.onStop();
+//        Intent intent = new Intent(getApplication(), TestService.class);
+//        startService(intent);
+//    }
 
     //Bluetooth_setupの戻るボタン
     public void setupBackButton(boolean enableBackButton) {
