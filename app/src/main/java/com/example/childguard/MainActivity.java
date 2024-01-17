@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         findViewById(R.id.fab_scan_qr_code).setOnClickListener(v -> {
-            Log.d("QRFragment", "onClick: called");
+            Log.d("MainActivity/Fab", "onClick: called");
             //QRリーダ起動
             ScanOptions options = new ScanOptions();
             options.setPrompt("QRコードを読み取ってください");
@@ -194,6 +194,7 @@ public class MainActivity extends AppCompatActivity {
                     String parent = documentSnapshot.getString("parent");
                     Log.d("nt", "レスポンスを検知しました1");
 
+                    assert parent != null;
                     if (parent.equals("s")) {//FireBaseの更新情報が"S"のとき＝サイト上で第三者ボタンが押されたとき
                         if (isInCar) {
                             int importance = NotificationManager.IMPORTANCE_DEFAULT;
@@ -288,14 +289,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public void onStop() {
-        super.onStop();
-        Intent intent = new Intent(getApplication(), TestService.class);
-        startService(intent);
-
-
-    }
+//    @Override
+//    public void onStop() {
+//        super.onStop();
+//        Intent intent = new Intent(getApplication(), TestService.class);
+//        startService(intent);
+//    }
 
     //Bluetooth_setupの戻るボタン
     public void setupBackButton(boolean enableBackButton) {
