@@ -134,7 +134,7 @@ public class HomeFragment extends Fragment implements OnEventListener{
         transaction.commit();
     }
 
-    private void updateUiState(boolean state) {
+    private boolean updateUiState(boolean state) {
         Log.d("HomeFragment", "updateUiState: called");
         // Init
         TextView tv;
@@ -144,10 +144,12 @@ public class HomeFragment extends Fragment implements OnEventListener{
             fl = requireView().findViewById(R.id.situation_bg);
         } catch (NullPointerException e) {
             Log.d("HomeFragment", "updateUiState: view is null");
-            return;
-        } catch (Exception e) {
-            Log.d("HomeFragment", "updateUiState: unknown error");
-            return;
+            return false;
+        } catch (IllegalStateException e) {
+            Log.d("HomeFragment", "updateUiState: view is not attached");
+//            getParentFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, HomeFragment.newInstance("test", "test")).commit();
+//            updateUiState(state);
+            return false;
         }
         String get_on = "\n乗車状態";
         String get_off = "\n降車状態";
@@ -160,12 +162,14 @@ public class HomeFragment extends Fragment implements OnEventListener{
             fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
             tv.setText(get_off);
         }
+
+        return true;
     }
 
     @Override
-    public void onEvent(boolean state) {
+    public boolean onEvent(boolean state) {
         Log.d("HomeFragment", "onEvent: called");
-        updateUiState(state);
+        return updateUiState(state);
     }
 }
 

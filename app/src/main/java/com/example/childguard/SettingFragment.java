@@ -74,10 +74,7 @@ public class SettingFragment extends Fragment {
                 Log.d("HomeFragment", "already printed");
                 //画面遷移＆ID受け渡し
                 Toast.makeText(getActivity(), "再印刷", Toast.LENGTH_SHORT).show();
-                QrUtils qrUtils = new QrUtils();
-                PrintHelper printHelper = new PrintHelper(requireContext());
-                printHelper.setScaleMode(PrintHelper.SCALE_MODE_FIT);
-                printHelper.printBitmap("QRコード", qrUtils.setContext(getContext()).getBitmap(sharedPreferences.getString("ID", "placeholder")), () -> Toast.makeText(getContext(), "印刷完了", Toast.LENGTH_SHORT).show());
+                getParentFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fragmentContainerView, GenerateQrFragment.newInstance(sharedPreferences.getString("ID", "none"))).commit();
             } else {
                 String valueParent = "placeholder";
                 String valueBorn = "placeholder";
@@ -107,15 +104,7 @@ public class SettingFragment extends Fragment {
                             editor.apply();
 
                             Toast.makeText(getActivity(), "初回登録", Toast.LENGTH_SHORT).show();
-                            QrUtils qrUtils = new QrUtils();
-                            PrintHelper printHelper = new PrintHelper(requireContext());
-                            printHelper.setScaleMode(PrintHelper.SCALE_MODE_FIT);
-                            printHelper.printBitmap("QRコード", qrUtils.setContext(getContext()).getBitmap(documentReference.getId()), new PrintHelper.OnPrintFinishCallback() {
-                                @Override
-                                public void onFinish() {
-                                    Toast.makeText(getContext(), "印刷完了", Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                            getParentFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fragmentContainerView, GenerateQrFragment.newInstance(documentReference.getId())).commit();
                         })
                         .addOnFailureListener(e -> {
                             //失敗したら

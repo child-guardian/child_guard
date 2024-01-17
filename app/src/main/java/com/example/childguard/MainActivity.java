@@ -64,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
     BluetoothManager bluetoothManager;
     BluetoothAdapter bluetoothAdapter;
 
+    DocumentReference mDocRef;
+
     private HomeFragment homeFragment;
 
     public static final String TAG = "InspirationQuote";
@@ -157,14 +159,22 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
-        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        String IdPref = sharedPreferences.getString("ID", null);
-        if (IdPref == null) {
-            Log.d("onResume", "ID not initialized.");
-            return;
+        Log.d("onResume", "called");
+        if (mDocRef == null) {
+            Log.d("onResume", "mDocRef is null");
+            SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
+            String IdPref = sharedPreferences.getString("ID", null);
+            if (IdPref == null) {
+                Log.d("onResume", "ID not initialized.");
+                return;
+            }
+            mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
+            initNotification(mDocRef);
         }
-        DocumentReference mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
-        initNotification(mDocRef);
+
+        if (mDocRef.getId().equals(null)) {
+            Log.d("onResume", "mDocRef.getId() is null");
+        }
 
         super.onResume();
     }
@@ -205,8 +215,11 @@ public class MainActivity extends AppCompatActivity {
                             E.putBoolean("car", true);
                             E.apply();
                         }
-
-                        homeFragment.onEvent(!isInCar);
+                        // SupportFragmentManagerが現在表示しているFragmentを取得
+                        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
+                        if (fragment instanceof HomeFragment) {
+                            ((HomeFragment) fragment).updateUiState(!isInCar);
+                        }
                     }
                 }
                 flg = true;
