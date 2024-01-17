@@ -3,16 +3,13 @@
     <item
         android:id="@+id/navigation_home"
         android:icon="@drawable/ic_home_black_24dp"
-        android:title="home"
-
-        />
-    <item
-        android:id="@+id/navigation_QR"
-        android:icon="@drawable/qr_code_scanner_fill0_wght400_grad0_opsz24"
-        android:title="QR"
-        />
+        android:title="home"/>
     <item
         android:id="@+id/navigation_notification"
         android:icon="@drawable/notifications_fill0_wght400_grad0_opsz24"
         android:title="notification"/>
+    <item
+        android:id="@+id/navigation_settings"
+        android:icon="@drawable/baseline_app_settings_alt_24"
+        android:title="settings"/>
 </menu>
