@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        super.onStart();
+//        super.onStart();
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.nav_view);
 
@@ -94,11 +94,24 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+        //Bluetooth検知機能
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            Log.d("BT", "No permission to connect bluetooth devices");
+            return;
+        }
+        else {
+            Log.d("BT", "Permission to connect bluetooth devices granted");
+        }
+        registerReceiver(receiver, intentFilter);
+
     }
 
     @Override
     protected void onResume() {
-        super.onResume();
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
         String IdPref = sharedPreferences.getString("ID", null);
         if (IdPref == null) {
@@ -106,7 +119,9 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         DocumentReference mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
-        initNotification(mDocRef);
+//        initNotification(mDocRef);
+
+        super.onResume();
     }
 
     private void initNotification(DocumentReference mDocRef) {
@@ -169,20 +184,6 @@ public class MainActivity extends AppCompatActivity {
                 flg = true;
             }
         });
-
-        //Bluetooth検知機能
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-        intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            Log.d("BT", "No permission to connect bluetooth devices");
-            return;
-        }
-        else {
-            Log.d("BT", "Permission to connect bluetooth devices granted");
-        }
-        registerReceiver(receiver, intentFilter);
 
     }
 
