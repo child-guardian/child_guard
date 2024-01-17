@@ -2,9 +2,16 @@ package com.example.childguard;
 
 import static android.content.ContentValues.TAG;
 
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+
+import androidx.core.app.ActivityCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -37,6 +44,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -172,11 +180,13 @@ public class HomeFragment extends Fragment {
 
         //デバック用ボタン
         view.findViewById(R.id.bt_debug).setOnClickListener( v -> {
-            Toast.makeText(getContext(), PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext()).getString("bluetooth_device1", "none"), Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext()).getString("bluetooth_device_id", "none"), Toast.LENGTH_SHORT).show();
         });
+
+
+
         return view;
     }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -212,4 +222,16 @@ public class HomeFragment extends Fragment {
         // フラグメントトランザクションをコミット
         transaction.commit();
     }
+
+    public void bluetooth_judge(String device_id){
+        if(device_id.equals(PreferenceManager.getDefaultSharedPreferences(requireContext().getApplicationContext()).getString("Bluetooth_device_id","none"))){
+            Log.d(" ","登録デバイスです");
+        }
+        else {
+            Log.d(" ","登録デバイスではないです");
+        }
+    }
+
+
 }
+

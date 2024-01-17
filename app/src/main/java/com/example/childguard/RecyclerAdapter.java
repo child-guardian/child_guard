@@ -54,7 +54,6 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
                     .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                         // OK button pressed
                         Toast.makeText(v.getContext(), "OK button clicked", Toast.LENGTH_SHORT).show();
-
                         //共有プリファレンスに保存
                         SharedPreferences sharedPreferences=PreferenceManager.getDefaultSharedPreferences(this.applicationContext);
                         sharedPreferences.edit().putString("bluetooth_device_id", deviceList.get(position)[1]).apply();
