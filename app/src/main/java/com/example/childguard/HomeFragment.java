@@ -84,31 +84,7 @@ public class HomeFragment extends Fragment implements OnEventListener{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        //    Log.d("HomeFlagment_cnt", "aaaaa");
-        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
-        MainActivity activity = (MainActivity) getActivity();
-        //共有プリファレンス全体の準備
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("app_situation", MODE_PRIVATE);
-        //QRコード印刷の処理
-        Button bt1 = view.findViewById(R.id.QRprinting);
-        bt1.setOnClickListener(v -> {
-            //初回起動かを保存する変数
-
-        });
-        //bluetooth設定ボタンの処理
-        Button bt2 = view.findViewById(R.id.Bluetooth_setup);
-        bt2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                replaceFragment(new bluetooth_setupFragment());
-            }
-        });
-
-        //デバック用ボタン
-        view.findViewById(R.id.bt_debug).setOnClickListener( v -> {
-            Toast.makeText(getContext(), PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext()).getString("bluetooth_device_id", "none"), Toast.LENGTH_SHORT).show();
-        });
 
         return view;
     }
