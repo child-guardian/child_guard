@@ -80,17 +80,18 @@ public class MainActivity extends AppCompatActivity {
     private final ActivityResultLauncher<ScanOptions> QrLauncher = registerForActivityResult(
             new ScanContract(),
             result -> {
-                if (result != null) {
-                    String url = result.getContents();
-                    Log.d("QRFragment", "onActivityResult: " + url);
-                    if (url != null) {
-                        Uri uri = Uri.parse(url);
-                        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-                        CustomTabsIntent customTabsIntent = builder.build();
-                        customTabsIntent.launchUrl(this, uri);
-                    }
+                String contents = result.getContents();
+                if (contents == null) {
+                    Toast.makeText(this, "QRコードが読み取れませんでした", Toast.LENGTH_LONG).show();
+                } else if (!contents.contains("https://practicefirestore1-8808c.web.app/")) {
+                    Toast.makeText(this, "Chiled Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
                 } else {
-                    Log.d("QRFragment", "onActivityResult: null");
+                    //URLの表示
+                    Toast.makeText(this, contents, Toast.LENGTH_SHORT).show();
+                    //ブラウザを起動し、URL先のサイトを開く
+                    CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+                    CustomTabsIntent customTabsIntent = builder.build();
+                    customTabsIntent.launchUrl(this, Uri.parse(contents));
                 }
             }
     );
