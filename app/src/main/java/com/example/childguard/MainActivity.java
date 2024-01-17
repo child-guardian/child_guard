@@ -110,16 +110,19 @@ public class MainActivity extends AppCompatActivity {
 
         {
             if (v.getItemId() == findViewById(R.id.navigation_home).getId()) {
+                findViewById(R.id.fab_scan_qr_code).setVisibility(FrameLayout.VISIBLE);
                 getSupportFragmentManager().beginTransaction()
                         .replace(findViewById(R.id.fragmentContainerView).getId(), this.homeFragment)
                         .addToBackStack(null)
                         .commit();
             } else if (v.getItemId() == findViewById(R.id.navigation_notification).getId()) {
+                findViewById(R.id.fab_scan_qr_code).setVisibility(FrameLayout.VISIBLE);
                 getSupportFragmentManager().beginTransaction()
                         .replace(findViewById(R.id.fragmentContainerView).getId(), NotificationFragment.newInstance("test", "test"))
                         .addToBackStack(null)
                         .commit();
             } else if (v.getItemId() == findViewById(R.id.navigation_settings).getId()) {
+                findViewById(R.id.fab_scan_qr_code).setVisibility(FrameLayout.GONE);
                 getSupportFragmentManager().beginTransaction()
                         .replace(findViewById(R.id.fragmentContainerView).getId(), SettingFragment.newInstance())
                         .addToBackStack(null)
@@ -202,9 +205,6 @@ public class MainActivity extends AppCompatActivity {
                             E.putBoolean("car", true);
                             E.apply();
                         }
-
-                        HomeFragment fragment = new HomeFragment();
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, fragment).commit();
 
                         homeFragment.onEvent(!isInCar);
                     }
