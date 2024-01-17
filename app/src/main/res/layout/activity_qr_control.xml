@@ -5,29 +5,6 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".GeneratedQrFragment" >
-
-    <com.google.android.material.appbar.MaterialToolbar
-        android:id="@+id/qr_control_toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:background="@color/white"
-        android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.ActionBar"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:title="Preview"/>
-
-
-    <ImageView
-        android:id="@+id/result_bitmap_image_view"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:src="@drawable/close_fill0_wght400_grad0_opsz24"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/toolbar" />
+    tools:context=".QrControlActivity">
 
 </androidx.constraintlayout.widget.ConstraintLayout>
