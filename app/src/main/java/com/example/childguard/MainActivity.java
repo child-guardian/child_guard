@@ -149,18 +149,19 @@ public class MainActivity extends AppCompatActivity {
         changessituation();
         Log.d("onResume", "called");
         Log.d("onResume", "mDocRef is null");
+        //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        String IdPref = sharedPreferences.getString("ID", null);
-        if (IdPref == null) {
+        String IdPref = sharedPreferences.getString("ID", null);////アプリに記録されているIDの取得
+        if (IdPref == null) {//FireBaseのIDがアプリに登録されているとき
             Log.d("onResume", "ID not initialized.");
         } else {
             mDocRef = FirebaseFirestore.getInstance().document("status/" + IdPref);//現在の位置を取得
-            initNotification(mDocRef);
+            initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
         }
     }
 
-    private void initNotification(DocumentReference mDocRef) {
-        // Init pref
+    private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
+        // 共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation",MODE_PRIVATE);
 
         mDocRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
@@ -171,27 +172,28 @@ public class MainActivity extends AppCompatActivity {
                 //共有プリファレンス 書き込みの準備
                 SharedPreferences.Editor E = sharedPreferences.edit();
                 //車の乗り降りを管理するtrue=乗車、false=降車
-                if (documentSnapshot.exists()) {
+                if (documentSnapshot.exists()) {//exists()でdocumentSnapshotの中のファイルの存在の確認
                     Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
                     Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
                     E.putBoolean("isInCarPref", documentSnapshot.getBoolean("isInCar"));//乗降状態の判定
                     E.apply();//確定処理
                     Log.d("nt", "レスポンスを検知しました1");
-                    if (documentSnapshot.getBoolean("isReported")==false ) {
-                        if (fragment instanceof HomeFragment) {
-                            changessituation();
+                    //FireBaseで更新された情報の判定
+                    if (documentSnapshot.getBoolean("isReported")==false ) {//isReportedがfalseのとき=サイト上で保護者ボタンが押されたとき
+                        if (fragment instanceof HomeFragment) {//fragementがHomeFragmentのインスタンスかの判定
+                            changessituation();//  changessituation()メソッドを処理→アプリ側の乗降状態を変化
                         }
-                    }else if(isInCar){
+                    }else if(isInCar){//第三者ボタンが押されたときにisInCarがtrueのとき＝乗車状態のとき→いたずら防止
                         int importance = NotificationManager.IMPORTANCE_DEFAULT;
                         NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
                         channel.setDescription("第3者からの通報を検知しました");
                         NotificationManager notificationManager = getSystemService(NotificationManager.class);
                         notificationManager.createNotificationChannel(channel);
                         Log.d("nt", "レスポンスを検知しました2");
-                        notifyMain();
-                        ResetReported();
-                        } else{
-                        ResetReported();
+                        notifyMain();//  notifyMain()メソッドを処理→通知のメソッド
+                        ResetReported();// ResetReported();メソッドを処理→FireBaseのisReportedをfalseにする
+                        } else{//第三者ボタンが押されたときにisInCarがfalseのとき=降車状態のとき
+                        ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
                         Log.d("nt", "何もなし" );
                     }
                     }
@@ -268,14 +270,14 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void ResetReported(){
-
+    public void ResetReported(){//FireBaseのisReportedをfalseに初期化するメソッド
+        //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("app_situation", MODE_PRIVATE);
-        String IdPref = sharedPreferences.getString("ID", null);
+        String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
-        DocumentReference isReported = db.collection("status").document(IdPref);
+        DocumentReference isReported = db.collection("status").document(IdPref);//更新するドキュメントとの紐づけ
         Map<String, Boolean> DEFAULT_ITEM = new HashMap<>();//mapの宣言
-        isReported.update("isReported",false).addOnSuccessListener(new OnSuccessListener<Void>() {
+        isReported.update("isReported",false).addOnSuccessListener(new OnSuccessListener<Void>() {//isReportedをfalseに更新
             @Override
             public void onSuccess(Void unused) {
                 Log.d(TAG, "DocumentSnapshot successfully updated!");
@@ -289,7 +291,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void changessituation(){
+    public void changessituation(){//乗降状態の管理をするためにHomeFramgentを呼び出すメソッド
+
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation",MODE_PRIVATE);
             //共有プリファレンス 書き込みの準備
             SharedPreferences.Editor E = sharedPreferences.edit();
@@ -298,10 +301,10 @@ public class MainActivity extends AppCompatActivity {
             ((HomeFragment) fragment).onEvent(!isInCar);
     }
         @Override
-    public void onStop() {
+    public void onStop() {//アプリをバックグラウンドにした時のメソッド
         super.onStop();
         Intent intent = new Intent(getApplication(), TestService.class);
-        startService(intent);
+        startService(intent);//TestServiceを起動
 
     }
 

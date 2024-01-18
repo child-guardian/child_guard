@@ -40,23 +40,24 @@ public class TestService extends Service  {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        String IdPref = sharedPreferences.getString("ID", null);
-        if (IdPref == null) {
+        String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
+        if (IdPref == null) {//FireBaseのIDがアプリに登録されているとき
             Log.d("onResume", "ID not initialized.");
         } else {
             mDocRef = FirebaseFirestore.getInstance().document("status/" + IdPref);//現在の位置を取得
-            initNotification(mDocRef);
+            initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
         }
         return flags;
     }
 
-    private void initNotification(DocumentReference mDocRef) {
+    private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
 
-        // Init pref
+        // 共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation",MODE_PRIVATE);
-
-        mDocRef.addSnapshotListener( new EventListener<DocumentSnapshot>() {
+        //車の乗り降りを管理するtrue=乗車、false=降車
+        mDocRef.addSnapshotListener( new EventListener<DocumentSnapshot>() {//exists()でdocumentSnapshotの中のファイルの存在の確認
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
 
@@ -64,22 +65,22 @@ public class TestService extends Service  {
                 //共有プリファレンス 書き込みの準備
                 SharedPreferences.Editor E = sharedPreferences.edit();
                 //車の乗り降りを管理するtrue=乗車、false=降車
-                if (documentSnapshot.exists()) {
+                if (documentSnapshot.exists()) {//exists()でdocumentSnapshotの中のファイルの存在の確認
                     Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
                     E.putBoolean("isInCarPref", documentSnapshot.getBoolean("isInCar"));//乗降状態の判定
                     E.apply();//確定処理
                     Log.d("nt", "レスポンスを検知しました1");
-                    if (documentSnapshot.getBoolean("isReported")==true && isInCar==true) {
-                        ResetReported();
+                    if (documentSnapshot.getBoolean("isReported")==true && isInCar==true) {//isReportedがtrueかつisInCarがtrueのとき=サイト上で第三者ボタンが押されたときに乗車状態のとき
+                        ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
                         int importance = NotificationManager.IMPORTANCE_DEFAULT;
                         NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
                         channel.setDescription("第3者からの通報を検知しました");
                         NotificationManager notificationManager = getSystemService(NotificationManager.class);
                         notificationManager.createNotificationChannel(channel);
                         Log.d("nt", "レスポンスを検知しました2");
-                        notifyMain();
-                    } else{
-                        ResetReported();
+                        notifyMain();//  notifyMain()メソッドを処理→通知のメソッド
+                    } else{//それ以外のとき
+                        ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
                         Log.d("nt", "何もなし" );
                     }
                 }
@@ -114,15 +115,15 @@ public class TestService extends Service  {
         notificationManager.notify(R.string.app_name, builder.build());
     }
 
-    public void ResetReported(){
-
+    public void ResetReported(){//FireBaseのisReportedをfalseに初期化するメソッド
+        //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences =getSharedPreferences("app_situation", MODE_PRIVATE);
-        String IdPref = sharedPreferences.getString("ID", null);
+        String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
-        DocumentReference isReported = db.collection("status").document(IdPref);
+        DocumentReference isReported = db.collection("status").document(IdPref);//更新するドキュメントとの紐づけ
         Map<String, Boolean> DEFAULT_ITEM = new HashMap<>();//mapの宣言
         DEFAULT_ITEM.put("isReported", false);
-        isReported.update("isReported",false).addOnSuccessListener(new OnSuccessListener<Void>() {
+        isReported.update("isReported",false).addOnSuccessListener(new OnSuccessListener<Void>() {//isReportedをfalseに更新
             @Override
             public void onSuccess(Void unused) {
                 Log.d(TAG, "DocumentSnapshot successfully updated!");
