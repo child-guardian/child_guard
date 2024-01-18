@@ -146,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        changessituation();
         Log.d("onResume", "called");
         Log.d("onResume", "mDocRef is null");
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
@@ -178,10 +179,9 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("nt", "レスポンスを検知しました1");
                     if (documentSnapshot.getBoolean("isReported")==false ) {
                         if (fragment instanceof HomeFragment) {
-                            ((HomeFragment) fragment).onEvent(isInCar);
+                            changessituation();
                         }
                     }else if(isInCar){
-                        ResetReported();
                         int importance = NotificationManager.IMPORTANCE_DEFAULT;
                         NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
                         channel.setDescription("第3者からの通報を検知しました");
@@ -189,6 +189,7 @@ public class MainActivity extends AppCompatActivity {
                         notificationManager.createNotificationChannel(channel);
                         Log.d("nt", "レスポンスを検知しました2");
                         notifyMain();
+                        ResetReported();
                         } else{
                         ResetReported();
                         Log.d("nt", "何もなし" );
@@ -274,7 +275,6 @@ public class MainActivity extends AppCompatActivity {
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
         DocumentReference isReported = db.collection("status").document(IdPref);
         Map<String, Boolean> DEFAULT_ITEM = new HashMap<>();//mapの宣言
-        DEFAULT_ITEM.put("isReported", false);
         isReported.update("isReported",false).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void unused) {
@@ -287,11 +287,22 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
+
+    public void changessituation(){
+        SharedPreferences sharedPreferences = getSharedPreferences("app_situation",MODE_PRIVATE);
+            //共有プリファレンス 書き込みの準備
+            SharedPreferences.Editor E = sharedPreferences.edit();
+            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
+            Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
+            ((HomeFragment) fragment).onEvent(!isInCar);
+    }
         @Override
     public void onStop() {
         super.onStop();
         Intent intent = new Intent(getApplication(), TestService.class);
         startService(intent);
+
     }
 
 }
