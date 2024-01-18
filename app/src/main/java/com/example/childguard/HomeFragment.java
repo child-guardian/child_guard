@@ -110,7 +110,7 @@ public class HomeFragment extends Fragment implements OnEventListener{
         transaction.commit();
     }
 
-    private boolean updateUiState(boolean state) {
+    private boolean updateUiState(boolean isInCar) {
         Log.d("HomeFragment", "updateUiState: called");
         // Init
         TextView tv;
@@ -123,13 +123,13 @@ public class HomeFragment extends Fragment implements OnEventListener{
             return false;
         } catch (IllegalStateException e) {
             Log.d("HomeFragment", "updateUiState: view is not attached");
-//            getParentFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, HomeFragment.newInstance("test", "test")).commit();
-//            updateUiState(state);
+            getParentFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, HomeFragment.newInstance("test", "test")).commit();
+            updateUiState(isInCar);
             return false;
         }
         String get_on = "\n乗車状態";
         String get_off = "\n降車状態";
-        if (state) {
+        if (!isInCar) {
             //乗車状態にする
             fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
             tv.setText(get_on);
@@ -143,9 +143,10 @@ public class HomeFragment extends Fragment implements OnEventListener{
     }
 
     @Override
-    public boolean onEvent(boolean state) {
+    public boolean onEvent(boolean isInCar) {
         Log.d("HomeFragment", "onEvent: called");
-        return updateUiState(state);
+
+        return updateUiState(isInCar);
     }
 }
 
