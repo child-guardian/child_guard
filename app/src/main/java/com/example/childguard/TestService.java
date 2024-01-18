@@ -101,6 +101,7 @@ public class TestService extends Service {
     }
 
 
+
     public void ResetReported() {//FireBaseのisReportedをfalseに初期化するメソッド
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
@@ -121,6 +122,7 @@ public class TestService extends Service {
             }
         });
     }
+
 
     public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
             int importance = NotificationManager.IMPORTANCE_DEFAULT;

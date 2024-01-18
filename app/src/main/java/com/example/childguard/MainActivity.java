@@ -101,6 +101,8 @@ public class MainActivity extends AppCompatActivity {
                         .replace(findViewById(R.id.fragmentContainerView).getId(), this.homeFragment)
                         .addToBackStack(null)
                         .commit();
+                firebaselink();
+
             } else if (v.getItemId() == findViewById(R.id.navigation_notification).getId()) {
                 findViewById(R.id.fab_scan_qr_code).setVisibility(FrameLayout.VISIBLE);
                 getSupportFragmentManager().beginTransaction()
@@ -123,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
             ScanOptions options = new ScanOptions();
             options.setPrompt("QRコードを読み取ってください");
             QrLauncher.launch(options);
+
         });
 
         //Bluetooth検知機能
@@ -138,7 +141,7 @@ public class MainActivity extends AppCompatActivity {
             Log.d("BT", "Permission to connect bluetooth devices granted");
         }
         registerReceiver(receiver, intentFilter);
-
+        changessituation();
     }
 
     @Override
@@ -147,15 +150,7 @@ public class MainActivity extends AppCompatActivity {
         changessituation();
         Log.d("onResume", "called");
         Log.d("onResume", "mDocRef is null");
-        //共有プリファレンス全体の準備
-        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        String IdPref = sharedPreferences.getString("ID", null);////アプリに記録されているIDの取得
-        if (IdPref == null) {//FireBaseのIDがアプリに登録されているとき
-            Log.d("onResume", "ID not initialized.");
-        } else {
-            mDocRef = FirebaseFirestore.getInstance().document("status/" + IdPref);//現在の位置を取得
-            initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
-        }
+       firebaselink();
     }
 
     private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
@@ -240,6 +235,19 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+
+    public void firebaselink(){//Firebaseのドキュメントの取得
+        //共有プリファレンス全体の準備
+        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
+        String IdPref = sharedPreferences.getString("ID", null);////アプリに記録されているIDの取得
+        if (IdPref == null) {//FireBaseのIDがアプリに登録されているとき
+            Log.d("onResume", "ID not initialized.");
+        } else {
+            mDocRef = FirebaseFirestore.getInstance().document("status/" + IdPref);//現在の位置を取得
+            initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
+
+        }
+    }
     public void ResetReported(){//FireBaseのisReportedをfalseに初期化するメソッド
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("app_situation", MODE_PRIVATE);
