@@ -1,17 +1,22 @@
 package com.example.childguard;
 
+import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.Vibrator;
 import android.util.Log;
 import android.widget.Toast;
-
+import android.content.Context;
+import android.content.Intent;
+import android.content.BroadcastReceiver;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -31,7 +36,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Executor;
 
-public class TestService extends Service  {
+public class TestService extends Service {
     FirebaseFirestore db;
     DocumentReference mDocRef;
 
@@ -55,9 +60,9 @@ public class TestService extends Service  {
     private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
 
         // 共有プリファレンス全体の準備
-        SharedPreferences sharedPreferences = getSharedPreferences("app_situation",MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
         //車の乗り降りを管理するtrue=乗車、false=降車
-        mDocRef.addSnapshotListener( new EventListener<DocumentSnapshot>() {//exists()でdocumentSnapshotの中のファイルの存在の確認
+        mDocRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {//exists()でdocumentSnapshotの中のファイルの存在の確認
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
 
@@ -70,7 +75,7 @@ public class TestService extends Service  {
                     E.putBoolean("isInCarPref", documentSnapshot.getBoolean("isInCar"));//乗降状態の判定
                     E.apply();//確定処理
                     Log.d("nt", "レスポンスを検知しました1");
-                    if (documentSnapshot.getBoolean("isReported")==true && isInCar==true) {//isReportedがtrueかつisInCarがtrueのとき=サイト上で第三者ボタンが押されたときに乗車状態のとき
+                    if (documentSnapshot.getBoolean("isReported") == true && isInCar == true) {//isReportedがtrueかつisInCarがtrueのとき=サイト上で第三者ボタンが押されたときに乗車状態のとき
                         ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
                         int importance = NotificationManager.IMPORTANCE_DEFAULT;
                         NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
@@ -78,10 +83,11 @@ public class TestService extends Service  {
                         NotificationManager notificationManager = getSystemService(NotificationManager.class);
                         notificationManager.createNotificationChannel(channel);
                         Log.d("nt", "レスポンスを検知しました2");
-                        notifyMain();//  notifyMain()メソッドを処理→通知のメソッド
-                    } else{//それ以外のとき
+                        NotificationSetting();//通知に関する設定のメソッド→Android8.0以降のバックグラウンド処理に関する設定など
+                        Notification(getApplicationContext());//バイブレーション、音、バナーによる通知を行うメソッド
+                    } else {//それ以外のとき
                         ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
-                        Log.d("nt", "何もなし" );
+                        Log.d("nt", "何もなし");
                     }
                 }
 
@@ -89,41 +95,18 @@ public class TestService extends Service  {
 
         });
     }
-    public void notifyMain() {
-        //↓通知をする際に起動するバイブレーション
-        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(1000);
-        //↓通知の詳細設定的な奴
-        NotificationCompat.Builder builder = new NotificationCompat
-                .Builder(this, "CHANNEL_ID")
-                .setSmallIcon(android.R.drawable.ic_menu_info_details)
-                .setContentTitle("通報検知")
-                .setContentText("子供の置き去りを検知しました。")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        notificationManager.notify(R.string.app_name, builder.build());
-    }
 
-    public void ResetReported(){//FireBaseのisReportedをfalseに初期化するメソッド
+    public void ResetReported() {//FireBaseのisReportedをfalseに初期化するメソッド
         //共有プリファレンス全体の準備
-        SharedPreferences sharedPreferences =getSharedPreferences("app_situation", MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
         String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
         DocumentReference isReported = db.collection("status").document(IdPref);//更新するドキュメントとの紐づけ
         Map<String, Boolean> DEFAULT_ITEM = new HashMap<>();//mapの宣言
         DEFAULT_ITEM.put("isReported", false);
-        isReported.update("isReported",false).addOnSuccessListener(new OnSuccessListener<Void>() {//isReportedをfalseに更新
+        isReported.update("isReported", false).addOnSuccessListener(new OnSuccessListener<Void>() {//isReportedをfalseに更新
             @Override
             public void onSuccess(Void unused) {
                 Log.d(TAG, "DocumentSnapshot successfully updated!");
@@ -134,6 +117,43 @@ public class TestService extends Service  {
                 Log.w(TAG, "Error updating document", e);
             }
         });
+    }
+
+    public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {//Android 8.0以降であることを確認する
+            int importance = NotificationManager.IMPORTANCE_DEFAULT;
+            //通知チャネルの実装
+            NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通知", importance);
+            channel.setDescription("第三者により置き去りの通報が行われたときに通知します。");
+
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
+    }
+
+    public void Notification(Context context) {//実際に通知を行うメソッド
+        // 通知がクリックされたときに送信されるIntent
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setAction("OPEN_ACTIVITY");
+        // PendingIntentの作成
+        int requestCode = 100;
+        int flags = 0;
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
+
+        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(2000);//バイブレーション
+        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "CHANNEL_ID")
+                .setSmallIcon(android.R.drawable.ic_menu_info_details)
+                .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
+                .setContentText("第三者からの通報が行われました。")//通知の本文
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
     @Nullable
     @Override
