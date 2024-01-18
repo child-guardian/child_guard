@@ -11,19 +11,16 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.os.Vibrator;
 import android.util.Log;
-import android.widget.Toast;
-import android.content.Context;
-import android.content.Intent;
-import android.content.BroadcastReceiver;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -35,13 +32,14 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Executor;
 
 public class TestService extends Service {
     FirebaseFirestore db;
     DocumentReference mDocRef;
 
     public static final String TAG = "InspirationQuote";
+
+    public PeriodicTaskManager periodicTaskManager;
 
 
     @Override
@@ -59,11 +57,13 @@ public class TestService extends Service {
     }
 
     private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
-
+        // PeriodicTaskManagerのインスタンス化
+        periodicTaskManager = new PeriodicTaskManager();
         // 共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
         //車の乗り降りを管理するtrue=乗車、false=降車
         mDocRef.addSnapshotListener(new EventListener<DocumentSnapshot>() {//exists()でdocumentSnapshotの中のファイルの存在の確認
+
             @Override
             public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
 
@@ -85,10 +85,13 @@ public class TestService extends Service {
                         notificationManager.createNotificationChannel(channel);
                         Log.d("nt", "レスポンスを検知しました2");
                         NotificationSetting();//通知に関する設定のメソッド
-                        Notification(getApplicationContext());//バイブレーション、音、バナーによる通知を行うメソッド
-                    } else {//それ以外のとき
+                        Notification(getApplicationContext());//通知を行うメソッド
+                    } else if(!isInCar){//Bluetoothの切断後5分以上乗車状態のままのとき→QRコード読み取りを忘れているとき→置き去り発生
                         ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
-                        Log.d("nt", "何もなし");
+                        periodicTaskManager.stopPeriodicTask();//通知のループをストップする
+                    }else {
+                        ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
+                        periodicTaskManager.startPeriodicTask();//5分毎に通知を行う
                     }
                 }
 
@@ -96,7 +99,6 @@ public class TestService extends Service {
 
         });
     }
-
 
 
     public void ResetReported() {//FireBaseのisReportedをfalseに初期化するメソッド
@@ -176,6 +178,87 @@ public class TestService extends Service {
             return;
         }
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
+    }
+    public void NotificationBluetooth(Context context) {//実際に通知を行うメソッド
+        final String CHANNEL_ID = "my_channel_id";
+        // 通知がクリックされたときに送信されるIntent
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setAction("OPEN_ACTIVITY");
+        // PendingIntentの作成
+        int requestCode = 100;
+        int flags = 0;
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
+
+        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(2000);//バイブレーション
+
+        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
+                .setSmallIcon(android.R.drawable.ic_menu_info_details)
+                .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
+                .setContentText("Bluetootと車の切断から5分が経過しました")//通知の本文
+                .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
+                .setAutoCancel(true)//通知をタップすると削除する
+                .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
+
+        // NotificationChannelの作成（Android 8.0以降）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                NotificationChannel channel = new NotificationChannel(
+                        CHANNEL_ID,
+                        "Channel Name",
+                        NotificationManager.IMPORTANCE_HIGH
+                );
+
+                channel.setDescription("Channel Description");
+                channel.enableLights(true);
+                channel.setLightColor(Color.RED);
+                channel.enableVibration(true);
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+
+
+        NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        notificationManager.notify(R.string.app_name, builder.build());//通知の表示
+    }
+    public class PeriodicTaskManager {//Bluetoothの切断後に乗車状態にならなかった場合に５分毎に通知を送るメソッド
+
+        private static final long INTERVAL = 5 *60* 1000; //300秒
+        private final Handler handler;
+        private final Runnable periodicTask;
+
+        public PeriodicTaskManager() {
+
+            handler = new Handler(Looper.getMainLooper());
+            periodicTask = new Runnable() {
+
+                public void run() {
+
+                    //共有プリファレンス全体の準備
+                    SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
+                    Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
+                    // 5分毎に実行される処理
+                    NotificationBluetooth(getApplicationContext());
+                    Log.d("PeriodicTask", "５分後に処理を実行します");
+
+                    handler.postDelayed(this, INTERVAL);
+                }
+            };
+        }
+
+        public void startPeriodicTask() {
+            // 最初の実行
+            handler.postDelayed(periodicTask,INTERVAL);//一回目は5分後に行う
+        }
+
+        public void stopPeriodicTask() {
+            // 定期的な処理の停止
+            handler.removeCallbacks(periodicTask);
+        }
     }
     @Nullable
     @Override

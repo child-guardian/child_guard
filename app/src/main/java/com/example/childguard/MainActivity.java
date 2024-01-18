@@ -3,6 +3,7 @@ package com.example.childguard;
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -12,7 +13,9 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
@@ -27,7 +30,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
 import androidx.fragment.app.Fragment;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -41,12 +43,8 @@ import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -190,7 +188,8 @@ public class MainActivity extends AppCompatActivity {
                         NotificationManager notificationManager = getSystemService(NotificationManager.class);
                         notificationManager.createNotificationChannel(channel);
                         Log.d("nt", "レスポンスを検知しました2");
-                        notifyMain();//  notifyMain()メソッドを処理→通知のメソッド
+                        NotificationSetting();//通知に関する設定のメソッド
+                        Notification(getApplicationContext());//通知を行うメソッド
                         ResetReported();// ResetReported();メソッドを処理→FireBaseのisReportedをfalseにする
                         } else{//第三者ボタンが押されたときにisInCarがfalseのとき=降車状態のとき
                         ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
@@ -241,35 +240,6 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    //↓通知のやつ
-    public void notifyMain() {
-        //↓通知をする際に起動するバイブレーション
-        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(1000);
-        //↓通知の詳細設定的な奴
-        NotificationCompat.Builder builder = new NotificationCompat
-                .Builder(this, "CHANNEL_ID")
-                .setSmallIcon(android.R.drawable.ic_menu_info_details)
-                .setContentTitle("通報検知")
-                .setContentText("子供の置き去りを検知しました。")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return;
-        }
-        notificationManager.notify(R.string.app_name, builder.build());
-
-
-    }
-
     public void ResetReported(){//FireBaseのisReportedをfalseに初期化するメソッド
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("app_situation", MODE_PRIVATE);
@@ -288,6 +258,62 @@ public class MainActivity extends AppCompatActivity {
                 Log.w(TAG, "Error updating document", e);
             }
         });
+    }
+    public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        //通知チャネルの実装
+        NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通知", importance);
+        channel.setDescription("第三者により置き去りの通報が行われたときに通知します。");
+
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+
+    }
+    public void Notification(Context context) {//実際に通知を行うメソッド
+        final String CHANNEL_ID = "my_channel_id";
+        // 通知がクリックされたときに送信されるIntent
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setAction("OPEN_ACTIVITY");
+        // PendingIntentの作成
+        int requestCode = 100;
+        int flags = 0;
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
+
+        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(2000);//バイブレーション
+
+        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
+                .setSmallIcon(android.R.drawable.ic_menu_info_details)
+                .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
+                .setContentText("第三者からの通報が行われました。")//通知の本文
+                .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
+                .setAutoCancel(true)//通知をタップすると削除する
+                .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
+
+        // NotificationChannelの作成（Android 8.0以降）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                NotificationChannel channel = new NotificationChannel(
+                        CHANNEL_ID,
+                        "Channel Name",
+                        NotificationManager.IMPORTANCE_HIGH
+                );
+
+                channel.setDescription("Channel Description");
+                channel.enableLights(true);
+                channel.setLightColor(Color.RED);
+                channel.enableVibration(true);
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+
+
+        NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
 
 
