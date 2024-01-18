@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Vibrator;
@@ -83,7 +84,7 @@ public class TestService extends Service {
                         NotificationManager notificationManager = getSystemService(NotificationManager.class);
                         notificationManager.createNotificationChannel(channel);
                         Log.d("nt", "レスポンスを検知しました2");
-                        NotificationSetting();//通知に関する設定のメソッド→Android8.0以降のバックグラウンド処理に関する設定など
+                        NotificationSetting();//通知に関する設定のメソッド
                         Notification(getApplicationContext());//バイブレーション、音、バナーによる通知を行うメソッド
                     } else {//それ以外のとき
                         ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
@@ -120,7 +121,6 @@ public class TestService extends Service {
     }
 
     public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {//Android 8.0以降であることを確認する
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
             //通知チャネルの実装
             NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通知", importance);
@@ -128,10 +128,11 @@ public class TestService extends Service {
 
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
-        }
+
     }
 
     public void Notification(Context context) {//実際に通知を行うメソッド
+         final String CHANNEL_ID = "my_channel_id";
         // 通知がクリックされたときに送信されるIntent
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction("OPEN_ACTIVITY");
@@ -141,13 +142,34 @@ public class TestService extends Service {
         PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
 
         ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(2000);//バイブレーション
-        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "CHANNEL_ID")
+
+        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
                 .setContentText("第三者からの通報が行われました。")//通知の本文
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
+                .setAutoCancel(true)//通知をタップすると削除する
+                .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
+
+        // NotificationChannelの作成（Android 8.0以降）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                NotificationChannel channel = new NotificationChannel(
+                        CHANNEL_ID,
+                        "Channel Name",
+                        NotificationManager.IMPORTANCE_HIGH
+                );
+
+                channel.setDescription("Channel Description");
+                channel.enableLights(true);
+                channel.setLightColor(Color.RED);
+                channel.enableVibration(true);
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+
 
         NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
