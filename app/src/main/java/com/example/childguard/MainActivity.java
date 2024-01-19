@@ -300,16 +300,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void changessituation() {//乗降状態の管理をするためにHomeFramgentを呼び出すメソッド
-
-        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        //共有プリファレンス 書き込みの準備
-        SharedPreferences.Editor E = sharedPreferences.edit();
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
-        Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
-        ((HomeFragment) fragment).onEvent(!isInCar);
-    }
-
 //    @Override
 //    public void onStop() {//アプリをバックグラウンドにした時のメソッド
 //        super.onStop();
