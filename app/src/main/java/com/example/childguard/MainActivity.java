@@ -135,6 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onResume() {
+        super.onResume();
         Log.d("onResume", "called");
         Log.d("onResume", "mDocRef is null");
         firebaselink();
@@ -229,7 +230,6 @@ public class MainActivity extends AppCompatActivity {
             initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
 
         }
-        super.onResume();
     }
 
     public void ResetReported() {//FireBaseのisReportedをfalseに初期化するメソッド
