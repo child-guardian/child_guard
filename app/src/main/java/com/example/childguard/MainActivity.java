@@ -24,22 +24,15 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.Fragment;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
@@ -57,8 +50,6 @@ public class MainActivity extends AppCompatActivity {
     private HomeFragment homeFragment;
 
     public static final String TAG = "InspirationQuote";
-
-
 
 
     private final ActivityResultLauncher<ScanOptions> QrLauncher = registerForActivityResult(
@@ -136,8 +127,7 @@ public class MainActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             Log.d("BT", "No permission to connect bluetooth devices");
             return;
-        }
-        else {
+        } else {
             Log.d("BT", "Permission to connect bluetooth devices granted");
         }
         registerReceiver(receiver, intentFilter);
@@ -150,50 +140,45 @@ public class MainActivity extends AppCompatActivity {
         changessituation();
         Log.d("onResume", "called");
         Log.d("onResume", "mDocRef is null");
-       firebaselink();
+        firebaselink();
     }
 
     private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
         // 共有プリファレンス全体の準備
-        SharedPreferences sharedPreferences = getSharedPreferences("app_situation",MODE_PRIVATE);
+        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
 
-        mDocRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
+        mDocRef.addSnapshotListener(this, (documentSnapshot, e) -> {
 
-                Log.d("nt", "イベント開始");
-                //共有プリファレンス 書き込みの準備
-                SharedPreferences.Editor E = sharedPreferences.edit();
-                //車の乗り降りを管理するtrue=乗車、false=降車
-                if (documentSnapshot.exists()) {//exists()でdocumentSnapshotの中のファイルの存在の確認
-                    Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
-                    Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
-                    E.putBoolean("isInCarPref", documentSnapshot.getBoolean("isInCar"));//乗降状態の判定
-                    E.apply();//確定処理
-                    Log.d("nt", "レスポンスを検知しました1");
-                    //FireBaseで更新された情報の判定
-                    if (documentSnapshot.getBoolean("isReported")==false ) {//isReportedがfalseのとき=サイト上で保護者ボタンが押されたとき
-                        if (fragment instanceof HomeFragment) {//fragementがHomeFragmentのインスタンスかの判定
-                            changessituation();//  changessituation()メソッドを処理→アプリ側の乗降状態を変化
-                        }
-                    }else if(isInCar){//第三者ボタンが押されたときにisInCarがtrueのとき＝乗車状態のとき→いたずら防止
-                        int importance = NotificationManager.IMPORTANCE_DEFAULT;
-                        NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
-                        channel.setDescription("第3者からの通報を検知しました");
-                        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-                        notificationManager.createNotificationChannel(channel);
-                        Log.d("nt", "レスポンスを検知しました2");
-                        NotificationSetting();//通知に関する設定のメソッド
-                        Notification(getApplicationContext());//通知を行うメソッド
-                        ResetReported();// ResetReported();メソッドを処理→FireBaseのisReportedをfalseにする
-                        } else{//第三者ボタンが押されたときにisInCarがfalseのとき=降車状態のとき
-                        ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
-                        Log.d("nt", "何もなし" );
+            Log.d("nt", "イベント開始");
+            //共有プリファレンス 書き込みの準備
+            SharedPreferences.Editor E = sharedPreferences.edit();
+            //車の乗り降りを管理するtrue=乗車、false=降車
+            if (documentSnapshot.exists()) {//exists()でdocumentSnapshotの中のファイルの存在の確認
+                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
+                Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
+                E.putBoolean("isInCarPref", documentSnapshot.getBoolean("isInCar"));//乗降状態の判定
+                E.apply();//確定処理
+                Log.d("nt", "レスポンスを検知しました1");
+                //FireBaseで更新された情報の判定
+                if (documentSnapshot.getBoolean("isReported") == false) {//isReportedがfalseのとき=サイト上で保護者ボタンが押されたとき
+                    if (fragment instanceof HomeFragment) {//fragementがHomeFragmentのインスタンスかの判定
+                        changessituation();//  changessituation()メソッドを処理→アプリ側の乗降状態を変化
                     }
-                    }
-
-                    }
-
+                } else if (isInCar) {//第三者ボタンが押されたときにisInCarがtrueのとき＝乗車状態のとき→いたずら防止
+                    int importance = NotificationManager.IMPORTANCE_DEFAULT;
+                    NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
+                    channel.setDescription("第3者からの通報を検知しました");
+                    NotificationManager notificationManager = getSystemService(NotificationManager.class);
+                    notificationManager.createNotificationChannel(channel);
+                    Log.d("nt", "レスポンスを検知しました2");
+                    NotificationSetting();//通知に関する設定のメソッド
+                    Notification(getApplicationContext());//通知を行うメソッド
+                    ResetReported();// ResetReported();メソッドを処理→FireBaseのisReportedをfalseにする
+                } else {//第三者ボタンが押されたときにisInCarがfalseのとき=降車状態のとき
+                    ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
+                    Log.d("nt", "何もなし");
+                }
+            }
         });
 
     }
@@ -212,7 +197,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("BT", "No permission to connect bluetooth devices");
                 return;
             }
-            String deviceName = device.getName();
             String deviceHardwareAddress = device.getAddress(); // MAC address
 
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
@@ -236,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
     };
 
 
-    public void firebaselink(){//Firebaseのドキュメントの取得
+    public void firebaselink() {//Firebaseのドキュメントの取得
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
         String IdPref = sharedPreferences.getString("ID", null);////アプリに記録されているIDの取得
@@ -248,25 +232,18 @@ public class MainActivity extends AppCompatActivity {
 
         }
     }
-    public void ResetReported(){//FireBaseのisReportedをfalseに初期化するメソッド
+
+    public void ResetReported() {//FireBaseのisReportedをfalseに初期化するメソッド
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("app_situation", MODE_PRIVATE);
         String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
         DocumentReference isReported = db.collection("status").document(IdPref);//更新するドキュメントとの紐づけ
         Map<String, Boolean> DEFAULT_ITEM = new HashMap<>();//mapの宣言
-        isReported.update("isReported",false).addOnSuccessListener(new OnSuccessListener<Void>() {//isReportedをfalseに更新
-            @Override
-            public void onSuccess(Void unused) {
-                Log.d(TAG, "DocumentSnapshot successfully updated!");
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.w(TAG, "Error updating document", e);
-            }
-        });
+        //isReportedをfalseに更新
+        isReported.update("isReported", false).addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
     }
+
     public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         //通知チャネルの実装
@@ -277,6 +254,7 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.createNotificationChannel(channel);
 
     }
+
     public void Notification(Context context) {//実際に通知を行うメソッド
         final String CHANNEL_ID = "my_channel_id";
         // 通知がクリックされたときに送信されるIntent
@@ -317,7 +295,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -325,16 +303,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void changessituation(){//乗降状態の管理をするためにHomeFramgentを呼び出すメソッド
+    public void changessituation() {//乗降状態の管理をするためにHomeFramgentを呼び出すメソッド
 
-        SharedPreferences sharedPreferences = getSharedPreferences("app_situation",MODE_PRIVATE);
-            //共有プリファレンス 書き込みの準備
-            SharedPreferences.Editor E = sharedPreferences.edit();
-            Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
-            Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
-            ((HomeFragment) fragment).onEvent(!isInCar);
+        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
+        //共有プリファレンス 書き込みの準備
+        SharedPreferences.Editor E = sharedPreferences.edit();
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
+        Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
+        ((HomeFragment) fragment).onEvent(!isInCar);
     }
-        @Override
+
+    @Override
     public void onStop() {//アプリをバックグラウンドにした時のメソッド
         super.onStop();
         Intent intent = new Intent(getApplication(), TestService.class);
