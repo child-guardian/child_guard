@@ -318,7 +318,6 @@ public class MainActivity extends AppCompatActivity {
         super.onStop();
         Intent intent = new Intent(getApplication(), TestService.class);
         startService(intent);//TestServiceを起動
-
     }
 
 }

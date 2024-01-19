@@ -5,9 +5,12 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
@@ -15,6 +18,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -95,8 +99,6 @@ public class TestService extends Service {
         });
     }
 
-
-
     public void ResetReported() {//FireBaseのisReportedをfalseに初期化するメソッド
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
@@ -108,7 +110,6 @@ public class TestService extends Service {
         //isReportedをfalseに更新
         isReported.update("isReported", false).addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
     }
-
 
     public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
             int importance = NotificationManager.IMPORTANCE_DEFAULT;
