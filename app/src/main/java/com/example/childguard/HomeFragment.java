@@ -1,5 +1,6 @@
 package com.example.childguard;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -76,6 +77,12 @@ public class HomeFragment extends Fragment implements OnEventListener{
     public void onResume() {
         super.onResume();
         Log.d("HomeFragment", "onResume: called");
+        this.updateUiState(getIsInCarLocal());
+    }
+
+    private boolean getIsInCarLocal() {
+        SharedPreferences pref = requireActivity().getSharedPreferences("app_situation", requireActivity().MODE_PRIVATE);
+        return pref.getBoolean("isInCar", false);
     }
 
     //画面遷移メソッド
