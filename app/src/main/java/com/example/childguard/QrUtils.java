@@ -8,7 +8,9 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.util.AndroidRuntimeException;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.WindowManager;
 import android.widget.ImageView;
 
 import androidx.print.PrintHelper;
@@ -35,6 +37,7 @@ public class QrUtils {
         AllURL=KoteiURL+key;
 
         int size = 1500;
+        int qrCodeSize = calculateQRCodeSize(); // 画面密度に応じてサイズを計算
         Bitmap QRGazou;
         Bitmap bitmapqr;
         try {
@@ -55,10 +58,21 @@ public class QrUtils {
 
         // 画像のサイズの調整
         int disWidth = (width - bitmapqr.getWidth()) / 2;
-        int disHeight = (int) ((height - bitmapqr.getHeight()) / 1.3);
+        int disHeight = (int) ((height - bitmapqr.getHeight()) / 1.4);
         canvas.drawBitmap(bitmap, 0, 0, (Paint) null);
         canvas.drawBitmap(bitmapqr, disWidth, disHeight, (Paint) null); // 画像合成
         //Androidからプリンターへ印刷指示を出すサポートライブラリ
         return QRGazou;
     }
+    private int calculateQRCodeSize() {
+        // 画面解像度を取得
+        DisplayMetrics metrics = new DisplayMetrics();
+        WindowManager windowManager = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+        windowManager.getDefaultDisplay().getMetrics(metrics);
+
+        // 画面密度に基づいてQRコードのサイズを計算
+        float density = context.getResources().getDisplayMetrics().density;
+        return (int) (1500 * density);
+    }
+
 }
