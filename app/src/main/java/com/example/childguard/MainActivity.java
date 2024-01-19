@@ -131,15 +131,12 @@ public class MainActivity extends AppCompatActivity {
             Log.d("BT", "Permission to connect bluetooth devices granted");
         }
         registerReceiver(receiver, intentFilter);
-        changessituation();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        changessituation();
         Log.d("onResume", "called");
-        Log.d("onResume", "mDocRef is null");
         firebaselink();
     }
 
@@ -162,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
                 //FireBaseで更新された情報の判定
                 if (documentSnapshot.getBoolean("isReported") == false) {//isReportedがfalseのとき=サイト上で保護者ボタンが押されたとき
                     if (fragment instanceof HomeFragment) {//fragementがHomeFragmentのインスタンスかの判定
-                        changessituation();//  changessituation()メソッドを処理→アプリ側の乗降状態を変化
+                        ((HomeFragment) fragment).onEvent(!isInCar);//onEvent()メソッドを処理→HomeFragmentのonEvent()メソッドを処理
                     }
                 } else if (isInCar) {//第三者ボタンが押されたときにisInCarがtrueのとき＝乗車状態のとき→いたずら防止
                     int importance = NotificationManager.IMPORTANCE_DEFAULT;
@@ -313,12 +310,12 @@ public class MainActivity extends AppCompatActivity {
         ((HomeFragment) fragment).onEvent(!isInCar);
     }
 
-    @Override
-    public void onStop() {//アプリをバックグラウンドにした時のメソッド
-        super.onStop();
-        Intent intent = new Intent(getApplication(), TestService.class);
-        startService(intent);//TestServiceを起動
-    }
+//    @Override
+//    public void onStop() {//アプリをバックグラウンドにした時のメソッド
+//        super.onStop();
+//        Intent intent = new Intent(getApplication(), TestService.class);
+//        startService(intent);//TestServiceを起動
+//    }
 
 }
 
