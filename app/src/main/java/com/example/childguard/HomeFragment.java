@@ -1,13 +1,9 @@
 package com.example.childguard;
 
+import static android.content.ContentValues.TAG;
+import static android.content.Context.MODE_PRIVATE;
+
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.core.content.res.ResourcesCompat;
@@ -16,26 +12,33 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.print.PrintHelper;
 
-import android.util.AndroidRuntimeException;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.google.zxing.BarcodeFormat;
-import com.google.zxing.WriterException;
-import com.journeyapps.barcodescanner.BarcodeEncoder;
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements OnEventListener{
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -43,8 +46,9 @@ public class HomeFragment extends Fragment {
     private static final String ARG_PARAM2 = "param2";
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
+    private String str_key;
     private String mParam2;
+
 
     public HomeFragment() {
         // Required empty public constructor
@@ -72,7 +76,7 @@ public class HomeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
+            // mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
     }
@@ -80,53 +84,20 @@ public class HomeFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        // Inflate the layout for this fragment
-        View view=inflater.inflate(R.layout.fragment_home,container,false);
-        MainActivity activity = (MainActivity) getActivity();
-        //QRコード印刷の処理
-        Button bt1=view.findViewById(R.id.QRprinting);
-        bt1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                replaceFragment(new QrPrintFragment());
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
 
-           }
-        });
-        //bluetooth設定ボタンの処理
-        Button bt2=view.findViewById(R.id.Bluetooth_setup);
-        bt2.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                replaceFragment(new bluetooth_setupFragment());
-            }
-        });
         return view;
     }
+
 
     @Override
     public void onResume() {
         super.onResume();
         Log.d("HomeFragment", "onResume: called");
-        TextView situationTextView = getView().findViewById(R.id.situation);
-        FrameLayout situation_bg=getView().findViewById(R.id.situation_bg);
-        updateInCarStatus(situationTextView,situation_bg);
     }
 
-    public void updateInCarStatus(TextView situationTextView,FrameLayout situation_bg) {
-        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("default", 0);
-
-        Log.d("HomeFragment", "updateInCarStatus: " + sharedPreferences.getBoolean("inCar", false));
-        if (sharedPreferences.getBoolean("inCar", false)) {
-            situationTextView.setText("\n降車状態");
-            situation_bg.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
-        } else {
-            situationTextView.setText("\n乗車状態");
-            situation_bg.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
-        }
-
-    }
     //画面遷移メソッド
-    private void replaceFragment(Fragment fragment){
+    private void replaceFragment(Fragment fragment) {
         // フラグメントマネージャーの取得
         FragmentManager manager = getParentFragmentManager(); // アクティビティではgetSupportFragmentManager()?
         // フラグメントトランザクションの開始
@@ -138,4 +109,43 @@ public class HomeFragment extends Fragment {
         // フラグメントトランザクションをコミット
         transaction.commit();
     }
+
+    private boolean updateUiState(boolean state) {
+        Log.d("HomeFragment", "updateUiState: called");
+        // Init
+        TextView tv;
+        FrameLayout fl;
+        try {
+            tv = requireView().findViewById(R.id.situation);
+            fl = requireView().findViewById(R.id.situation_bg);
+        } catch (NullPointerException e) {
+            Log.d("HomeFragment", "updateUiState: view is null");
+            return false;
+        } catch (IllegalStateException e) {
+            Log.d("HomeFragment", "updateUiState: view is not attached");
+//            getParentFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, HomeFragment.newInstance("test", "test")).commit();
+//            updateUiState(state);
+            return false;
+        }
+        String get_on = "\n乗車状態";
+        String get_off = "\n降車状態";
+        if (state) {
+            //乗車状態にする
+            fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
+            tv.setText(get_on);
+        } else {
+            //降車状態にする
+            fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
+            tv.setText(get_off);
+        }
+
+        return true;
+    }
+
+    @Override
+    public boolean onEvent(boolean state) {
+        Log.d("HomeFragment", "onEvent: called");
+        return updateUiState(state);
+    }
 }
+
