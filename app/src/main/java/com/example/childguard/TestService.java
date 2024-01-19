@@ -3,11 +3,15 @@ package com.example.childguard;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.Service;
+import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.annotation.Nullable;
@@ -19,12 +23,62 @@ public class TestService extends Service  {
 
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        //Bluetooth検知機能
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
 
-        audioStart();
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            Log.d("BT", "No permission to connect bluetooth devices");
+
+        }
+        else {
+            Log.d("BT", "Permission to connect bluetooth devices granted");
+        }
+
+
+        registerReceiver(receiver, intentFilter);
+        //audioStart();
 
         return START_NOT_STICKY;
 
+
     }
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction(); // may need to chain this to a recognizing function
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            HomeFragment homeFragment=new HomeFragment();
+
+            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                Log.d("BT", "No permission to connect bluetooth devices");
+                return;
+            }
+            String deviceName = device.getName();
+            String deviceHardwareAddress = device.getAddress(); // MAC address
+
+            if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+                //Do something if connected
+                Log.d("BT", "Device connected");
+
+                String registeredId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("bluetooth_device_id", "none");
+
+                Log.d("BT_Judge", "Registered: " + registeredId);
+
+                if (deviceHardwareAddress.equals(registeredId)) {
+                    Log.d("BT_Judge", "登録済み");
+                } else Log.d("BT_Judge", "未登録");
+
+            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+                //Do something if disconnected
+                Log.d("BT", "Device disconnected");
+
+            }
+        }
+    };
 
     private void audioStart(){
         //↓通知をする際に起動するバイブレーション

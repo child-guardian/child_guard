@@ -174,6 +174,8 @@ public class MainActivity extends AppCompatActivity {
             this.flg = false;
             initNotification(mDocRef);
         }
+
+
     }
 
     private void initNotification(DocumentReference mDocRef) {
@@ -289,12 +291,12 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//        Intent intent = new Intent(getApplication(), TestService.class);
-//        startService(intent);
-//    }
+    @Override
+    public void onStop() {
+        super.onStop();
+        Intent intent = new Intent(getApplication(), TestService.class);
+        startService(intent);
+    }
 
     //Bluetooth_setupの戻るボタン
     public void setupBackButton(boolean enableBackButton) {
