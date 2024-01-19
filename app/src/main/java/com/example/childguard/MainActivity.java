@@ -131,13 +131,11 @@ public class MainActivity extends AppCompatActivity {
             Log.d("BT", "Permission to connect bluetooth devices granted");
         }
         registerReceiver(receiver, intentFilter);
-        changessituation();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        changessituation();
         Log.d("onResume", "called");
         Log.d("onResume", "mDocRef is null");
         firebaselink();
@@ -162,7 +160,8 @@ public class MainActivity extends AppCompatActivity {
                 //FireBaseで更新された情報の判定
                 if (documentSnapshot.getBoolean("isReported") == false) {//isReportedがfalseのとき=サイト上で保護者ボタンが押されたとき
                     if (fragment instanceof HomeFragment) {//fragementがHomeFragmentのインスタンスかの判定
-                        changessituation();//  changessituation()メソッドを処理→アプリ側の乗降状態を変化
+//                        changessituation();//  changessituation()メソッドを処理→アプリ側の乗降状態を変化
+                        ((HomeFragment) fragment).onEvent(!isInCar);
                     }
                 } else if (isInCar) {//第三者ボタンが押されたときにisInCarがtrueのとき＝乗車状態のとき→いたずら防止
                     int importance = NotificationManager.IMPORTANCE_DEFAULT;
@@ -300,17 +299,6 @@ public class MainActivity extends AppCompatActivity {
             return;
         }
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
-    }
-
-
-    public void changessituation() {//乗降状態の管理をするためにHomeFramgentを呼び出すメソッド
-
-        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        //共有プリファレンス 書き込みの準備
-        SharedPreferences.Editor E = sharedPreferences.edit();
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
-        Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
-        ((HomeFragment) fragment).onEvent(!isInCar);
     }
 
     @Override
