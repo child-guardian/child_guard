@@ -16,6 +16,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Vibrator;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
@@ -81,9 +82,13 @@ public class TestService extends Service {
                 } else if(isInCar){//Bluetoothの切断後5分以上乗車状態のままのとき→QRコード読み取りを忘れているとき→置き去り発生
                     ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
                     periodicTaskManager.startPeriodicTask();//通知のループをストップする
+                    E.putBoolean("isInCarPref", !documentSnapshot.getBoolean("isInCar"));//乗降状態の判定
+                    E.apply();//確定処理
                 }else {
                     ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
                     periodicTaskManager.stopPeriodicTask();//5分毎に通知を行う
+                    E.putBoolean("isInCarPref", documentSnapshot.getBoolean("isInCar"));//乗降状態の判定
+                    E.apply();//確定処理
                 }
             }
 
@@ -210,7 +215,7 @@ public class TestService extends Service {
     }
     public class PeriodicTaskManager {//Bluetoothの切断後に乗車状態にならなかった場合に５分毎に通知を送るメソッド
 
-        private static final long INTERVAL = 5 *60* 1000; //300秒
+        private static final long INTERVAL = 5 * 1000; //300秒
         private final Handler handler;
         private final Runnable periodicTask;
 
@@ -231,7 +236,7 @@ public class TestService extends Service {
                         E.putInt("time",5);
                         E.apply();;
                     }else {
-                        E.putInt("time",time*2);
+                        E.putInt("time",time+5);
                         E.apply();
                     }
 
@@ -250,6 +255,14 @@ public class TestService extends Service {
         }
 
         public void stopPeriodicTask() {
+            //共有プリファレンス全体の準備
+            SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
+
+            int time=sharedPreferences.getInt("time",0);
+            //共有プリファレンス 書き込みの準備
+            SharedPreferences.Editor E = sharedPreferences.edit();
+            E.putInt("time",0);
+            E.apply();
             // 定期的な処理の停止
             handler.removeCallbacks(periodicTask);
         }
