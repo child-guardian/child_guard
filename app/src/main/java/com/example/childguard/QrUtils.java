@@ -36,14 +36,14 @@ public class QrUtils {
         //IdPrefにの値が初期値の場合
         AllURL=KoteiURL+key;
 
-        int size = 1500;
+
         int qrCodeSize = calculateQRCodeSize(); // 画面密度に応じてサイズを計算
         Bitmap QRGazou;
         Bitmap bitmapqr;
         try {
             //QRコード生成
             BarcodeEncoder barcodeEncoder = new BarcodeEncoder();
-            bitmapqr = barcodeEncoder.encodeBitmap(AllURL, BarcodeFormat.QR_CODE, size, size);
+            bitmapqr = barcodeEncoder.encodeBitmap(AllURL, BarcodeFormat.QR_CODE, qrCodeSize, qrCodeSize);
         } catch (WriterException e) {
             throw new AndroidRuntimeException("Barcode Error.", e);
         }
@@ -58,7 +58,7 @@ public class QrUtils {
 
         // 画像のサイズの調整
         int disWidth = (width - bitmapqr.getWidth()) / 2;
-        int disHeight = (int) ((height - bitmapqr.getHeight()) / 1.4);
+        int disHeight = (int) ((height - bitmapqr.getHeight()) / 1.5);
         canvas.drawBitmap(bitmap, 0, 0, (Paint) null);
         canvas.drawBitmap(bitmapqr, disWidth, disHeight, (Paint) null); // 画像合成
         //Androidからプリンターへ印刷指示を出すサポートライブラリ
@@ -72,7 +72,7 @@ public class QrUtils {
 
         // 画面密度に基づいてQRコードのサイズを計算
         float density = context.getResources().getDisplayMetrics().density;
-        return (int) (1500 * density);
+        return (int) (800 * density);
     }
 
 }

@@ -73,26 +73,16 @@ public class TestService extends Service {
                 E.putBoolean("isInCarPref", documentSnapshot.getBoolean("isInCar"));//乗降状態の判定
                 E.apply();//確定処理
                 Log.d("nt", "レスポンスを検知しました1");
-                if (documentSnapshot.getBoolean("isReported") == true && isInCar) {//isReportedがtrueかつisInCarがtrueのとき=サイト上で第三者ボタンが押されたときに乗車状態のとき
-                    ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
-                    int importance = NotificationManager.IMPORTANCE_DEFAULT;
-                    NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
-                    channel.setDescription("第3者からの通報を検知しました");
-                    NotificationManager notificationManager = getSystemService(NotificationManager.class);
-                    notificationManager.createNotificationChannel(channel);
-                    Log.d("nt", "レスポンスを検知しました2");
-                    NotificationSetting();//通知に関する設定のメソッド
-                    Notification(getApplicationContext());//通知を行うメソッド
-                } else if(isInCar){//Bluetoothの切断後5分以上乗車状態のままのとき→QRコード読み取りを忘れているとき→置き去り発生
+                if (isInCar) {//isReportedがtrue=サイト上で乗車状態のとき
+                    if (documentSnapshot.getBoolean("isReported")) {
+                        ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
+                        NotificationSetting();//通知に関する設定のメソッド
+                        Notification(getApplicationContext());//通知を行うメソッド
+                    }
+                } else if(!isInCar){//isReportedがfalse=サイト上で降車状態のとき
                     ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
-                    periodicTaskManager.startPeriodicTask();//通知のループをストップする
-                    E.putBoolean("isInCarPref", !documentSnapshot.getBoolean("isInCar"));//乗降状態の判定
-                    E.apply();//確定処理
                 }else {
                     ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
-                    periodicTaskManager.stopPeriodicTask();//5分毎に通知を行う
-                    E.putBoolean("isInCarPref", documentSnapshot.getBoolean("isInCar"));//乗降状態の判定
-                    E.apply();//確定処理
                 }
             }
 
