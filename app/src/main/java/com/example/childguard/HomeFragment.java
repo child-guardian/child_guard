@@ -1,37 +1,18 @@
 package com.example.childguard;
 
-import static android.content.ContentValues.TAG;
-import static android.content.Context.MODE_PRIVATE;
-
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.FrameLayout;
+import android.widget.TextView;
 
 import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.print.PrintHelper;
-
-import android.preference.PreferenceManager;
-import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -75,10 +56,12 @@ public class HomeFragment extends Fragment implements OnEventListener{
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             // mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
     }
 
     @Override
@@ -94,6 +77,12 @@ public class HomeFragment extends Fragment implements OnEventListener{
     public void onResume() {
         super.onResume();
         Log.d("HomeFragment", "onResume: called");
+        this.updateUiState(getIsInCarLocal());
+    }
+
+    private boolean getIsInCarLocal() {
+        SharedPreferences pref = requireActivity().getSharedPreferences("app_situation", requireActivity().MODE_PRIVATE);
+        return pref.getBoolean("isInCar", false);
     }
 
     //画面遷移メソッド
@@ -110,7 +99,7 @@ public class HomeFragment extends Fragment implements OnEventListener{
         transaction.commit();
     }
 
-    private boolean updateUiState(boolean state) {
+    private boolean updateUiState(boolean isInCar) {
         Log.d("HomeFragment", "updateUiState: called");
         // Init
         TextView tv;
@@ -123,13 +112,13 @@ public class HomeFragment extends Fragment implements OnEventListener{
             return false;
         } catch (IllegalStateException e) {
             Log.d("HomeFragment", "updateUiState: view is not attached");
-//            getParentFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, HomeFragment.newInstance("test", "test")).commit();
-//            updateUiState(state);
+            getParentFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, HomeFragment.newInstance("test", "test")).commit();
+            updateUiState(isInCar);
             return false;
         }
         String get_on = "\n乗車状態";
         String get_off = "\n降車状態";
-        if (state) {
+        if (!isInCar) {
             //乗車状態にする
             fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
             tv.setText(get_on);
@@ -143,9 +132,10 @@ public class HomeFragment extends Fragment implements OnEventListener{
     }
 
     @Override
-    public boolean onEvent(boolean state) {
+    public boolean onEvent(boolean isInCar) {
         Log.d("HomeFragment", "onEvent: called");
-        return updateUiState(state);
+
+        return updateUiState(isInCar);
     }
 }
 

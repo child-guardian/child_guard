@@ -5,21 +5,14 @@ import static android.content.Context.MODE_PRIVATE;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import androidx.annotation.NonNull;
-import androidx.fragment.app.Fragment;
-import androidx.print.PrintHelper;
-
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.firestore.DocumentReference;
+import androidx.fragment.app.Fragment;
+
 import com.google.firebase.firestore.FirebaseFirestore;
 
 import java.util.HashMap;
@@ -76,18 +69,16 @@ public class SettingFragment extends Fragment {
                 Toast.makeText(getActivity(), "再印刷", Toast.LENGTH_SHORT).show();
                 getParentFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fragmentContainerView, GenerateQrFragment.newInstance(sharedPreferences.getString("ID", "none"))).commit();
             } else {
-                String valueParent = "placeholder";
-                String valueBorn = "placeholder";
-                Map<String, String> user = new HashMap<>();//mapの宣言
+                Map<String, Boolean> DEFAULT_ITEM = new HashMap<>();//mapの宣言
 
                 Log.d("HomeFragment", "onClick is called");
 
                 //mapに入れる
-                user.put("parent", valueParent);
-                user.put("born", valueBorn);
+                DEFAULT_ITEM.put("isInCar", false);
+                DEFAULT_ITEM.put("isReported", false);
                 //新しいドキュメントにIDを作って追加
-                db.collection("users")
-                        .add(user)
+                db.collection("status")
+                        .add(DEFAULT_ITEM)
                         .addOnSuccessListener(documentReference -> {
                             //成功したら
                             //documentReference.getId()でID取得
@@ -95,6 +86,7 @@ public class SettingFragment extends Fragment {
                             SharedPreferences.Editor e = sharedPreferences.edit();
                             // キー"alreadySaved"の値をtrueにする
                             e.putBoolean("alreadySaved", true);
+
                             //確定処理
                             e.apply();
                             //画面遷移＆ID受け渡し

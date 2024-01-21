@@ -1,67 +1,47 @@
 package com.example.childguard;
 
-import static java.security.AccessController.getContext;
-
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.appcompat.app.ActionBar;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.app.NotificationManagerCompat;
-
 import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.graphics.Paint;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
-
-import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Random;
-import java.util.UUID;
-
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.FrameLayout;
-import android.widget.TextView;
 import android.widget.Toast;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.fragment.app.Fragment;
+
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.FirebaseFirestoreException;
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class MainActivity extends AppCompatActivity {
 
+    FirebaseFirestore db;
     BluetoothManager bluetoothManager;
     BluetoothAdapter bluetoothAdapter;
 
@@ -71,14 +51,6 @@ public class MainActivity extends AppCompatActivity {
 
     public static final String TAG = "InspirationQuote";
 
-    boolean flg = false;
-
-    //↓日付を取得するやつ
-    public static String getNowDate() {
-        @SuppressLint("SimpleDateFormat") final DateFormat df = new SimpleDateFormat("yyy/MM/dd HH:mm:ss");
-        final Date date = new Date(System.currentTimeMillis());
-        return df.format(date);
-    }
 
     private final ActivityResultLauncher<ScanOptions> QrLauncher = registerForActivityResult(
             new ScanContract(),
@@ -105,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        super.onStart();
+        db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.nav_view);
 
@@ -120,6 +92,8 @@ public class MainActivity extends AppCompatActivity {
                         .replace(findViewById(R.id.fragmentContainerView).getId(), this.homeFragment)
                         .addToBackStack(null)
                         .commit();
+                firebaselink();
+
             } else if (v.getItemId() == findViewById(R.id.navigation_notification).getId()) {
                 findViewById(R.id.fab_scan_qr_code).setVisibility(FrameLayout.VISIBLE);
                 getSupportFragmentManager().beginTransaction()
@@ -142,6 +116,7 @@ public class MainActivity extends AppCompatActivity {
             ScanOptions options = new ScanOptions();
             options.setPrompt("QRコードを読み取ってください");
             QrLauncher.launch(options);
+
         });
 
         //Bluetooth検知機能
@@ -152,12 +127,10 @@ public class MainActivity extends AppCompatActivity {
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             Log.d("BT", "No permission to connect bluetooth devices");
             return;
-        }
-        else {
+        } else {
             Log.d("BT", "Permission to connect bluetooth devices granted");
         }
         registerReceiver(receiver, intentFilter);
-
     }
 
     @Override
@@ -165,61 +138,45 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.d("onResume", "called");
         Log.d("onResume", "mDocRef is null");
-        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        String IdPref = sharedPreferences.getString("ID", null);
-        if (IdPref == null) {
-            Log.d("onResume", "ID not initialized.");
-        } else {
-            mDocRef = FirebaseFirestore.getInstance().document("users/" + IdPref);//現在の位置を取得
-            this.flg = false;
-            initNotification(mDocRef);
-        }
-
-
+        firebaselink();
     }
 
-    private void initNotification(DocumentReference mDocRef) {
+    private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
+        // 共有プリファレンス全体の準備
+        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
 
-        // Init pref
-        SharedPreferences sharedPreferences = getSharedPreferences("app_situation",MODE_PRIVATE);
+        mDocRef.addSnapshotListener(this, (documentSnapshot, e) -> {
 
-        mDocRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
-            @Override
-            public void onEvent(@Nullable DocumentSnapshot documentSnapshot, @Nullable FirebaseFirestoreException e) {
-                Log.d("nt", "イベント開始");
-                //共有プリファレンス 書き込みの準備
-                SharedPreferences.Editor E=sharedPreferences.edit();
-                //車の乗り降りを管理するtrue=乗車、false=降車
-                boolean isInCar = sharedPreferences.getBoolean("car", false);
-                if (flg && documentSnapshot != null && documentSnapshot.exists()) {
-
-                    String parent = documentSnapshot.getString("parent");
-                    Log.d("nt", "レスポンスを検知しました1");
-
-                    assert parent != null;
-                    if (parent.equals("s")) {//FireBaseの更新情報が"S"のとき＝サイト上で第三者ボタンが押されたとき
-                        if (isInCar) {
-                            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-                            NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
-                            channel.setDescription("第3者からの通報を検知しました");
-                            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-                            notificationManager.createNotificationChannel(channel);
-                            Log.d("nt", "レスポンスを検知しました2");
-                            notifyMain();
-                        }
-                    } else {
-                        E.putBoolean("car", !isInCar);
-                        E.apply();
-                        // SupportFragmentManagerが現在表示しているFragmentを取得
-                        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
-                        if (fragment instanceof HomeFragment) {
-                            ((HomeFragment) fragment).onEvent(!isInCar);
-                        } else {
-                            Log.d("nt", "HomeFragment is not visible");
-                        }
+            Log.d("nt", "イベント開始");
+            //共有プリファレンス 書き込みの準備
+            SharedPreferences.Editor E = sharedPreferences.edit();
+            //車の乗り降りを管理するtrue=乗車、false=降車
+            if (documentSnapshot.exists()) {//exists()でdocumentSnapshotの中のファイルの存在の確認
+                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
+                Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
+                E.putBoolean("isInCarPref", documentSnapshot.getBoolean("isInCar"));//乗降状態の判定
+                E.apply();//確定処理
+                Log.d("nt", "レスポンスを検知しました1");
+                //FireBaseで更新された情報の判定
+                if (documentSnapshot.getBoolean("isReported") == false) {//isReportedがfalseのとき=サイト上で保護者ボタンが押されたとき
+                    if (fragment instanceof HomeFragment) {//fragementがHomeFragmentのインスタンスかの判定
+//                        changessituation();//  changessituation()メソッドを処理→アプリ側の乗降状態を変化
+                        ((HomeFragment) fragment).onEvent(!isInCar);
                     }
+                } else if (isInCar) {//第三者ボタンが押されたときにisInCarがtrueのとき＝乗車状態のとき→いたずら防止
+                    int importance = NotificationManager.IMPORTANCE_DEFAULT;
+                    NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
+                    channel.setDescription("第3者からの通報を検知しました");
+                    NotificationManager notificationManager = getSystemService(NotificationManager.class);
+                    notificationManager.createNotificationChannel(channel);
+                    Log.d("nt", "レスポンスを検知しました2");
+                    NotificationSetting();//通知に関する設定のメソッド
+                    Notification(getApplicationContext());//通知を行うメソッド
+                    ResetReported();// ResetReported();メソッドを処理→FireBaseのisReportedをfalseにする
+                } else {//第三者ボタンが押されたときにisInCarがfalseのとき=降車状態のとき
+                    ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
+                    Log.d("nt", "何もなし");
                 }
-                flg = true;
             }
         });
 
@@ -233,13 +190,12 @@ public class MainActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction(); // may need to chain this to a recognizing function
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-            HomeFragment homeFragment=new HomeFragment();
+//            HomeFragment homeFragment=new HomeFragment();
 
             if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 Log.d("BT", "No permission to connect bluetooth devices");
                 return;
             }
-            String deviceName = device.getName();
             String deviceHardwareAddress = device.getAddress(); // MAC address
 
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
@@ -262,46 +218,94 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    //↓通知のやつ
-    public void notifyMain() {
-        //↓通知をする際に起動するバイブレーション
-        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(1000);
-        //↓通知の詳細設定的な奴
-        NotificationCompat.Builder builder = new NotificationCompat
-                .Builder(this, "CHANNEL_ID")
+
+    public void firebaselink() {//Firebaseのドキュメントの取得
+        //共有プリファレンス全体の準備
+        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
+        String IdPref = sharedPreferences.getString("ID", null);////アプリに記録されているIDの取得
+        if (IdPref == null) {//FireBaseのIDがアプリに登録されているとき
+            Log.d("onResume", "ID not initialized.");
+        } else {
+            mDocRef = FirebaseFirestore.getInstance().document("status/" + IdPref);//現在の位置を取得
+            initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
+
+        }
+    }
+
+    public void ResetReported() {//FireBaseのisReportedをfalseに初期化するメソッド
+        //共有プリファレンス全体の準備
+        SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("app_situation", MODE_PRIVATE);
+        String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
+        db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
+        DocumentReference isReported = db.collection("status").document(IdPref);//更新するドキュメントとの紐づけ
+        Map<String, Boolean> DEFAULT_ITEM = new HashMap<>();//mapの宣言
+        //isReportedをfalseに更新
+        isReported.update("isReported", false).addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
+    }
+
+    public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        //通知チャネルの実装
+        NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通知", importance);
+        channel.setDescription("第三者により置き去りの通報が行われたときに通知します。");
+
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
+
+    }
+
+    public void Notification(Context context) {//実際に通知を行うメソッド
+        final String CHANNEL_ID = "my_channel_id";
+        // 通知がクリックされたときに送信されるIntent
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setAction("OPEN_ACTIVITY");
+        // PendingIntentの作成
+        int requestCode = 100;
+        int flags = 0;
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
+
+        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(2000);//バイブレーション
+
+        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
-                .setContentTitle("通報検知")
-                .setContentText("子供の置き去りを検知しました。")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+                .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
+                .setContentText("第三者からの通報が行われました。")//通知の本文
+                .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
+                .setAutoCancel(true)//通知をタップすると削除する
+                .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
 
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        // NotificationChannelの作成（Android 8.0以降）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                NotificationChannel channel = new NotificationChannel(
+                        CHANNEL_ID,
+                        "Channel Name",
+                        NotificationManager.IMPORTANCE_HIGH
+                );
 
+                channel.setDescription("Channel Description");
+                channel.enableLights(true);
+                channel.setLightColor(Color.RED);
+                channel.enableVibration(true);
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+
+
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
             return;
         }
-        notificationManager.notify(R.string.app_name, builder.build());
-
-
+        notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
 
     @Override
-    public void onStop() {
+    public void onStop() {//アプリをバックグラウンドにした時のメソッド
         super.onStop();
         Intent intent = new Intent(getApplication(), TestService.class);
-        startService(intent);
-    }
-
-    //Bluetooth_setupの戻るボタン
-    public void setupBackButton(boolean enableBackButton) {
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(enableBackButton);
+        startService(intent);//TestServiceを起動
     }
 
 }
