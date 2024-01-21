@@ -20,6 +20,7 @@ import android.os.Bundle;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -52,6 +53,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "InspirationQuote";
 
 
+
     private final ActivityResultLauncher<ScanOptions> QrLauncher = registerForActivityResult(
             new ScanContract(),
             result -> {
@@ -60,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(this, "QRコードが読み取れませんでした", Toast.LENGTH_LONG).show();
                 } else {
                     if (!contents.contains("https://practicefirestore1-8808c.web.app/")) {
-                        Toast.makeText(this, "Chiled Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Child Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
                     } else {
                         //URLの表示
                         Toast.makeText(this, contents, Toast.LENGTH_SHORT).show();
@@ -73,15 +75,17 @@ public class MainActivity extends AppCompatActivity {
             }
     );
 
+    @SuppressLint("MissingInflatedId")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.nav_view);
 
-        this.homeFragment = HomeFragment.newInstance("test", "tset");
+        this.homeFragment = HomeFragment.newInstance("test", "test");
 
         bottomNavigationView.setOnNavigationItemSelectedListener(v ->
 
@@ -119,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
+
         //Bluetooth検知機能
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
@@ -131,7 +136,9 @@ public class MainActivity extends AppCompatActivity {
             Log.d("BT", "Permission to connect bluetooth devices granted");
         }
         registerReceiver(receiver, intentFilter);
+
     }
+
 
     @Override
     protected void onResume() {
@@ -159,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("nt", "レスポンスを検知しました1");
                 //FireBaseで更新された情報の判定
                 if (documentSnapshot.getBoolean("isReported") == false) {//isReportedがfalseのとき=サイト上で保護者ボタンが押されたとき
-                    if (fragment instanceof HomeFragment) {//fragementがHomeFragmentのインスタンスかの判定
+                    if (fragment instanceof HomeFragment) {//fragmentがHomeFragmentのインスタンスかの判定
 //                        changessituation();//  changessituation()メソッドを処理→アプリ側の乗降状態を変化
                         ((HomeFragment) fragment).onEvent(!isInCar);
                     }

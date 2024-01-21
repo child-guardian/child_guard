@@ -1,6 +1,7 @@
 package com.example.childguard;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -14,6 +15,7 @@ import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -25,10 +27,18 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,9 +50,76 @@ public class TestService extends Service {
 
     public PeriodicTaskManager periodicTaskManager;
 
+    //時間を取得するやつ↓
+    public static String getNowDate() {
+        @SuppressLint("SimpleDateFormat") final DateFormat df = new SimpleDateFormat("yyy/MM/dd HH:mm:ss");
+        final Date date = new Date(System.currentTimeMillis());
+        return df.format(date);
+    }
+
+   @SuppressLint("NotifyDataSetChanged")
+   public void NotifityRecycle(){
+
+       RecyclerView recyclerView = recyclerView().findViewById(R.id.recyclerView1);
+
+        //RecyclerViewのサイズを固定
+        recyclerView.setHasFixedSize(true);
+
+        //RecyclerViewに区切り線を入れる
+        RecyclerView.ItemDecoration itemDecoration =
+                new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
+        recyclerView.addItemDecoration(itemDecoration);
+
+        //レイアウトマネージャを設定
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(layoutManager);
+
+        //①リスト構造(String型の可変長の配列)を宣言
+        ArrayList<String> arrayList = new ArrayList<>();
+
+        //③Adapterとリスト構造を結び付け
+        //RecyclerAdapterクラスを呼び出す
+        RecyclerAdapter2 adapter = new RecyclerAdapter2(arrayList, null);
+
+        //④RecyclerViewとAdapterの結び付け
+        recyclerView.setAdapter(adapter);
+
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+
+       arrayList.add(0,"通知を検知しました: " + getNowDate());
+
+       //一番下に値が追加されたことをAdapterが画面に通知
+       adapter.notifyItemInserted(arrayList.size());
+
+       //共有プリファレンス　書き込みの準備
+       SharedPreferences.Editor e = pref.edit();
+
+       //リストを,区切りで結合する
+       String str = String.join(",", arrayList);
+
+       //変数名currentに、値の代入
+       e.putString("current", str.toString());
+
+       //確定処理
+       e.apply();
+
+       String strTo = pref.getString("current", null);
+       if (strTo == null) return;
+
+       String[] list = strTo.split(",");
+       arrayList.clear();
+       arrayList.addAll(Arrays.asList(list));
+       adapter.notifyDataSetChanged();
+    }
+
+    private Activity recyclerView() {
+        return null;
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+       NotifityRecycle();
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
         String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
@@ -53,6 +130,8 @@ public class TestService extends Service {
             initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
         }
         return flags;
+
+
     }
 
     private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
@@ -173,7 +252,7 @@ public class TestService extends Service {
         @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
-                .setContentText("Bluetootと車の切断から"+time+"分が経過しました")//通知の本文
+                .setContentText("Bluetoothと車の切断から"+time+"分が経過しました")//通知の本文
                 .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
                 .setAutoCancel(true)//通知をタップすると削除する
                 .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
@@ -223,7 +302,7 @@ public class TestService extends Service {
                     int time=sharedPreferences.getInt("time",0);
                     //共有プリファレンス 書き込みの準備
                     SharedPreferences.Editor E = sharedPreferences.edit();
-                    if(time==0) {//Bluetoot切断からの時間経過(5分刻み)
+                    if(time==0) {//Bluetooth切断からの時間経過(5分刻み)
                         E.putInt("time",5);
                         E.apply();;
                     }else {
