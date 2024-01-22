@@ -18,6 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Vibrator;
+import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.View;
@@ -45,6 +46,7 @@ public class MainActivity extends AppCompatActivity {
     FirebaseFirestore db;
     BluetoothManager bluetoothManager;
     BluetoothAdapter bluetoothAdapter;
+
 
     DocumentReference mDocRef;
 
@@ -80,6 +82,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //Bluetooth接続判定用
+        SharedPreferences pref=PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor e=pref.edit();
+        e.putBoolean("connection_status",false);
 
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
 
@@ -187,12 +194,19 @@ public class MainActivity extends AppCompatActivity {
 
 
     //Bluetoothの検知機能
+
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
+
+
+                //PreferenceManager.getDefaultSharedPreferences("myPreferences",Context.MODE_PRIVATE);
 
         @Override
         public void onReceive(Context context, Intent intent) {
+            SharedPreferences pref= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences.Editor e=pref.edit();
             String action = intent.getAction(); // may need to chain this to a recognizing function
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
 //            HomeFragment homeFragment=new HomeFragment();
 
             if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
@@ -211,12 +225,19 @@ public class MainActivity extends AppCompatActivity {
 
                 if (deviceHardwareAddress.equals(registeredId)) {
                     Log.d("BT_Judge", "登録済み");
-                } else Log.d("BT_Judge", "未登録");
+                    e.putBoolean("connection_status",true);
+
+                } else{
+                    Log.d("BT_Judge", "未登録");
+                    e.putBoolean("connection_status",false);
+                }
+                e.apply();
 
             } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
                 //Do something if disconnected
                 Log.d("BT", "Device disconnected");
-
+                e.putBoolean("connection_status",false);
+                e.apply();
             }
         }
     };
