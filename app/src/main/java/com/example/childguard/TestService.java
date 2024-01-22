@@ -48,7 +48,7 @@ public class TestService extends Service {
 
     public static final String TAG = "InspirationQuote";
 
-    public PeriodicTaskManager periodicTaskManager;
+;
 
 
     @Override
@@ -73,7 +73,7 @@ public class TestService extends Service {
 
     private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
         // PeriodicTaskManagerのインスタンス化
-        periodicTaskManager = new PeriodicTaskManager();
+
         // 共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
         //車の乗り降りを管理するtrue=乗車、false=降車
@@ -174,7 +174,7 @@ public class TestService extends Service {
         }
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
-    public void NotificationBluetooth(Context context, int time) {//実際に通知を行うメソッド
+    public void NotificationBluetooth(Context context) {//実際に通知を行うメソッド
         final String CHANNEL_ID = "my_channel_id";
         // 通知がクリックされたときに送信されるIntent
         Intent intent = new Intent(context, MainActivity.class);
@@ -189,7 +189,7 @@ public class TestService extends Service {
         @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
-                .setContentText("Bluetoothと車の切断から"+time+"分が経過しました")//通知の本文
+                .setContentText("Bluetoothと車の切断から5分が経過しました")//通知の本文
                 .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
                 .setAutoCancel(true)//通知をタップすると削除する
                 .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
@@ -220,60 +220,10 @@ public class TestService extends Service {
         }
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
-    public class PeriodicTaskManager {//Bluetoothの切断後に乗車状態にならなかった場合に５分毎に通知を送るメソッド
 
-        private static final long INTERVAL = 5 * 1000; //300秒
-        private final Handler handler;
-        private final Runnable periodicTask;
 
-        public PeriodicTaskManager() {
 
-            handler = new Handler(Looper.getMainLooper());
-            periodicTask = new Runnable() {
 
-                public void run() {
-
-                    //共有プリファレンス全体の準備
-                    SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-
-                    int time=sharedPreferences.getInt("time",0);
-                    //共有プリファレンス 書き込みの準備
-                    SharedPreferences.Editor E = sharedPreferences.edit();
-                    if(time==0) {//Bluetooth切断からの時間経過(5分刻み)
-                        E.putInt("time",5);
-                        E.apply();;
-                    }else {
-                        E.putInt("time",time+5);
-                        E.apply();
-                    }
-
-                    // 5分毎に実行される処理
-                    NotificationBluetooth(getApplicationContext(),time);
-                    Log.d("PeriodicTask", "５分後に処理を実行します");
-
-                    handler.postDelayed(this, INTERVAL);
-                }
-            };
-        }
-
-        public void startPeriodicTask() {
-            // 最初の実行
-            handler.postDelayed(periodicTask,INTERVAL);//一回目は5分後に行う
-        }
-
-        public void stopPeriodicTask() {
-            //共有プリファレンス全体の準備
-            SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-
-            int time=sharedPreferences.getInt("time",0);
-            //共有プリファレンス 書き込みの準備
-            SharedPreferences.Editor E = sharedPreferences.edit();
-            E.putInt("time",0);
-            E.apply();
-            // 定期的な処理の停止
-            handler.removeCallbacks(periodicTask);
-        }
-    }
 
 
     public void Bluetooth_status() {
@@ -303,7 +253,6 @@ public class TestService extends Service {
             String action = intent.getAction(); // may need to chain this to a recognizing function
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
 
-//            HomeFragment homeFragment=new HomeFragment();
 
             if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 Log.d("BT", "No permission to connect bluetooth devices");
@@ -334,6 +283,8 @@ public class TestService extends Service {
                 Log.d("BT", "Device disconnected");
                 e.putBoolean("connection_status",false);
                 e.apply();
+                NotificationBluetooth(getApplicationContext());
+
             }
         }
     };
@@ -341,11 +292,7 @@ public class TestService extends Service {
 
 
 
-//    public void bluetoothTest() {
-//        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-//        Boolean b = pref.getBoolean("connection_status", false);
-//        Log.d("bluetooth", b.toString());
-//    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
