@@ -64,6 +64,8 @@ public class TestService extends Service {
             mDocRef = FirebaseFirestore.getInstance().document("status/" + IdPref);//現在の位置を取得
             initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
         }
+
+        Bluetooth_status();
         return flags;
 
 
@@ -272,6 +274,78 @@ public class TestService extends Service {
             handler.removeCallbacks(periodicTask);
         }
     }
+
+
+    public void Bluetooth_status() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            Log.d("BT", "No permission to connect bluetooth devices");
+            return;
+        } else {
+            Log.d("BT", "Permission to connect bluetooth devices granted");
+        }
+        registerReceiver(receiver, intentFilter);
+    }
+
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+
+
+        //PreferenceManager.getDefaultSharedPreferences("myPreferences",Context.MODE_PRIVATE);
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            SharedPreferences pref= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences.Editor e=pref.edit();
+            String action = intent.getAction(); // may need to chain this to a recognizing function
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+//            HomeFragment homeFragment=new HomeFragment();
+
+            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                Log.d("BT", "No permission to connect bluetooth devices");
+                return;
+            }
+            String deviceHardwareAddress = device.getAddress(); // MAC address
+
+            if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+                //Do something if connected
+                Log.d("BT", "Device connected");
+
+                String registeredId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("bluetooth_device_id", "none");
+
+                Log.d("BT_Judge", "Registered: " + registeredId);
+
+                if (deviceHardwareAddress.equals(registeredId)) {
+                    Log.d("BT_Judge", "登録済み");
+                    e.putBoolean("connection_status",true);
+
+                } else{
+                    Log.d("BT_Judge", "未登録");
+                    e.putBoolean("connection_status",false);
+                }
+                e.apply();
+
+            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+                //Do something if disconnected
+                Log.d("BT", "Device disconnected");
+                e.putBoolean("connection_status",false);
+                e.apply();
+            }
+        }
+    };
+
+
+
+
+//    public void bluetoothTest() {
+//        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+//        Boolean b = pref.getBoolean("connection_status", false);
+//        Log.d("bluetooth", b.toString());
+//    }
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
