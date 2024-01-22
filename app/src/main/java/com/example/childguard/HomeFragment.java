@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.core.content.res.ResourcesCompat;
@@ -132,11 +133,58 @@ public class HomeFragment extends Fragment implements OnEventListener{
         return true;
     }
 
+    private boolean updateBluetoothSituation(Boolean Bluetoothconnect){
+        FrameLayout frameLayout;
+        TextView textView;
+        ImageView imageView;
+        try {
+            frameLayout=requireView().findViewById(R.id.situation_bg2);
+            textView=requireView().findViewById(R.id.Bluetoothsituation);
+            imageView=requireView().findViewById(R.id.Bluetoothsituationimage);
+        }catch (NullPointerException e) {
+            Log.d("HomeFragment", "updateUiState: view is null");
+            return false;
+        } catch (IllegalStateException e) {
+            Log.d("HomeFragment", "updateUiState: view is not attached");
+            getParentFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, HomeFragment.newInstance("test", "test")).commit();
+            updateBluetoothSituation(Bluetoothconnect);
+            return false;
+        }
+        String connect="接続中";
+        String disconnect="切断中";
+        if (Bluetoothconnect) {
+            //接続状態にする
+            frameLayout.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
+            textView.setText(connect);
+            imageView.setVisibility(View.GONE);
+        } else {
+            //降車状態にする
+            frameLayout.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
+            textView.setText(disconnect);
+            imageView.setVisibility(View.VISIBLE);
+        }
+
+        return true;
+    }
+
+
     @Override
-    public boolean onEvent(boolean isInCar) {
+    public boolean onEvent(boolean isInCar) {//乗車状態と降車状態の変更を受け取ってupdateUiState()に渡す
         Log.d("HomeFragment", "onEvent: called");
 
         return updateUiState(isInCar);
+    }
+
+    @Override
+    public boolean onEvent2(boolean BluetoothConnect) {
+        return false;
+    }
+
+
+    @Override
+    public boolean onEvent2(Boolean Bluetoothconnect) {//Bluetoothの接続切断を受け取ってupdateBluetoothSituation()に渡す
+        updateBluetoothSituation(Bluetoothconnect);
+        return false;
     }
 }
 

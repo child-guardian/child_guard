@@ -371,17 +371,21 @@ public class MainActivity extends AppCompatActivity {
 
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
                 //Do something if connected
+                //Bluetoothデバイスが接続されたときの処理
+                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
+                Boolean Bluetoothconnect=true;
+                ((HomeFragment) fragment).onEvent2(Bluetoothconnect);//HomeFragmentの表示を接続にする
                 Log.d("BT", "Device connected");
-
-
 
                 Log.d("BT_Judge", "Registered: " + registeredId);
 
                 if (deviceHardwareAddress.equals(registeredId)) {
+                    //登録済みのデバイスだったときの処理
                     Log.d("BT_Judge", "登録済み");
                     e.putBoolean("connection_status",true);
 
                 } else{
+                    //登録していないデバイスだったときの処理
                     Log.d("BT_Judge", "未登録");
                     e.putBoolean("connection_status",false);
                 }
@@ -390,6 +394,10 @@ public class MainActivity extends AppCompatActivity {
             } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)&&!isInCar) {//bluetoothが切断されたときに乗車状態のとき
 
                 //Do something if disconnected
+                //デバイスが切断されたときの処理
+                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
+                Boolean Bluetoothconnect=false;
+                ((HomeFragment) fragment).onEvent2(Bluetoothconnect);//HomeFragmentの表示を切断にする
                 if (deviceHardwareAddress.equals(registeredId)) {
                     // 5分待機する
                     Handler handler = new Handler();
@@ -400,12 +408,12 @@ public class MainActivity extends AppCompatActivity {
                                 NotificationBluetooth(getApplicationContext());//通知を行うメソッド
                             }}
 
-                    }, 5*60*1000); // 5分をミリ秒に変換
+                    }, 5 *60 *1000); // 5分をミリ秒に変換
                 }
             }else {
                 Log.d("BT", "Device disconnected");
             }
         }
-};
+    };
 }
 
