@@ -1,7 +1,6 @@
 package com.example.childguard;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,35 +9,24 @@ import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.Looper;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,8 +35,6 @@ public class TestService extends Service {
     DocumentReference mDocRef;
 
     public static final String TAG = "InspirationQuote";
-
-;
 
 
     @Override
@@ -95,9 +81,7 @@ public class TestService extends Service {
                         NotificationSetting();//通知に関する設定のメソッド
                         Notification(getApplicationContext());//通知を行うメソッド
                     }
-                } else if(!isInCar){//isReportedがfalse=サイト上で降車状態のとき
-                    ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
-                }else {
+                } else {//isReportedがfalse=サイト上で降車状態のとき
                     ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
                 }
             }
@@ -248,10 +232,11 @@ public class TestService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            SharedPreferences pref= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            SharedPreferences pref=getSharedPreferences("Bluetooth_situation",MODE_PRIVATE);
             SharedPreferences.Editor e=pref.edit();
             String action = intent.getAction(); // may need to chain this to a recognizing function
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            Boolean isInCar = pref.getBoolean("isInCarPref", false);
 
 
             if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
@@ -280,17 +265,23 @@ public class TestService extends Service {
                 }
                 e.apply();
 
-            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)&&!isInCar) {//bluetoothが切断されたときに乗車状態のとき
+
                 //Do something if disconnected
                 if (deviceHardwareAddress.equals(registeredId)) {
-                    Log.d("BT_Judge", "登録済み切断");
-                    e.putBoolean("connection_status",false);
+                    // 5分待機する
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)&&!isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
+                                NotificationBluetooth(getApplicationContext());//通知を行うメソッド
+                            }}
 
+                    }, 5 *60 *1000); // 5分をミリ秒に変換
                 }
+            }else {
                 Log.d("BT", "Device disconnected");
-                e.apply();
-                NotificationBluetooth(getApplicationContext());
-
             }
         }
     };

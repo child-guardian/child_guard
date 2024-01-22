@@ -4,9 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -17,11 +15,10 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Vibrator;
-import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.util.Log;
-import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.Toast;
 
@@ -44,8 +41,6 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity {
 
     FirebaseFirestore db;
-    BluetoothManager bluetoothManager;
-    BluetoothAdapter bluetoothAdapter;
 
 
     DocumentReference mDocRef;
@@ -114,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
                         .commit();
             }
             firebaselink();
+            Bluetooth_status();
             return true;
         });
 
@@ -168,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
                 E.apply();//確定処理
                 Log.d("nt", "レスポンスを検知しました1");
                 //FireBaseで更新された情報の判定
-                if (documentSnapshot.getBoolean("isReported") == false) {//isReportedがfalseのとき=サイト上で保護者ボタンが押されたとき
+                if (!documentSnapshot.getBoolean("isReported")) {//isReportedがfalseのとき=サイト上で保護者ボタンが押されたとき
                     if (fragment instanceof HomeFragment) {//fragmentがHomeFragmentのインスタンスかの判定
 //                        changessituation();//  changessituation()メソッドを処理→アプリ側の乗降状態を変化
                         ((HomeFragment) fragment).onEvent(!isInCar);
@@ -193,54 +189,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    //Bluetoothの検知機能
-
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-
-
-                //PreferenceManager.getDefaultSharedPreferences("myPreferences",Context.MODE_PRIVATE);
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            SharedPreferences pref= PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-            SharedPreferences.Editor e=pref.edit();
-            String action = intent.getAction(); // may need to chain this to a recognizing function
-            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-
-//            HomeFragment homeFragment=new HomeFragment();
-
-            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                Log.d("BT", "No permission to connect bluetooth devices");
-                return;
-            }
-            String deviceHardwareAddress = device.getAddress(); // MAC address
-
-            if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
-                //Do something if connected
-                Log.d("BT", "Device connected");
-
-                String registeredId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("bluetooth_device_id", "none");
-
-                Log.d("BT_Judge", "Registered: " + registeredId);
-
-                if (deviceHardwareAddress.equals(registeredId)) {
-                    Log.d("BT_Judge", "登録済み");
-                    e.putBoolean("connection_status",true);
-
-                } else{
-                    Log.d("BT_Judge", "未登録");
-                    e.putBoolean("connection_status",false);
-                }
-                e.apply();
-
-            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
-                //Do something if disconnected
-                Log.d("BT", "Device disconnected");
-                e.putBoolean("connection_status",false);
-                e.apply();
-            }
-        }
-    };
 
 
     public void firebaselink() {//Firebaseのドキュメントの取得
@@ -325,6 +273,7 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
 
+
     @Override
     public void onStop() {//アプリをバックグラウンドにした時のメソッド
         super.onStop();
@@ -332,5 +281,131 @@ public class MainActivity extends AppCompatActivity {
         startService(intent);//TestServiceを起動
     }
 
+    public void NotificationBluetooth(Context context) {//実際に通知を行うメソッド
+        final String CHANNEL_ID = "my_channel_id";
+        // 通知がクリックされたときに送信されるIntent
+        Intent intent = new Intent(context, MainActivity.class);
+        intent.setAction("OPEN_ACTIVITY");
+        // PendingIntentの作成
+        int requestCode = 100;
+        int flags = 0;
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
+
+        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(2000);//バイブレーション
+
+        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
+                .setSmallIcon(android.R.drawable.ic_menu_info_details)
+                .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
+                .setContentText("Bluetoothと車の切断から5分が経過しました")//通知の本文
+                .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
+                .setAutoCancel(true)//通知をタップすると削除する
+                .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
+
+        // NotificationChannelの作成（Android 8.0以降）
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+            if (notificationManager != null) {
+                NotificationChannel channel = new NotificationChannel(
+                        CHANNEL_ID,
+                        "Channel Name",
+                        NotificationManager.IMPORTANCE_HIGH
+                );
+
+                channel.setDescription("Channel Description");
+                channel.enableLights(true);
+                channel.setLightColor(Color.RED);
+                channel.enableVibration(true);
+                notificationManager.createNotificationChannel(channel);
+            }
+        }
+
+
+        NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        notificationManager.notify(R.string.app_name, builder.build());//通知の表示
+    }
+
+
+
+
+
+    public void Bluetooth_status() {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            Log.d("BT", "No permission to connect bluetooth devices");
+            return;
+        } else {
+            Log.d("BT", "Permission to connect bluetooth devices granted");
+        }
+        registerReceiver(receiver, intentFilter);
+    }
+
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+
+
+        //PreferenceManager.getDefaultSharedPreferences("myPreferences",Context.MODE_PRIVATE);
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            SharedPreferences pref=getSharedPreferences("Bluetooth_situation",MODE_PRIVATE);
+            SharedPreferences.Editor e=pref.edit();
+            String action = intent.getAction(); // may need to chain this to a recognizing function
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            Boolean isInCar = pref.getBoolean("isInCarPref", false);
+
+
+            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                Log.d("BT", "No permission to connect bluetooth devices");
+                return;
+            }
+            String deviceHardwareAddress = device.getAddress(); // MAC address
+
+            String registeredId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("bluetooth_device_id", "none");
+
+            if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+                //Do something if connected
+                Log.d("BT", "Device connected");
+
+
+
+                Log.d("BT_Judge", "Registered: " + registeredId);
+
+                if (deviceHardwareAddress.equals(registeredId)) {
+                    Log.d("BT_Judge", "登録済み");
+                    e.putBoolean("connection_status",true);
+
+                } else{
+                    Log.d("BT_Judge", "未登録");
+                    e.putBoolean("connection_status",false);
+                }
+                e.apply();
+
+            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)&&!isInCar) {//bluetoothが切断されたときに乗車状態のとき
+
+                //Do something if disconnected
+                if (deviceHardwareAddress.equals(registeredId)) {
+                    // 5分待機する
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)&&!isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
+                                NotificationBluetooth(getApplicationContext());//通知を行うメソッド
+                            }}
+
+                    }, 5*60*1000); // 5分をミリ秒に変換
+                }
+            }else {
+                Log.d("BT", "Device disconnected");
+            }
+        }
+};
 }
 
