@@ -94,12 +94,7 @@ public class MainActivity extends AppCompatActivity {
                         .commit();
                 firebaselink();
 
-            } else if (v.getItemId() == findViewById(R.id.navigation_notification).getId()) {
-                findViewById(R.id.fab_scan_qr_code).setVisibility(FrameLayout.VISIBLE);
-                getSupportFragmentManager().beginTransaction()
-                        .replace(findViewById(R.id.fragmentContainerView).getId(), NotificationFragment.newInstance("test", "test"))
-                        .addToBackStack(null)
-                        .commit();
+
             } else if (v.getItemId() == findViewById(R.id.navigation_settings).getId()) {
                 findViewById(R.id.fab_scan_qr_code).setVisibility(FrameLayout.GONE);
                 getSupportFragmentManager().beginTransaction()
@@ -107,6 +102,7 @@ public class MainActivity extends AppCompatActivity {
                         .addToBackStack(null)
                         .commit();
             }
+            firebaselink();
             return true;
         });
 
