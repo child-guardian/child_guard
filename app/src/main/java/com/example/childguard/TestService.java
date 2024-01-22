@@ -50,76 +50,11 @@ public class TestService extends Service {
 
     public PeriodicTaskManager periodicTaskManager;
 
-    //時間を取得するやつ↓
-    public static String getNowDate() {
-        @SuppressLint("SimpleDateFormat") final DateFormat df = new SimpleDateFormat("yyy/MM/dd HH:mm:ss");
-        final Date date = new Date(System.currentTimeMillis());
-        return df.format(date);
-    }
-
-   @SuppressLint("NotifyDataSetChanged")
-   public void NotifityRecycle(){
-
-       RecyclerView recyclerView = recyclerView().findViewById(R.id.recyclerView1);
-
-        //RecyclerViewのサイズを固定
-        recyclerView.setHasFixedSize(true);
-
-        //RecyclerViewに区切り線を入れる
-        RecyclerView.ItemDecoration itemDecoration =
-                new DividerItemDecoration(this, DividerItemDecoration.VERTICAL);
-        recyclerView.addItemDecoration(itemDecoration);
-
-        //レイアウトマネージャを設定
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this);
-        recyclerView.setLayoutManager(layoutManager);
-
-        //①リスト構造(String型の可変長の配列)を宣言
-        ArrayList<String> arrayList = new ArrayList<>();
-
-        //③Adapterとリスト構造を結び付け
-        //RecyclerAdapterクラスを呼び出す
-        RecyclerAdapter2 adapter = new RecyclerAdapter2(arrayList, null);
-
-        //④RecyclerViewとAdapterの結び付け
-        recyclerView.setAdapter(adapter);
-
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-
-       arrayList.add(0,"通知を検知しました: " + getNowDate());
-
-       //一番下に値が追加されたことをAdapterが画面に通知
-       adapter.notifyItemInserted(arrayList.size());
-
-       //共有プリファレンス　書き込みの準備
-       SharedPreferences.Editor e = pref.edit();
-
-       //リストを,区切りで結合する
-       String str = String.join(",", arrayList);
-
-       //変数名currentに、値の代入
-       e.putString("current", str.toString());
-
-       //確定処理
-       e.apply();
-
-       String strTo = pref.getString("current", null);
-       if (strTo == null) return;
-
-       String[] list = strTo.split(",");
-       arrayList.clear();
-       arrayList.addAll(Arrays.asList(list));
-       adapter.notifyDataSetChanged();
-    }
-
-    private Activity recyclerView() {
-        return null;
-    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-       NotifityRecycle();
+
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
         String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
