@@ -311,11 +311,13 @@ public class TestService extends Service {
             }
             String deviceHardwareAddress = device.getAddress(); // MAC address
 
+            String registeredId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("bluetooth_device_id", "none");
+
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
                 //Do something if connected
                 Log.d("BT", "Device connected");
 
-                String registeredId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("bluetooth_device_id", "none");
+
 
                 Log.d("BT_Judge", "Registered: " + registeredId);
 
@@ -331,8 +333,12 @@ public class TestService extends Service {
 
             } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
                 //Do something if disconnected
+                if (deviceHardwareAddress.equals(registeredId)) {
+                    Log.d("BT_Judge", "登録済み切断");
+                    e.putBoolean("connection_status",false);
+
+                }
                 Log.d("BT", "Device disconnected");
-                e.putBoolean("connection_status",false);
                 e.apply();
             }
         }
