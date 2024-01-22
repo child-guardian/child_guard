@@ -222,11 +222,11 @@ public class TestService extends Service {
     }
 
 
-
-
-
-
+    /**
+     * registerReceiverを呼び出すためのメソッド
+     */
     public void Bluetooth_status() {
+
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
@@ -264,6 +264,7 @@ public class TestService extends Service {
 
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
                 //Do something if connected
+                //Bluetoothデバイスが接続されたときの処理
                 Log.d("BT", "Device connected");
 
 
@@ -271,10 +272,12 @@ public class TestService extends Service {
                 Log.d("BT_Judge", "Registered: " + registeredId);
 
                 if (deviceHardwareAddress.equals(registeredId)) {
+                    //登録済みのデバイスだったときの処理
                     Log.d("BT_Judge", "登録済み");
                     e.putBoolean("connection_status",true);
 
                 } else{
+                    //登録していないデバイスだったときの処理
                     Log.d("BT_Judge", "未登録");
                     e.putBoolean("connection_status",false);
                 }
@@ -282,7 +285,9 @@ public class TestService extends Service {
 
             } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
                 //Do something if disconnected
+                //デバイスが切断されたときの処理
                 if (deviceHardwareAddress.equals(registeredId)) {
+                    //登録済みのデバイスだったときの処理
                     Log.d("BT_Judge", "登録済み切断");
                     e.putBoolean("connection_status",false);
 
