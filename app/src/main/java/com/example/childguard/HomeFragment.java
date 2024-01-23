@@ -1,5 +1,6 @@
 package com.example.childguard;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,6 +13,9 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -68,7 +72,45 @@ public class HomeFragment extends Fragment implements OnEventListener{
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_home, container, false);
 
+        view.findViewById(R.id.situation_bg).setOnClickListener(v -> {
+            if (updateStateByServer()) {
+                Log.d("HomeFragment", "onCreateView: updateStateByServer() success");
+            } else {
+                Log.d("HomeFragment", "onCreateView: updateStateByServer() failed");
+            }
+        });
+
         return view;
+    }
+
+    // TODO: updateUiState()を切り出す
+    private boolean updateStateByServer() {
+        SharedPreferences pref = requireActivity().getSharedPreferences("app_situation", requireActivity().MODE_PRIVATE);
+        String key = pref.getString("ID", null);
+        DocumentReference documentReference;
+        if (key == null) {
+            Log.d("HomeFragment", "updateStateCache: key is null");
+            return false;
+        } else {
+            Log.d("HomeFragment", "updateStateCache: key is " + key);
+            documentReference = FirebaseFirestore.getInstance().document("status/" + key);
+
+            documentReference.get().addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    Log.d("HomeFragment", "updateStateCache: get document success");
+                    Log.d("HomeFragment", "updateStateCache: isInCar is " + task.getResult().getBoolean("isInCar"));
+                    if (pref.getBoolean("isInCar", false) != task.getResult().getBoolean("isInCar")) {
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putBoolean("isInCar", task.getResult().getBoolean("isInCar"));
+                        editor.apply();
+                    }
+                    updateUiState(pref.getBoolean("isInCar", false)); // UpdateUI
+                } else {
+                    Log.d("HomeFragment", "updateStateCache: get document failed");
+                }
+            });
+        }
+        return true;
     }
 
 
@@ -111,7 +153,7 @@ public class HomeFragment extends Fragment implements OnEventListener{
         }
         String get_on = "\n乗車状態";
         String get_off = "\n降車状態";
-        if (!isInCar) {
+        if (isInCar) {
             //乗車状態にする
             fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
             tv.setText(get_on);

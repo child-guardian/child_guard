@@ -24,6 +24,7 @@ import android.widget.FrameLayout;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.app.ActivityCompat;
@@ -35,6 +36,9 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.journeyapps.barcodescanner.ScanContract;
 import com.journeyapps.barcodescanner.ScanOptions;
+
+// Manifest
+import android.Manifest;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -78,6 +82,11 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
+
+        if (!hasPermissions()) {
+            requestPermissions();
+        }
+
 
         BottomNavigationView bottomNavigationView = findViewById(R.id.nav_view);
 
@@ -140,6 +149,47 @@ public class MainActivity extends AppCompatActivity {
         firebaselink();
     }
 
+    private boolean hasPermissions() {
+        return ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_ADMIN) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_SCAN) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.VIBRATE) == PackageManager.PERMISSION_GRANTED &&
+                ActivityCompat.checkSelfPermission(this, Manifest.permission.FOREGROUND_SERVICE) == PackageManager.PERMISSION_GRANTED;
+    }
+
+    private void requestPermissions() {
+        ActivityCompat.requestPermissions(this,
+                new String[]{
+                        Manifest.permission.BLUETOOTH,
+                        Manifest.permission.BLUETOOTH_ADMIN,
+                        Manifest.permission.BLUETOOTH_SCAN,
+                        Manifest.permission.BLUETOOTH_CONNECT,
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION,
+                        Manifest.permission.POST_NOTIFICATIONS,
+                        Manifest.permission.VIBRATE,
+                        Manifest.permission.FOREGROUND_SERVICE
+                },
+                2);
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == 2) {
+            if (!hasPermissions()) {
+                Toast.makeText(this, "Permissions not granted.", Toast.LENGTH_SHORT).show();
+            }
+            else {
+                Toast.makeText(this, "Permissions granted.", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
+
     private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
         // 共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
@@ -158,9 +208,9 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("nt", "レスポンスを検知しました1");
                 //FireBaseで更新された情報の判定
                 if (documentSnapshot.getBoolean("isReported") == false) {//isReportedがfalseのとき=サイト上で保護者ボタンが押されたとき
-                    if (fragment instanceof HomeFragment) {//fragementがHomeFragmentのインスタンスかの判定
-                        ((HomeFragment) fragment).onEvent(!isInCar);//onEvent()メソッドを処理→HomeFragmentのonEvent()メソッドを処理
-                    }
+//                    if (fragment instanceof HomeFragment) {//fragementがHomeFragmentのインスタンスかの判定
+//                        ((HomeFragment) fragment).onEvent(!isInCar);//onEvent()メソッドを処理→HomeFragmentのonEvent()メソッドを処理
+//                    }
                 } else if (isInCar) {//第三者ボタンが押されたときにisInCarがtrueのとき＝乗車状態のとき→いたずら防止
                     int importance = NotificationManager.IMPORTANCE_DEFAULT;
                     NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
