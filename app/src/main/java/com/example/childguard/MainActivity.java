@@ -408,7 +408,7 @@ public class MainActivity extends AppCompatActivity {
                                 NotificationBluetooth(getApplicationContext());//通知を行うメソッド
                             }}
 
-                    }, 5 *60 *1000); // 5分をミリ秒に変換
+                    }, 5 *60*1000); // 5分をミリ秒に変換
                 }
             }else {
                 Log.d("BT", "Device disconnected");

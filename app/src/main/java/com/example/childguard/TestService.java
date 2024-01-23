@@ -102,18 +102,18 @@ public class TestService extends Service {
     }
 
     public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
-            int importance = NotificationManager.IMPORTANCE_DEFAULT;
-            //通知チャネルの実装
-            NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通知", importance);
-            channel.setDescription("第三者により置き去りの通報が行われたときに通知します。");
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        //通知チャネルの実装
+        NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通知", importance);
+        channel.setDescription("第三者により置き去りの通報が行われたときに通知します。");
 
-            NotificationManager notificationManager = getSystemService(NotificationManager.class);
-            notificationManager.createNotificationChannel(channel);
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
 
     }
 
     public void Notification(Context context) {//実際に通知を行うメソッド
-         final String CHANNEL_ID = "my_channel_id";
+        final String CHANNEL_ID = "my_channel_id";
         // 通知がクリックされたときに送信されるIntent
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction("OPEN_ACTIVITY");
@@ -152,12 +152,13 @@ public class TestService extends Service {
         }
 
 
-        NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
+
     public void NotificationBluetooth(Context context) {//実際に通知を行うメソッド
         final String CHANNEL_ID = "my_channel_id";
         // 通知がクリックされたときに送信されるIntent
@@ -198,16 +199,12 @@ public class TestService extends Service {
         }
 
 
-        NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
-
-
-
-
 
 
     public void Bluetooth_status() {
@@ -232,8 +229,8 @@ public class TestService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            SharedPreferences pref=getSharedPreferences("Bluetooth_situation",MODE_PRIVATE);
-            SharedPreferences.Editor e=pref.edit();
+            SharedPreferences pref = getSharedPreferences("Bluetooth_situation", MODE_PRIVATE);
+            SharedPreferences.Editor e = pref.edit();
             String action = intent.getAction(); // may need to chain this to a recognizing function
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             Boolean isInCar = pref.getBoolean("isInCarPref", false);
@@ -253,22 +250,21 @@ public class TestService extends Service {
                 Log.d("BT", "Device connected");
 
 
-
                 Log.d("BT_Judge", "Registered: " + registeredId);
 
                 if (deviceHardwareAddress.equals(registeredId)) {
                     //登録済みのデバイスだったときの処理
                     Log.d("BT_Judge", "登録済み");
-                    e.putBoolean("connection_status",true);
+                    e.putBoolean("connection_status", true);
 
-                } else{
+                } else {
                     //登録していないデバイスだったときの処理
                     Log.d("BT_Judge", "未登録");
-                    e.putBoolean("connection_status",false);
+                    e.putBoolean("connection_status", false);
                 }
                 e.apply();
 
-            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)&&!isInCar) {//bluetoothが切断されたときに乗車状態のとき
+            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//bluetoothが切断されたときに乗車状態のとき
 
                 //Do something if disconnected
                 //デバイスが切断されたときの処理
@@ -278,20 +274,18 @@ public class TestService extends Service {
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)&&!isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
+                            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
                                 NotificationBluetooth(getApplicationContext());//通知を行うメソッド
-                            }}
+                            }
+                        }
 
-                    }, 5 *60 *1000); // 5分をミリ秒に変換
+                    }, 5 * 60 * 1000); // 5分をミリ秒に変換
                 }
-            }else {
+            } else {
                 Log.d("BT", "Device disconnected");
             }
         }
     };
-
-
-
 
 
     @Nullable
