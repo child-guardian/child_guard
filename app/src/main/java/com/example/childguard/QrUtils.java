@@ -48,7 +48,7 @@ public class QrUtils {
             throw new AndroidRuntimeException("Barcode Error.", e);
         }
         // 画像合成の準備
-        Bitmap bitmap = BitmapFactory.decodeResource(this.context.getResources(), R.drawable.a_group_qr_sos);
+        Bitmap bitmap = BitmapFactory.decodeResource(this.context.getResources(), R.drawable.a_group_qr_sos_2);
         int width = bitmap.getWidth();
         int height = bitmap.getHeight();
         QRGazou = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
@@ -72,7 +72,7 @@ public class QrUtils {
 
         // 画面密度に基づいてQRコードのサイズを計算
         float density = context.getResources().getDisplayMetrics().density;
-        return (int) (800 * density);
+        return (int) (700 * density);
     }
 
 }

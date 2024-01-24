@@ -65,12 +65,7 @@ public class MainActivity extends AppCompatActivity {
                     if (!contents.contains("https://practicefirestore1-8808c.web.app/")) {
                         Toast.makeText(this, "Child Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
                     } else {
-                        //URLの表示
-                        Toast.makeText(this, contents, Toast.LENGTH_SHORT).show();
-                        //ブラウザを起動し、URL先のサイトを開く
-                        CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-                        CustomTabsIntent customTabsIntent = builder.build();
-                        customTabsIntent.launchUrl(this, Uri.parse(contents));
+                        changeisInCar();
                     }
                 }
             }
@@ -87,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences.Editor e=pref.edit();
         e.putBoolean("connection_status",false);
 
-        db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
+
 
         if (!hasPermissions()) {
             requestPermissions();
@@ -107,7 +102,6 @@ public class MainActivity extends AppCompatActivity {
                         .addToBackStack(null)
                         .commit();
                 firebaselink();
-
 
             } else if (v.getItemId() == findViewById(R.id.navigation_settings).getId()) {
                 findViewById(R.id.fab_scan_qr_code).setVisibility(FrameLayout.GONE);
@@ -130,12 +124,12 @@ public class MainActivity extends AppCompatActivity {
 
         });
 
-
         //Bluetooth検知機能
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
 
+        db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
             Log.d("BT", "No permission to connect bluetooth devices");
             return;
@@ -155,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
         firebaselink();
     }
 
-    private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
+        private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
         // 共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
 
@@ -261,6 +255,25 @@ public class MainActivity extends AppCompatActivity {
         isReported.update("isReported", false).addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
     }
 
+    public void changeisInCar() {
+        //共有プリファレンス全体の準備
+        SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("app_situation", MODE_PRIVATE);
+        //共有プリファレンス 書き込みの準備
+        SharedPreferences.Editor E = sharedPreferences.edit();
+        String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
+        Boolean change=sharedPreferences.getBoolean("change",false);
+        db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
+        DocumentReference isReported = db.collection("status").document(IdPref);//更新するドキュメントとの紐づけ
+        Map<String, Boolean> DEFAULT_ITEM = new HashMap<>();//mapの宣言
+        if (!change) {
+            //isInCarをtrueに更新
+            E.putBoolean("change",true);
+        }else{
+            E.putBoolean("change",false);
+        }
+        isReported.update("isInCar", change).addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
+        E.apply();
+    }
     public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         //通知チャネルの実装
@@ -405,8 +418,7 @@ public class MainActivity extends AppCompatActivity {
             String action = intent.getAction(); // may need to chain this to a recognizing function
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             Boolean isInCar = pref.getBoolean("isInCarPref", false);
-
-
+            Boolean Bluetoothconnect = pref.getBoolean("change", false);
             if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 Log.d("BT", "No permission to connect bluetooth devices");
                 return;
@@ -418,9 +430,9 @@ public class MainActivity extends AppCompatActivity {
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
                 //Do something if connected
                 //Bluetoothデバイスが接続されたときの処理
-                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
-                Boolean Bluetoothconnect=true;
-                ((HomeFragment) fragment).onEvent2(Bluetoothconnect);//HomeFragmentの表示を接続にする
+                e.putBoolean("change", true);
+                e.apply();
+                changeBluetooth();//HomeFragmentの表示を接続にする
                 Log.d("BT", "Device connected");
 
                 Log.d("BT_Judge", "Registered: " + registeredId);
@@ -441,9 +453,9 @@ public class MainActivity extends AppCompatActivity {
 
                 //Do something if disconnected
                 //デバイスが切断されたときの処理
-                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
-                Boolean Bluetoothconnect=false;
-                ((HomeFragment) fragment).onEvent2(Bluetoothconnect);//HomeFragmentの表示を切断にする
+                e.putBoolean("change", false);
+                e.apply();
+                changeBluetooth();//HomeFragmentの表示を切断にする
                 if (deviceHardwareAddress.equals(registeredId)) {
                     // 5分待機する
                     Handler handler = new Handler();
@@ -461,5 +473,13 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    public void changeBluetooth(){
+        SharedPreferences pref=getSharedPreferences("Bluetooth_situation",MODE_PRIVATE);
+        SharedPreferences.Editor e=pref.edit();
+        Boolean Bluetoothconnect = pref.getBoolean("change", false);
+        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
+        ((HomeFragment) fragment).onEvent2(Bluetoothconnect);
+    }
 }
 

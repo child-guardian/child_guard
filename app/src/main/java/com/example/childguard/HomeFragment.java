@@ -176,8 +176,8 @@ public class HomeFragment extends Fragment implements OnEventListener{
     }
 
     @Override
-    public boolean onEvent2(boolean BluetoothConnect) {
-        return false;
+    public void onEvent2(boolean BluetoothConnect) {
+        return ;
     }
 
 
