@@ -126,7 +126,6 @@ public class bluetooth_setupFragment extends Fragment {
             for (BluetoothDevice device : pairedDevices) {
 
 
-
                 String[] deviceInfo = new String[2];
                 deviceInfo[0] = device.getName();
                 deviceInfo[1] = device.getAddress(); // MAC address
@@ -143,9 +142,8 @@ public class bluetooth_setupFragment extends Fragment {
 
             //④RecyclerViewとAdapterの結び付け
             recyclerView1.setAdapter(adapter);
-            TextView textView=view.findViewById(R.id.registered_device);
-            textView.setText(PreferenceManager.getDefaultSharedPreferences(requireActivity().getApplicationContext()).getString("bluetooth_device_name","none"));
-
+            TextView textView = view.findViewById(R.id.registered_device);
+            textView.setText(PreferenceManager.getDefaultSharedPreferences(requireActivity().getApplicationContext()).getString("bluetooth_device_name", "none"));
 
 
         }

@@ -77,6 +77,7 @@ public class TestService extends Service {
                 Log.d("nt", "レスポンスを検知しました1");
                 if (isInCar) {//isReportedがtrue=サイト上で乗車状態のとき
                     if (documentSnapshot.getBoolean("isReported")) {
+                        //ここスタート（リサイクル）
                         ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
                         NotificationSetting();//通知に関する設定のメソッド
                         Notification(getApplicationContext());//通知を行うメソッド

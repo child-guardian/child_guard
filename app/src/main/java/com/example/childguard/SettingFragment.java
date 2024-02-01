@@ -26,6 +26,7 @@ import java.util.Map;
 public class SettingFragment extends Fragment {
 
     FirebaseFirestore db;
+
     public SettingFragment() {
         // Required empty public constructor
     }
@@ -55,11 +56,11 @@ public class SettingFragment extends Fragment {
 
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
 
-        view.findViewById(R.id.button_bluetooth_setting).setOnClickListener( v -> {
+        view.findViewById(R.id.button_bluetooth_setting).setOnClickListener(v -> {
             getParentFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, bluetooth_setupFragment.newInstance("test", "test")).addToBackStack(null).commit();
         });
 
-        view.findViewById(R.id.button_print_qr).setOnClickListener( v -> {
+        view.findViewById(R.id.button_print_qr).setOnClickListener(v -> {
             SharedPreferences sharedPreferences = getActivity().getSharedPreferences("app_situation", MODE_PRIVATE);
             boolean alreadySaved = sharedPreferences.getBoolean("alreadySaved", false);
             //falseのときにFirebaseへの登録

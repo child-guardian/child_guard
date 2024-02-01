@@ -12,7 +12,6 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -25,7 +24,6 @@ import android.widget.Toast;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
 import androidx.fragment.app.Fragment;
@@ -65,7 +63,7 @@ public class MainActivity extends AppCompatActivity {
                     if (!contents.contains("https://practicefirestore1-8808c.web.app/")) {
                         Toast.makeText(this, "Child Guardに対応するQRコードではありません", Toast.LENGTH_LONG).show();
                     } else {
-                        changeisInCar();
+                        changeIsInCar();
                     }
                 }
             }
@@ -101,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                         .replace(findViewById(R.id.fragmentContainerView).getId(), this.homeFragment)
                         .addToBackStack(null)
                         .commit();
-                firebaselink();
+                firebaseLink();
 
             } else if (v.getItemId() == findViewById(R.id.navigation_settings).getId()) {
                 findViewById(R.id.fab_scan_qr_code).setVisibility(FrameLayout.GONE);
@@ -110,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
                         .addToBackStack(null)
                         .commit();
             }
-            firebaselink();
+            firebaseLink();
             Bluetooth_status();
             return true;
         });
@@ -146,7 +144,7 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.d("onResume", "called");
         Log.d("onResume", "mDocRef is null");
-        firebaselink();
+        firebaseLink();
     }
 
         private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
@@ -168,7 +166,7 @@ public class MainActivity extends AppCompatActivity {
                 //FireBaseで更新された情報の判定
                 if (!documentSnapshot.getBoolean("isReported")) {//isReportedがfalseのとき=サイト上で保護者ボタンが押されたとき
                     if (fragment instanceof HomeFragment) {//fragmentがHomeFragmentのインスタンスかの判定
-//                        changessituation();//  changessituation()メソッドを処理→アプリ側の乗降状態を変化
+//                        changes-situation();//  changes-situation()メソッドを処理→アプリ側の乗降状態を変化
                         ((HomeFragment) fragment).onEvent(!isInCar);
                     }
                 } else if (isInCar) {//第三者ボタンが押されたときにisInCarがtrueのとき＝乗車状態のとき→いたずら防止
@@ -231,7 +229,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    public void firebaselink() {//Firebaseのドキュメントの取得
+    public void firebaseLink() {//Firebaseのドキュメントの取得
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
         String IdPref = sharedPreferences.getString("ID", null);////アプリに記録されているIDの取得
@@ -255,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
         isReported.update("isReported", false).addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
     }
 
-    public void changeisInCar() {
+    public void changeIsInCar() {
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("app_situation", MODE_PRIVATE);
         //共有プリファレンス 書き込みの準備
@@ -418,7 +416,6 @@ public class MainActivity extends AppCompatActivity {
             String action = intent.getAction(); // may need to chain this to a recognizing function
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             Boolean isInCar = pref.getBoolean("isInCarPref", false);
-            Boolean Bluetoothconnect = pref.getBoolean("change", false);
             if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 Log.d("BT", "No permission to connect bluetooth devices");
                 return;
@@ -477,9 +474,9 @@ public class MainActivity extends AppCompatActivity {
     public void changeBluetooth(){
         SharedPreferences pref=getSharedPreferences("Bluetooth_situation",MODE_PRIVATE);
         SharedPreferences.Editor e=pref.edit();
-        Boolean Bluetoothconnect = pref.getBoolean("change", false);
+        Boolean BluetoothConnect = pref.getBoolean("change", false);
         Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
-        ((HomeFragment) fragment).onEvent2(Bluetoothconnect);
+        ((HomeFragment) fragment).onEvent2(BluetoothConnect);
     }
 }
 

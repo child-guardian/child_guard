@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 
 public class NotificationReceiver extends BroadcastReceiver {//通知をタップしたときにアプリを起動する処理
+
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction() != null && intent.getAction().equals("OPEN_ACTIVITY")) {// 通知がタップされたときの処理

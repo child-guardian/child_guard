@@ -20,7 +20,7 @@ import androidx.fragment.app.FragmentTransaction;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment implements OnEventListener{
+public class HomeFragment extends Fragment implements OnEventListener {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -133,26 +133,26 @@ public class HomeFragment extends Fragment implements OnEventListener{
         return true;
     }
 
-    private boolean updateBluetoothSituation(Boolean Bluetoothconnect){
+    private boolean updateBluetoothSituation(Boolean BluetoothConnect) {
         FrameLayout frameLayout;
         TextView textView;
         ImageView imageView;
         try {
-            frameLayout=requireView().findViewById(R.id.situation_bg2);
-            textView=requireView().findViewById(R.id.Bluetoothsituation);
-            imageView=requireView().findViewById(R.id.Bluetoothsituationimage);
-        }catch (NullPointerException e) {
+            frameLayout = requireView().findViewById(R.id.situation_bg2);
+            textView = requireView().findViewById(R.id.Bluetoothsituation);
+            imageView = requireView().findViewById(R.id.Bluetoothsituationimage);
+        } catch (NullPointerException e) {
             Log.d("HomeFragment", "updateUiState: view is null");
             return false;
         } catch (IllegalStateException e) {
             Log.d("HomeFragment", "updateUiState: view is not attached");
             getParentFragmentManager().beginTransaction().replace(R.id.fragmentContainerView, HomeFragment.newInstance("test", "test")).commit();
-            updateBluetoothSituation(Bluetoothconnect);
+            updateBluetoothSituation(BluetoothConnect);
             return false;
         }
-        String connect="接続中";
-        String disconnect="切断中";
-        if (Bluetoothconnect) {
+        String connect = "接続中";
+        String disconnect = "切断中";
+        if (BluetoothConnect) {
             //接続状態にする
             frameLayout.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
             textView.setText(connect);
@@ -177,13 +177,13 @@ public class HomeFragment extends Fragment implements OnEventListener{
 
     @Override
     public void onEvent2(boolean BluetoothConnect) {
-        return ;
+        return;
     }
 
 
     @Override
-    public boolean onEvent2(Boolean Bluetoothconnect) {//Bluetoothの接続切断を受け取ってupdateBluetoothSituation()に渡す
-        updateBluetoothSituation(Bluetoothconnect);
+    public boolean onEvent2(Boolean BluetoothConnect) {//Bluetoothの接続切断を受け取ってupdateBluetoothSituation()に渡す
+        updateBluetoothSituation(BluetoothConnect);
         return false;
     }
 }

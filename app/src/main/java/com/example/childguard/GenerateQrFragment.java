@@ -23,6 +23,7 @@ public class GenerateQrFragment extends Fragment {
     public GenerateQrFragment() {
         // Required empty public constructor
     }
+
     public static GenerateQrFragment newInstance(String key) {
         GenerateQrFragment fragment = new GenerateQrFragment();
         Bundle args = new Bundle();
@@ -54,7 +55,7 @@ public class GenerateQrFragment extends Fragment {
         ImageView imageView = view.findViewById(R.id.result_bitmap_image_view);
         imageView.setImageBitmap(result);
 
-        view.findViewById(R.id.button_print).setOnClickListener( v -> {
+        view.findViewById(R.id.button_print).setOnClickListener(v -> {
             PrintHelper photoPrinter = new PrintHelper(requireContext());
             photoPrinter.setScaleMode(PrintHelper.SCALE_MODE_FIT);
             photoPrinter.printBitmap("placeholder", result, () -> {
@@ -62,7 +63,7 @@ public class GenerateQrFragment extends Fragment {
             });
         });
 
-        view.findViewById(R.id.button_cancel).setOnClickListener( v -> {
+        view.findViewById(R.id.button_cancel).setOnClickListener(v -> {
             getParentFragmentManager().popBackStack();
         });
     }

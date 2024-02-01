@@ -6,5 +6,5 @@ public interface OnEventListener {
 
     void onEvent2(boolean BluetoothConnect);
 
-    boolean onEvent2(Boolean Bluetoothconnect);
+    boolean onEvent2(Boolean BluetoothConnect);
 }

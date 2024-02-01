@@ -23,6 +23,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
     Context applicationContext;
     View parentView;
 
+
     // Constructor
     public RecyclerAdapter(ArrayList<String[]> deviceList, Context applicationContext, View parentView) {
         // Init
@@ -30,6 +31,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
         this.deviceList = deviceList;
         this.applicationContext = applicationContext;
         this.parentView = parentView;
+
     }
 
     @NonNull
@@ -43,7 +45,7 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
     @Override
     public void onBindViewHolder(@NonNull ItemViewHolder holder, int position) {
         holder.textView.setText(deviceList.get(position)[0]);
-        holder.textView.setOnClickListener( v -> {
+        holder.textView.setOnClickListener(v -> {
 
             // アラートダイアログを表示
             new AlertDialog.Builder(v.getContext())
@@ -53,14 +55,13 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
                         // OK button pressed
                         Toast.makeText(v.getContext(), "OK button clicked", Toast.LENGTH_SHORT).show();
                         //共有プリファレンスに保存
-                        SharedPreferences sharedPreferences=PreferenceManager.getDefaultSharedPreferences(this.applicationContext);
+                        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.applicationContext);
                         sharedPreferences.edit().putString("bluetooth_device_id", deviceList.get(position)[1]).apply();
-                        sharedPreferences.edit().putString("bluetooth_device_name",deviceList.get(position)[0]).apply();
-                        Toast.makeText(v.getContext(),PreferenceManager.getDefaultSharedPreferences(this.applicationContext).getString("bluetooth_device_id","none"), Toast.LENGTH_SHORT).show();
+                        sharedPreferences.edit().putString("bluetooth_device_name", deviceList.get(position)[0]).apply();
+                        Toast.makeText(v.getContext(), PreferenceManager.getDefaultSharedPreferences(this.applicationContext).getString("bluetooth_device_id", "none"), Toast.LENGTH_SHORT).show();
 
                         TextView textView = this.parentView.findViewById(R.id.registered_device);
-                        textView.setText(PreferenceManager.getDefaultSharedPreferences(this.applicationContext).getString("bluetooth_device_name","none"));
-
+                        textView.setText(PreferenceManager.getDefaultSharedPreferences(this.applicationContext).getString("bluetooth_device_name", "none"));
 
 
                     })
