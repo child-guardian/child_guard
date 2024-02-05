@@ -7,28 +7,50 @@
     tools:context=".SettingFragment"
     android:padding="16dp">
 
-    <Button
-        android:id="@+id/button_print_qr"
-        android:layout_width="match_parent"
+
+    <ImageView
+        android:src="@drawable/bluetooth_and_qr2"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="wrap_content"
+        android:layout_height="200dp"
+        android:layout_marginTop="150dp"
+        />
+    <TextView
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="QRコード印刷"
-        android:layout_marginVertical="8dp"/>
+        android:textColor="@color/black"
+        android:text="QRコード印刷とBluetooth設定"
+        android:layout_gravity="center_horizontal"
+        android:textStyle="bold"
+        android:textSize="18dp"
+        android:layout_marginTop="20dp"
+        />
 
     <Button
         android:id="@+id/button_bluetooth_setting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Bluetooth設定"
-        android:layout_marginVertical="8dp"/>
+        android:layout_marginTop="120dp"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/button_print_qr"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="QRコード印刷"/>
+
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:gravity="bottom">
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="QRコードは株式会社デンソーウェーブの登録商標です" />
+            android:text="QRコードは株式会社デンソーウェーブの登録商標です"
+            android:textColor="@color/black" />
     </LinearLayout>
 
 </LinearLayout>
