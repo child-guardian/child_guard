@@ -188,7 +188,10 @@ public class TestService extends Service {
         });
     }
 
-    public void resetReported() {//FireBaseのisReportedをfalseに初期化するメソッド
+    /**
+     * 通報フラグをリセットする
+     */
+    public void resetReported() {
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
         DocumentReference isReported = db.collection("status").document(this.userId);
         //isReportedをfalseに更新
