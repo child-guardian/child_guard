@@ -71,9 +71,9 @@ public class TestService extends Service {
     // DEBUG
     private static final int NOTIFICATION_DELAY = 5 * 1000; // 15 seconds
     private static final NotificationContent REPORTED_NOTIFICATION =
-            new NotificationContent("子供の置き去りをしていませんか？", "第三者からの通報が行われました。", REPORTED_CHANNEL_ID, 1);
+            new NotificationContent("子供の置き去りをしていませんか？", "第三者からの通報が行われました。", REPORTED_CHANNEL_ID, 2);
     private static final NotificationContent BLUETOOTH_NOTIFICATION =
-            new NotificationContent("子供の置き去りをしていませんか？", "Bluetoothと車の切断から5分が経過しました", BT_ALERT_CHANNEL_ID, 2);
+            new NotificationContent("子供の置き去りをしていませんか？", "Bluetoothと車の切断から5分が経過しました", BT_ALERT_CHANNEL_ID, 3);
 
     private String userId = null;
 
