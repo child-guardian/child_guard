@@ -279,12 +279,10 @@ public class TestService extends Service {
                 if (deviceHardwareAddress.equals(registeredId)) {
                     //登録済みのデバイスだったときの処理
                     Log.d("BT_Judge", "登録済み");
-                    e.putBoolean("connection_status", true);
 
                 } else {
                     //登録していないデバイスだったときの処理
                     Log.d("BT_Judge", "未登録");
-                    e.putBoolean("connection_status", false);
                 }
                 e.apply();
 
