@@ -67,11 +67,18 @@ public class TestService extends Service {
         }
     }
 
+    /**
+     * 通知チャネルが作成されているか確認
+     * @return 通知チャンネルの有無 true: 作成済み false: 未作成
+     */
     private boolean isNotificationChannelCreated() {
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         return notificationManager.getNotificationChannel(CHANNEL_ID) != null;
     }
 
+    /**
+     * 通知チャネルの作成
+     */
     private void createNotificationChannel() {
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "通知", importance);
