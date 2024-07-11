@@ -126,8 +126,6 @@ public class TestService extends Service {
         String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
         DocumentReference isReported = db.collection("status").document(IdPref);//更新するドキュメントとの紐づけ
-        Map<String, Boolean> DEFAULT_ITEM = new HashMap<>();//mapの宣言
-        DEFAULT_ITEM.put("isReported", false);
         //isReportedをfalseに更新
         isReported.update("isReported", false).addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
     }
