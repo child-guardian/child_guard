@@ -37,6 +37,8 @@ public class TestService extends Service {
 
     public static final String TAG = "InspirationQuote";
     private static final String CHANNEL_ID = "child_guard_emergency";
+    private static final int REQUEST_CODE = 100;
+
     // ユーザーID
     private String userId = null;
 
@@ -137,15 +139,13 @@ public class TestService extends Service {
         notificationManager.createNotificationChannel(channel);
     }
 
-    public void Notification(Context context) {//実際に通知を行うメソッド
-        final String CHANNEL_ID = "my_channel_id";
-        // 通知がクリックされたときに送信されるIntent
+    private PendingIntent getPendingIntent(Context context, int requestCode, int flags) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction("OPEN_ACTIVITY");
-        // PendingIntentの作成
-        int requestCode = 100;
-        int flags = 0;
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
+        return PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
+    }
+
+    public void Notification(Context context) {//実際に通知を行うメソッド
 
         ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(2000);//バイブレーション
 
@@ -153,7 +153,7 @@ public class TestService extends Service {
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
                 .setContentText("第三者からの通報が行われました。")//通知の本文
-                .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
+                .setContentIntent(getPendingIntent(context, REQUEST_CODE, 0))//通知をタップするとActivityへ移動する
                 .setAutoCancel(true)//通知をタップすると削除する
                 .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
@@ -172,14 +172,6 @@ public class TestService extends Service {
         if (ActivityCompat.checkSelfPermission(this,
                 android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return;
 
-        final String CHANNEL_ID = "my_channel_id";
-        // 通知がクリックされたときに送信されるIntent
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.setAction("OPEN_ACTIVITY");
-        // PendingIntentの作成
-        int requestCode = 100;
-        int flags = 0;
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
 
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator.hasVibrator()) {
@@ -190,7 +182,7 @@ public class TestService extends Service {
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
                 .setContentText("Bluetoothと車の切断から5分が経過しました")//通知の本文
-                .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
+                .setContentIntent(getPendingIntent(context, REQUEST_CODE, 0))//通知をタップするとActivityへ移動する
                 .setAutoCancel(true)//通知をタップすると削除する
                 .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
