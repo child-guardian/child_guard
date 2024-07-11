@@ -110,7 +110,6 @@ public class TestService extends Service {
                     if (documentSnapshot.getBoolean("isReported")) {
                         //ここスタート（リサイクル）
                         ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
-                        NotificationSetting();//通知に関する設定のメソッド
                         Notification(getApplicationContext());//通知を行うメソッド
                     }
                 } else {//isReportedがfalse=サイト上で降車状態のとき
@@ -127,16 +126,6 @@ public class TestService extends Service {
         //isReportedをfalseに更新
         isReported.update("isReported", false).addOnSuccessListener(unused ->
                 Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
-    }
-
-    public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
-        int importance = NotificationManager.IMPORTANCE_DEFAULT;
-        //通知チャネルの実装
-        NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通知", importance);
-        channel.setDescription("第三者により置き去りの通報が行われたときに通知します。");
-
-        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-        notificationManager.createNotificationChannel(channel);
     }
 
     private PendingIntent getPendingIntent(Context context, int requestCode, int flags) {
