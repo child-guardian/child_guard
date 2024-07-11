@@ -133,6 +133,9 @@ public class TestService extends Service {
         notificationManager.createNotificationChannel(channel);
     }
 
+    /**
+     * バックグラウンドで実行中の通知チャネルを作成
+     */
     private void createRunningNotificationChannel() {
         NotificationChannel serviceChannel = new NotificationChannel(
                 BACKGROUND_CHANNEL_ID,
