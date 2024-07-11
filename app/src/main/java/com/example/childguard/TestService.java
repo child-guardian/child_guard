@@ -151,6 +151,9 @@ public class TestService extends Service {
         return PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
     }
 
+    /**
+     * デバイスをバイブレーションさせる
+     */
     private void vibrateDevice() {
         Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
         if (vibrator.hasVibrator()) {
