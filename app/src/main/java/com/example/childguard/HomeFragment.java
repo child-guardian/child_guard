@@ -80,6 +80,12 @@ public class HomeFragment extends Fragment implements OnEventListener {
         super.onResume();
         Log.d("HomeFragment", "onResume: called");
         this.updateUiState(getIsInCarLocal());
+        this.updateBluetoothSituation(isBluetoothConnected());
+    }
+
+    private boolean isBluetoothConnected() {
+        SharedPreferences pref = requireActivity().getSharedPreferences("Bluetooth_situation", requireActivity().MODE_PRIVATE);
+        return pref.getBoolean("status", false);
     }
 
     private boolean getIsInCarLocal() {
@@ -173,18 +179,6 @@ public class HomeFragment extends Fragment implements OnEventListener {
         Log.d("HomeFragment", "onEvent: called");
 
         return updateUiState(isInCar);
-    }
-
-    @Override
-    public void onEvent2(boolean BluetoothConnect) {
-        return;
-    }
-
-
-    @Override
-    public boolean onEvent2(Boolean BluetoothConnect) {//Bluetoothの接続切断を受け取ってupdateBluetoothSituation()に渡す
-        updateBluetoothSituation(BluetoothConnect);
-        return false;
     }
 }
 

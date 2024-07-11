@@ -429,9 +429,7 @@ public class MainActivity extends AppCompatActivity {
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
                 //Do something if connected
                 //Bluetoothデバイスが接続されたときの処理
-                e.putBoolean("change", true);
-                e.apply();
-                changeBluetooth();//HomeFragmentの表示を接続にする
+                changeBluetooth(true);
                 Log.d("BT", "Device connected");
 
                 Log.d("BT_Judge", "Registered: " + registeredId);
@@ -452,9 +450,7 @@ public class MainActivity extends AppCompatActivity {
 
                 //Do something if disconnected
                 //デバイスが切断されたときの処理
-                e.putBoolean("change", false);
-                e.apply();
-                changeBluetooth();//HomeFragmentの表示を切断にする
+                changeBluetooth(false);
                 if (deviceHardwareAddress.equals(registeredId)) {
                     // 5分待機する
                     Handler handler = new Handler();
@@ -473,12 +469,8 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
-    public void changeBluetooth(){
-        SharedPreferences pref=getSharedPreferences("Bluetooth_situation",MODE_PRIVATE);
-        SharedPreferences.Editor e=pref.edit();
-        Boolean BluetoothConnect = pref.getBoolean("change", false);
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
-        ((HomeFragment) fragment).onEvent2(BluetoothConnect);
+    public void changeBluetooth(boolean actual){
+        getSharedPreferences("Bluetooth_situation",MODE_PRIVATE).edit().putBoolean("status",actual).apply();
     }
 }
 
