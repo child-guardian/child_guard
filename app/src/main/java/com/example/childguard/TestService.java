@@ -66,7 +66,7 @@ public class TestService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         this.userId = getSharedPreferences("app_situation", MODE_PRIVATE).getString("ID", null);
-        if (getSharedPreferences("app_situation", MODE_PRIVATE).getString("ID", null) == null) {
+        if (this.userId == null) {
             Log.d("onResume", "ID not initialized.");
             return flags; // IDが初期化されていない場合は何もしない
         }
