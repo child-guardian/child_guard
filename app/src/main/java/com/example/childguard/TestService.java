@@ -72,7 +72,9 @@ public class TestService extends Service {
             return flags; // IDが初期化されていない場合は何もしない
         }
 
-        createRunningNotificationChannel();
+        if (!isNotificationChannelCreated(BACKGROUND_CHANNEL_ID)) {
+            createRunningNotificationChannel();
+        }
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new NotificationCompat.Builder(this, BACKGROUND_CHANNEL_ID)
@@ -94,7 +96,7 @@ public class TestService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (!isNotificationChannelCreated()) {
+        if (!isNotificationChannelCreated(CHANNEL_ID)) {
             createAlertNotificationChannel();
         }
     }
@@ -103,9 +105,9 @@ public class TestService extends Service {
      * 通知チャネルが作成されているか確認
      * @return 通知チャンネルの有無 true: 作成済み false: 未作成
      */
-    private boolean isNotificationChannelCreated() {
+    private boolean isNotificationChannelCreated(String channelId) {
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
-        return notificationManager.getNotificationChannel(CHANNEL_ID) != null;
+        return notificationManager.getNotificationChannel(channelId) != null;
     }
 
     /**
