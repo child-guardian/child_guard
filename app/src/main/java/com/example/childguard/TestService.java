@@ -147,6 +147,10 @@ public class TestService extends Service {
         registerReceiver(receiver, intentFilter);
     }
 
+    /**
+     * Firestoreのスナップショットリスナーを設定
+     * @param mDocRef Firestoreのドキュメントリファレンス
+     */
     private void setSnapshotListener(DocumentReference mDocRef) {
         // Initialize the PeriodicTaskManager
         // (Assuming it's done elsewhere as it's not shown in the original code)
