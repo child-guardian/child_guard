@@ -180,17 +180,5 @@ public class HomeFragment extends Fragment implements OnEventListener {
 
         return updateUiState(isInCar);
     }
-
-    @Override
-    public void onEvent2(boolean BluetoothConnect) {
-        return;
-    }
-
-
-    @Override
-    public boolean onEvent2(Boolean BluetoothConnect) {//Bluetoothの接続切断を受け取ってupdateBluetoothSituation()に渡す
-        updateBluetoothSituation(BluetoothConnect);
-        return false;
-    }
 }
 
