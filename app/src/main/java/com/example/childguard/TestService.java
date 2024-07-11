@@ -171,7 +171,7 @@ public class TestService extends Service {
                     if (documentSnapshot.getBoolean("isReported")) {
                         //ここスタート（リサイクル）
                         ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
-                        Notification(getApplicationContext());//通知を行うメソッド
+                        Notification(getApplicationContext(), REPORTED_NOTIFICATION);//通知を行うメソッド
                     }
                 } else {//isReportedがfalse=サイト上で降車状態のとき
                     ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
@@ -286,7 +286,7 @@ public class TestService extends Service {
                         @Override
                         public void run() {
                             if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
-                                NotificationBluetooth(getApplicationContext());//通知を行うメソッド
+                                Notification(context, BLUETOOTH_NOTIFICATION);
                             }
                         }
 
