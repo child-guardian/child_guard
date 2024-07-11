@@ -37,26 +37,25 @@ public class TestService extends Service {
 
     public static final String TAG = "InspirationQuote";
     private static final String CHANNEL_ID = "child_guard_emergency";
+    // ユーザーID
+    private String userId = null;
 
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
-
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
-        if (IdPref == null) {//FireBaseのIDがアプリに登録されているとき
+        this.userId = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
+        if (this.userId == null) {
             Log.d("onResume", "ID not initialized.");
+            return flags; // IDが初期化されていない場合は何もしない
         } else {
-            mDocRef = FirebaseFirestore.getInstance().document("status/" + IdPref);//現在の位置を取得
+            mDocRef = FirebaseFirestore.getInstance().document("status/" + this.userId);//現在の位置を取得
             initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
         }
 
         Bluetooth_status();
         return flags;
-
-
     }
 
     @Override
@@ -121,11 +120,8 @@ public class TestService extends Service {
     }
 
     public void ResetReported() {//FireBaseのisReportedをfalseに初期化するメソッド
-        //共有プリファレンス全体の準備
-        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
-        DocumentReference isReported = db.collection("status").document(IdPref);//更新するドキュメントとの紐づけ
+        DocumentReference isReported = db.collection("status").document(this.userId);
         //isReportedをfalseに更新
         isReported.update("isReported", false).addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
     }
