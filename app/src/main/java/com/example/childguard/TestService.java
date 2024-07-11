@@ -272,9 +272,7 @@ public class TestService extends Service {
                 handler.postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
-                            Notification(context, BLUETOOTH_NOTIFICATION);
-                        }
+                        Notification(context, BLUETOOTH_NOTIFICATION);
                     }
 
                 }, 5 * 60 * 1000); // 5分をミリ秒に変換
