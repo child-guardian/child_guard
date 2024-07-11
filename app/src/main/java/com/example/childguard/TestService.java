@@ -196,7 +196,7 @@ public class TestService extends Service {
 
         vibrateDevice();
 
-        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
                 .setContentText("第三者からの通報が行われました。")//通知の本文
