@@ -268,14 +268,6 @@ public class TestService extends Service {
 
             Boolean isInCar = pref.getBoolean("isInCarPref", false);
 
-
-            if (ActivityCompat.checkSelfPermission(context, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-                Log.d("BT", "No permission to connect bluetooth devices");
-                return;
-            }
-
-
-
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
                 //Do something if connected
                 //Bluetoothデバイスが接続されたときの処理
