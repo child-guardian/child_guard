@@ -28,12 +28,35 @@ import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class TestService extends Service {
+
+    public static class NotificationContent {
+        private final String title;
+        private final String description;
+
+        public NotificationContent(String title, String description) {
+            this.title = title;
+            this.description = description;
+        }
+
+        public String getTitle() {
+            return title;
+        }
+
+        public String getDescription() {
+            return description;
+        }
+    }
+
     FirebaseFirestore db;
     DocumentReference mDocRef;
 
     public static final String TAG = "InspirationQuote";
     private static final String CHANNEL_ID = "child_guard_emergency";
     private static final int REQUEST_CODE = 100;
+    private static final NotificationContent REPORTED_NOTIFICATION =
+            new NotificationContent("子供の置き去りをしていませんか？", "第三者からの通報が行われました。");
+    private static final NotificationContent BLUETOOTH_NOTIFICATION =
+            new NotificationContent("子供の置き去りをしていませんか？", "Bluetoothと車の切断から5分が経過しました");
 
     // ユーザーID
     private String userId = null;
@@ -189,7 +212,7 @@ public class TestService extends Service {
         }
     }
 
-    public void Notification(Context context) {//実際に通知を行うメソッド
+    public void Notification(Context context, NotificationContent content) {//通知を行うメソッド
 
         // 権限の保有を確認
         if (isNotNotificationEnabled()) return;
@@ -198,8 +221,8 @@ public class TestService extends Service {
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
-                .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
-                .setContentText("第三者からの通報が行われました。")//通知の本文
+                .setContentTitle(content.getTitle())//通知のタイトル
+                .setContentText(content.getDescription())//通知の内容
                 .setContentIntent(getPendingIntent(context, REQUEST_CODE, 0))//通知をタップするとActivityへ移動する
                 .setAutoCancel(true)//通知をタップすると削除する
                 .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
@@ -209,28 +232,6 @@ public class TestService extends Service {
 
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
-
-    public void NotificationBluetooth(Context context) {//実際に通知を行うメソッド
-
-        // 権限の保有を確認
-        if (isNotNotificationEnabled()) return;
-
-        vibrateDevice();
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(android.R.drawable.ic_menu_info_details)
-                .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
-                .setContentText("Bluetoothと車の切断から5分が経過しました")//通知の本文
-                .setContentIntent(getPendingIntent(context, REQUEST_CODE, 0))//通知をタップするとActivityへ移動する
-                .setAutoCancel(true)//通知をタップすると削除する
-                .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
-
-        NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
-
-        notificationManager.notify(R.string.app_name, builder.build());//通知の表示
-    }
-
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
 
