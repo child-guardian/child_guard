@@ -85,7 +85,7 @@ public class TestService extends Service {
 
     /**
      * 通知が許可がされているかどうかを確認
-     * @return 通知の許可の有無 true: 許可されている false: 許可されていない
+     * @return 通知の許可の有無 true: 許可されていない false: 許可されている
      */
     private boolean isNotNotificationEnabled() {
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
