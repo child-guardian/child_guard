@@ -236,13 +236,8 @@ public class TestService extends Service {
     }
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
-
-
-        //PreferenceManager.getDefaultSharedPreferences("myPreferences",Context.MODE_PRIVATE);
-
         @Override
         public void onReceive(Context context, Intent intent) {
-
             // 処理対象か確認 ----------------------------------------
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             if (device == null) {
@@ -264,7 +259,6 @@ public class TestService extends Service {
                 return;
             }
             // -----------------------------------------------------
-
             String action = intent.getAction(); // may need to chain this to a recognizing function
             boolean isInCar = getSharedPreferences("Bluetooth_situation", MODE_PRIVATE).getBoolean("isInCarPref", false);
             if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {
@@ -273,7 +267,6 @@ public class TestService extends Service {
                     // 5分経過した時点でも車に乗っていない場合
                     Notification(context, BLUETOOTH_NOTIFICATION);
                 };
-
                 handler.postDelayed(notificationRunnable, 5 * 60 * 1000); // 5分をミリ秒に変換
             } else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
                 // 再接続された場合、通知をキャンセルする
