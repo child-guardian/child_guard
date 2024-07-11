@@ -24,6 +24,7 @@ import android.util.Log;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
@@ -41,7 +42,6 @@ public class TestService extends Service {
 
     // ユーザーID
     private String userId = null;
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -86,6 +86,15 @@ public class TestService extends Service {
         channel.setDescription("第三者により置き去りの通報が行われたときに通知します。");
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
+    }
+
+    /**
+     * 通知が許可がされているかどうかを確認
+     * @return 通知の許可の有無 true: 許可されている false: 許可されていない
+     */
+    private boolean isNotificationEnabled() {
+        NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
+        return notificationManagerCompat.areNotificationsEnabled();
     }
 
     private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
@@ -143,6 +152,9 @@ public class TestService extends Service {
 
     public void Notification(Context context) {//実際に通知を行うメソッド
 
+        // 権限の保有を確認
+        if (!isNotificationEnabled()) return;
+
         vibrateDevice();
 
         @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
@@ -156,17 +168,13 @@ public class TestService extends Service {
 
         NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
 
     public void NotificationBluetooth(Context context) {//実際に通知を行うメソッド
 
         // 権限の保有を確認
-        if (ActivityCompat.checkSelfPermission(this,
-                android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return;
+        if (!isNotificationEnabled()) return;
 
         vibrateDevice();
 
