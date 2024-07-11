@@ -72,8 +72,7 @@ public class TestService extends Service {
             Log.d("onResume", "ID not initialized.");
             return flags; // IDが初期化されていない場合は何もしない
         } else {
-            mDocRef = FirebaseFirestore.getInstance().document("status/" + this.userId);//現在の位置を取得
-            setSnapshotListener(mDocRef);//現在の位置を引数に initNotification()を処理
+            setSnapshotListener(FirebaseFirestore.getInstance().document("status/" + this.userId));
         }
 
         if (isNotBluetoothGranted()) return flags;
