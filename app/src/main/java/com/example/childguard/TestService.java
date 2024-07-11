@@ -270,12 +270,9 @@ public class TestService extends Service {
             boolean isInCar = pref.getBoolean("isInCarPref", false);
             if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {
                 // bluetoothが切断されたときに乗車状態のとき
-                notificationRunnable = new Runnable() {
-                    @Override
-                    public void run() {
-                        // 5分経過した時点でも車に乗っていない場合
-                        Notification(context, BLUETOOTH_NOTIFICATION);
-                    }
+                notificationRunnable = () -> {
+                    // 5分経過した時点でも車に乗っていない場合
+                    Notification(context, BLUETOOTH_NOTIFICATION);
                 };
 
                 handler.postDelayed(notificationRunnable, 5 * 60 * 1000); // 5分をミリ秒に変換
