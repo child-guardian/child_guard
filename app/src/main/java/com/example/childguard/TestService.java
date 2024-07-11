@@ -123,7 +123,8 @@ public class TestService extends Service {
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
         DocumentReference isReported = db.collection("status").document(this.userId);
         //isReportedをfalseに更新
-        isReported.update("isReported", false).addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
+        isReported.update("isReported", false).addOnSuccessListener(unused ->
+                Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
     }
 
     public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
@@ -134,7 +135,6 @@ public class TestService extends Service {
 
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
-
     }
 
     public void Notification(Context context) {//実際に通知を行うメソッド
