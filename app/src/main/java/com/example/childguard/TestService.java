@@ -1,5 +1,6 @@
 package com.example.childguard;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -51,6 +52,7 @@ public class TestService extends Service {
 
     public static final String TAG = "InspirationQuote";
     private static final String CHANNEL_ID = "child_guard_emergency";
+    private static final String BACKGROUND_CHANNEL_ID = "child_guard_background";
     private static final int REQUEST_CODE = 100;
 //    private static final int NOTIFICATION_DELAY = 5 * 60 * 1000; // 5 minutes
     // DEBUG
@@ -70,19 +72,30 @@ public class TestService extends Service {
             return flags; // IDが初期化されていない場合は何もしない
         }
 
+        createRunningNotificationChannel();
+        Intent notificationIntent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
+        Notification notification = new NotificationCompat.Builder(this, BACKGROUND_CHANNEL_ID)
+                .setContentTitle("Test Service Running")
+                .setContentText("This service is running in the foreground")
+                .setSmallIcon(android.R.drawable.ic_menu_info_details)
+                .setContentIntent(pendingIntent)
+                .build();
+        startForeground(1, notification);
+
         setSnapshotListener(FirebaseFirestore.getInstance().document("status/" + this.userId));
 
         if (isNotBluetoothGranted()) return flags;
 
         registerReceiver(receiver);
-        return flags;
+        return START_STICKY;
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
         if (!isNotificationChannelCreated()) {
-            createNotificationChannel();
+            createAlertNotificationChannel();
         }
     }
 
@@ -98,12 +111,24 @@ public class TestService extends Service {
     /**
      * 通知チャネルの作成
      */
-    private void createNotificationChannel() {
+    private void createAlertNotificationChannel() {
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "通知", importance);
         channel.setDescription("第三者により置き去りの通報が行われたときに通知します。");
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
+    }
+
+    private void createRunningNotificationChannel() {
+        NotificationChannel serviceChannel = new NotificationChannel(
+                CHANNEL_ID,
+                "Foreground Service Channel",
+                NotificationManager.IMPORTANCE_DEFAULT
+        );
+        NotificationManager manager = getSystemService(NotificationManager.class);
+        if (manager != null) {
+            manager.createNotificationChannel(serviceChannel);
+        }
     }
 
     /**
