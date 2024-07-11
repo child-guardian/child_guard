@@ -65,18 +65,13 @@ public class TestService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //共有プリファレンス全体の準備
-        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        this.userId = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
-        if (this.userId == null) {
+        if (getSharedPreferences("app_situation", MODE_PRIVATE).getString("ID", null) == null) {
             Log.d("onResume", "ID not initialized.");
             return flags; // IDが初期化されていない場合は何もしない
-        } else {
-            setSnapshotListener(FirebaseFirestore.getInstance().document("status/" + this.userId));
         }
+        setSnapshotListener(FirebaseFirestore.getInstance().document("status/" + this.userId));
 
         if (isNotBluetoothGranted()) return flags;
-
         registerReceiver(receiver);
         return flags;
     }
