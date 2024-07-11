@@ -125,7 +125,7 @@ public class TestService extends Service {
         NotificationChannel serviceChannel = new NotificationChannel(
                 BACKGROUND_CHANNEL_ID,
                 "Foreground Service Channel",
-                NotificationManager.IMPORTANCE_DEFAULT
+                NotificationManager.IMPORTANCE_NONE
         );
         NotificationManager manager = getSystemService(NotificationManager.class);
         if (manager != null) {
