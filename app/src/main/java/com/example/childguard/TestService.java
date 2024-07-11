@@ -200,7 +200,7 @@ public class TestService extends Service {
     private PendingIntent getPendingIntent(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction("OPEN_ACTIVITY");
-        return PendingIntent.getActivity(context, TestService.REQUEST_CODE, intent, 0 | PendingIntent.FLAG_IMMUTABLE);
+        return PendingIntent.getActivity(context, TestService.REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     /**
