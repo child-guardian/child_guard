@@ -193,15 +193,14 @@ public class TestService extends Service {
 
     /**
      * 通知をタップしたときにアプリを起動するPendingIntentを取得
+     *
      * @param context コンテキスト
-     * @param requestCode リクエストコード
-     * @param flags フラグ
      * @return PendingIntent
      */
-    private PendingIntent getPendingIntent(Context context, int requestCode, int flags) {
+    private PendingIntent getPendingIntent(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction("OPEN_ACTIVITY");
-        return PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
+        return PendingIntent.getActivity(context, TestService.REQUEST_CODE, intent, 0 | PendingIntent.FLAG_IMMUTABLE);
     }
 
     /**
@@ -225,7 +224,7 @@ public class TestService extends Service {
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle(content.getTitle())//通知のタイトル
                 .setContentText(content.getDescription())//通知の内容
-                .setContentIntent(getPendingIntent(context, REQUEST_CODE, 0))//通知をタップするとActivityへ移動する
+                .setContentIntent(getPendingIntent(context))//通知をタップするとActivityへ移動する
                 .setAutoCancel(true)//通知をタップすると削除する
                 .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
