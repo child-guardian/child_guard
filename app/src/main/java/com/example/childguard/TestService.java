@@ -139,7 +139,7 @@ public class TestService extends Service {
      * ブロードキャストレシーバーを登録
      * @param receiver ブロードキャストレシーバー
      */
-    public void registerReceiver(BroadcastReceiver receiver) {
+    private void registerReceiver(BroadcastReceiver receiver) {
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
@@ -195,7 +195,7 @@ public class TestService extends Service {
     /**
      * 通報フラグをリセットする
      */
-    public void resetReported() {
+    private void resetReported() {
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
         DocumentReference isReported = db.collection("status").document(this.userId);
         //isReportedをfalseに更新
@@ -230,7 +230,7 @@ public class TestService extends Service {
      * @param context コンテキスト
      * @param content NotificationContent 通知内容
      */
-    public void sendNotification(Context context, NotificationContent content) {//通知を行うメソッド
+    private void sendNotification(Context context, NotificationContent content) {//通知を行うメソッド
 
         // 権限の保有を確認
         if (isNotNotificationEnabled()) return;
