@@ -80,6 +80,12 @@ public class HomeFragment extends Fragment implements OnEventListener {
         super.onResume();
         Log.d("HomeFragment", "onResume: called");
         this.updateUiState(getIsInCarLocal());
+        this.updateBluetoothSituation(isBluetoothConnected());
+    }
+
+    private boolean isBluetoothConnected() {
+        SharedPreferences pref = requireActivity().getSharedPreferences("Bluetooth_situation", requireActivity().MODE_PRIVATE);
+        return pref.getBoolean("status", false);
     }
 
     private boolean getIsInCarLocal() {
