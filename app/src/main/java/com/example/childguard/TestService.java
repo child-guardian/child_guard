@@ -36,6 +36,7 @@ public class TestService extends Service {
     DocumentReference mDocRef;
 
     public static final String TAG = "InspirationQuote";
+    private static final String CHANNEL_ID = "child_guard_emergency";
 
 
     @Override
@@ -56,6 +57,27 @@ public class TestService extends Service {
         return flags;
 
 
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        if (!isNotificationChannelCreated()) {
+            createNotificationChannel();
+        }
+    }
+
+    private boolean isNotificationChannelCreated() {
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        return notificationManager.getNotificationChannel(CHANNEL_ID) != null;
+    }
+
+    private void createNotificationChannel() {
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "通知", importance);
+        channel.setDescription("第三者により置き去りの通報が行われたときに通知します。");
+        NotificationManager notificationManager = getSystemService(NotificationManager.class);
+        notificationManager.createNotificationChannel(channel);
     }
 
     private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
@@ -126,7 +148,7 @@ public class TestService extends Service {
 
         ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(2000);//バイブレーション
 
-        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
+        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
                 .setContentText("第三者からの通報が行われました。")//通知の本文
@@ -135,26 +157,8 @@ public class TestService extends Service {
                 .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
 
-        // NotificationChannelの作成（Android 8.0以降）
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
-            if (notificationManager != null) {
-                NotificationChannel channel = new NotificationChannel(
-                        CHANNEL_ID,
-                        "Channel Name",
-                        NotificationManager.IMPORTANCE_HIGH
-                );
+        NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
 
-                channel.setDescription("Channel Description");
-                channel.enableLights(true);
-                channel.setLightColor(Color.RED);
-                channel.enableVibration(true);
-                notificationManager.createNotificationChannel(channel);
-            }
-        }
-
-
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
@@ -181,7 +185,7 @@ public class TestService extends Service {
             vibrator.vibrate(VibrationEffect.createOneShot(2000, VibrationEffect.DEFAULT_AMPLITUDE));
         }
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
                 .setContentText("Bluetoothと車の切断から5分が経過しました")//通知の本文
@@ -192,19 +196,7 @@ public class TestService extends Service {
 
         // 通知チャンネルの作成
         NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
-        if (notificationManager != null) {
-            NotificationChannel channel = new NotificationChannel(
-                    CHANNEL_ID,
-                    "Channel Name",
-                    NotificationManager.IMPORTANCE_HIGH
-            );
 
-            channel.setDescription("Channel Description");
-            channel.enableLights(true);
-            channel.setLightColor(Color.RED);
-            channel.enableVibration(true);
-            notificationManager.createNotificationChannel(channel);
-        }
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
 
