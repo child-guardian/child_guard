@@ -60,7 +60,6 @@ public class TestService extends Service {
     private static final NotificationContent BLUETOOTH_NOTIFICATION =
             new NotificationContent("子供の置き去りをしていませんか？", "Bluetoothと車の切断から5分が経過しました");
 
-    // ユーザーID
     private String userId = null;
 
     @Override
