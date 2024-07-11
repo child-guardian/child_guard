@@ -138,6 +138,13 @@ public class TestService extends Service {
                 Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
     }
 
+    /**
+     * 通知をタップしたときにアプリを起動するPendingIntentを取得
+     * @param context コンテキスト
+     * @param requestCode リクエストコード
+     * @param flags フラグ
+     * @return PendingIntent
+     */
     private PendingIntent getPendingIntent(Context context, int requestCode, int flags) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction("OPEN_ACTIVITY");
