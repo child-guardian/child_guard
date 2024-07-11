@@ -181,7 +181,7 @@ public class TestService extends Service {
             vibrator.vibrate(VibrationEffect.createOneShot(2000, VibrationEffect.DEFAULT_AMPLITUDE));
         }
 
-        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
                 .setContentText("Bluetoothと車の切断から5分が経過しました")//通知の本文
