@@ -226,7 +226,6 @@ public class TestService extends Service {
                 .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
 
-        // 通知チャンネルの作成
         NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
 
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
