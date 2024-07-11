@@ -42,6 +42,7 @@ public class TestService extends Service {
             this.title = title;
             this.description = description;
             this.channelId = channelId;
+            this.notificationId = notificationId;
         }
 
         public String getTitle() {
