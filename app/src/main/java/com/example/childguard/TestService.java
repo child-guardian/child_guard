@@ -12,8 +12,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.VibrationEffect;
@@ -28,9 +26,6 @@ import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
-
-import java.util.HashMap;
-import java.util.Map;
 
 public class TestService extends Service {
     FirebaseFirestore db;
@@ -92,9 +87,15 @@ public class TestService extends Service {
      * 通知が許可がされているかどうかを確認
      * @return 通知の許可の有無 true: 許可されている false: 許可されていない
      */
-    private boolean isNotificationEnabled() {
+    private boolean isNotNotificationEnabled() {
         NotificationManagerCompat notificationManagerCompat = NotificationManagerCompat.from(this);
-        return notificationManagerCompat.areNotificationsEnabled();
+        if (!notificationManagerCompat.areNotificationsEnabled()) {
+            Log.d(TAG, "通知が許可されていません");
+            return true;
+        } else {
+            Log.d(TAG, "通知が許可されています");
+            return false;
+        }
     }
 
     private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
@@ -153,7 +154,7 @@ public class TestService extends Service {
     public void Notification(Context context) {//実際に通知を行うメソッド
 
         // 権限の保有を確認
-        if (!isNotificationEnabled()) return;
+        if (isNotNotificationEnabled()) return;
 
         vibrateDevice();
 
@@ -174,7 +175,7 @@ public class TestService extends Service {
     public void NotificationBluetooth(Context context) {//実際に通知を行うメソッド
 
         // 権限の保有を確認
-        if (!isNotificationEnabled()) return;
+        if (isNotNotificationEnabled()) return;
 
         vibrateDevice();
 
