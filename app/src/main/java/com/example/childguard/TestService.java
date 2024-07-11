@@ -52,7 +52,9 @@ public class TestService extends Service {
     public static final String TAG = "InspirationQuote";
     private static final String CHANNEL_ID = "child_guard_emergency";
     private static final int REQUEST_CODE = 100;
-    private static final int NOTIFICATION_DELAY = 5 * 60 * 1000; // 5 minutes
+//    private static final int NOTIFICATION_DELAY = 5 * 60 * 1000; // 5 minutes
+    // DEBUG
+    private static final int NOTIFICATION_DELAY = 15 * 1000; // 15 seconds
     private static final NotificationContent REPORTED_NOTIFICATION =
             new NotificationContent("子供の置き去りをしていませんか？", "第三者からの通報が行われました。");
     private static final NotificationContent BLUETOOTH_NOTIFICATION =
