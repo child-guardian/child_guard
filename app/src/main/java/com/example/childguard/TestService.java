@@ -1,6 +1,5 @@
 package com.example.childguard;
 
-import android.annotation.SuppressLint;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -170,18 +169,18 @@ public class TestService extends Service {
                 if (isInCar) {//isReportedがtrue=サイト上で乗車状態のとき
                     if (documentSnapshot.getBoolean("isReported")) {
                         //ここスタート（リサイクル）
-                        ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
+                        resetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
                         Notification(getApplicationContext(), REPORTED_NOTIFICATION);//通知を行うメソッド
                     }
                 } else {//isReportedがfalse=サイト上で降車状態のとき
-                    ResetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
+                    resetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
                 }
             }
 
         });
     }
 
-    public void ResetReported() {//FireBaseのisReportedをfalseに初期化するメソッド
+    public void resetReported() {//FireBaseのisReportedをfalseに初期化するメソッド
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
         DocumentReference isReported = db.collection("status").document(this.userId);
         //isReportedをfalseに更新
