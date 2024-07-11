@@ -36,8 +36,9 @@ public class TestService extends Service {
         private final String title;
         private final String description;
         private final String channelId;
+        private final int notificationId;
 
-        public NotificationContent(String title, String description, String channelId) {
+        public NotificationContent(String title, String description, String channelId, int notificationId) {
             this.title = title;
             this.description = description;
             this.channelId = channelId;
@@ -54,6 +55,10 @@ public class TestService extends Service {
         public String getChannelId() {
             return channelId;
         }
+
+        public int getNotificationId() {
+            return notificationId;
+        }
     }
 
     public static final String TAG = "InspirationQuote";
@@ -65,9 +70,9 @@ public class TestService extends Service {
     // DEBUG
     private static final int NOTIFICATION_DELAY = 5 * 1000; // 15 seconds
     private static final NotificationContent REPORTED_NOTIFICATION =
-            new NotificationContent("子供の置き去りをしていませんか？", "第三者からの通報が行われました。", REPORTED_CHANNEL_ID);
+            new NotificationContent("子供の置き去りをしていませんか？", "第三者からの通報が行われました。", REPORTED_CHANNEL_ID, 1);
     private static final NotificationContent BLUETOOTH_NOTIFICATION =
-            new NotificationContent("子供の置き去りをしていませんか？", "Bluetoothと車の切断から5分が経過しました", BT_ALERT_CHANNEL_ID);
+            new NotificationContent("子供の置き去りをしていませんか？", "Bluetoothと車の切断から5分が経過しました", BT_ALERT_CHANNEL_ID, 2);
 
     private String userId = null;
 
@@ -280,7 +285,7 @@ public class TestService extends Service {
 
         NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
 
-        notificationManager.notify(R.string.app_name, builder.build());//通知の表示
+        notificationManager.notify(content.getNotificationId(), builder.build());
     }
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
