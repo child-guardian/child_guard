@@ -181,22 +181,20 @@ public class TestService extends Service {
                 .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
 
-        // NotificationChannelの作成（Android 8.0以降）
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
-            if (notificationManager != null) {
-                NotificationChannel channel = new NotificationChannel(
-                        CHANNEL_ID,
-                        "Channel Name",
-                        NotificationManager.IMPORTANCE_HIGH
-                );
+        // 通知チャンネルの作成
+        NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+        if (notificationManager != null) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID,
+                    "Channel Name",
+                    NotificationManager.IMPORTANCE_HIGH
+            );
 
-                channel.setDescription("Channel Description");
-                channel.enableLights(true);
-                channel.setLightColor(Color.RED);
-                channel.enableVibration(true);
-                notificationManager.createNotificationChannel(channel);
-            }
+            channel.setDescription("Channel Description");
+            channel.enableLights(true);
+            channel.setLightColor(Color.RED);
+            channel.enableVibration(true);
+            notificationManager.createNotificationChannel(channel);
         }
 
 
