@@ -267,26 +267,7 @@ public class TestService extends Service {
             String action = intent.getAction(); // may need to chain this to a recognizing function
 
             boolean isInCar = pref.getBoolean("isInCarPref", false);
-
-            if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
-                //Do something if connected
-                //Bluetoothデバイスが接続されたときの処理
-                Log.d("BT", "Device connected");
-
-
-                Log.d("BT_Judge", "Registered: " + registeredId);
-
-                if (deviceHardwareAddress.equals(registeredId)) {
-                    //登録済みのデバイスだったときの処理
-                    Log.d("BT_Judge", "登録済み");
-
-                } else {
-                    //登録していないデバイスだったときの処理
-                    Log.d("BT_Judge", "未登録");
-                }
-                e.apply();
-
-            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//bluetoothが切断されたときに乗車状態のとき
+            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//bluetoothが切断されたときに乗車状態のとき
 
                 //Do something if disconnected
                 //デバイスが切断されたときの処理
