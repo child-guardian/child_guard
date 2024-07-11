@@ -24,7 +24,6 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class TestService extends Service {
@@ -74,7 +73,7 @@ public class TestService extends Service {
             return flags; // IDが初期化されていない場合は何もしない
         } else {
             mDocRef = FirebaseFirestore.getInstance().document("status/" + this.userId);//現在の位置を取得
-            initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
+            setSnapshotListener(mDocRef);//現在の位置を引数に initNotification()を処理
         }
 
         if (isNotBluetoothGranted()) return flags;
@@ -152,7 +151,7 @@ public class TestService extends Service {
         registerReceiver(receiver, intentFilter);
     }
 
-    private void initNotification(DocumentReference mDocRef) {
+    private void setSnapshotListener(DocumentReference mDocRef) {
         // Initialize the PeriodicTaskManager
         // (Assuming it's done elsewhere as it's not shown in the original code)
 
