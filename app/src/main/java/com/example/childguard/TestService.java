@@ -266,7 +266,7 @@ public class TestService extends Service {
             SharedPreferences.Editor e = pref.edit();
             String action = intent.getAction(); // may need to chain this to a recognizing function
 
-            Boolean isInCar = pref.getBoolean("isInCarPref", false);
+            boolean isInCar = pref.getBoolean("isInCarPref", false);
 
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
                 //Do something if connected
