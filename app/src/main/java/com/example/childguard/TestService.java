@@ -218,6 +218,11 @@ public class TestService extends Service {
         }
     }
 
+    /**
+     * 通知を送信する
+     * @param context コンテキスト
+     * @param content NotificationContent 通知内容
+     */
     public void sendNotification(Context context, NotificationContent content) {//通知を行うメソッド
 
         // 権限の保有を確認
@@ -282,7 +287,6 @@ public class TestService extends Service {
             }
         }
     };
-
 
     @Nullable
     @Override
