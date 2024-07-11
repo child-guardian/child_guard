@@ -24,6 +24,7 @@ import androidx.core.app.NotificationCompat;
 import androidx.core.app.NotificationManagerCompat;
 
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
 public class TestService extends Service {
@@ -151,35 +152,44 @@ public class TestService extends Service {
         registerReceiver(receiver, intentFilter);
     }
 
-    private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
-        // PeriodicTaskManagerのインスタンス化
+    private void initNotification(DocumentReference mDocRef) {
+        // Initialize the PeriodicTaskManager
+        // (Assuming it's done elsewhere as it's not shown in the original code)
 
-        // 共有プリファレンス全体の準備
+        // Prepare SharedPreferences
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        //車の乗り降りを管理するtrue=乗車、false=降車
-        //exists()でdocumentSnapshotの中のファイルの存在の確認
-        mDocRef.addSnapshotListener((documentSnapshot, e) -> {
 
-            Log.d("nt", "イベント開始");
-            //共有プリファレンス 書き込みの準備
-            SharedPreferences.Editor E = sharedPreferences.edit();
-            //車の乗り降りを管理するtrue=乗車、false=降車
-            if (documentSnapshot.exists()) {//exists()でdocumentSnapshotの中のファイルの存在の確認
-                Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
-                E.putBoolean("isInCarPref", documentSnapshot.getBoolean("isInCar"));//乗降状態の判定
-                E.apply();//確定処理
-                Log.d("nt", "レスポンスを検知しました1");
-                if (isInCar) {//isReportedがtrue=サイト上で乗車状態のとき
-                    if (documentSnapshot.getBoolean("isReported")) {
-                        //ここスタート（リサイクル）
-                        resetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
-                        sendNotification(getApplicationContext(), REPORTED_NOTIFICATION);//通知を行うメソッド
-                    }
-                } else {//isReportedがfalse=サイト上で降車状態のとき
-                    resetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
-                }
+        // Add a snapshot listener to the document reference
+        mDocRef.addSnapshotListener((documentSnapshot, e) -> {
+            if (e != null) {
+                Log.w("nt", "Listen failed.", e);
+                return;
             }
 
+            if (documentSnapshot != null && documentSnapshot.exists()) {
+                Log.d("nt", "イベント開始");
+
+                // Handle document snapshot
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);
+                boolean newIsInCarState = Boolean.TRUE.equals(documentSnapshot.getBoolean("isInCar"));
+
+                editor.putBoolean("isInCarPref", newIsInCarState);
+                editor.apply();
+
+                Log.d("nt", "レスポンスを検知しました1");
+
+                if (isInCar) {
+                    if (Boolean.TRUE.equals(documentSnapshot.getBoolean("isReported"))) {
+                        resetReported();
+                        sendNotification(getApplicationContext(), REPORTED_NOTIFICATION);
+                    }
+                } else {
+                    resetReported();
+                }
+            } else {
+                Log.d("nt", "Current data: null");
+            }
         });
     }
 
