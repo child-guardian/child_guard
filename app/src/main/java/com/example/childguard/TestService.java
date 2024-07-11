@@ -265,27 +265,19 @@ public class TestService extends Service {
             SharedPreferences pref = getSharedPreferences("Bluetooth_situation", MODE_PRIVATE);
             SharedPreferences.Editor e = pref.edit();
             String action = intent.getAction(); // may need to chain this to a recognizing function
-
             boolean isInCar = pref.getBoolean("isInCarPref", false);
             if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//bluetoothが切断されたときに乗車状態のとき
-
-                //Do something if disconnected
-                //デバイスが切断されたときの処理
-                if (deviceHardwareAddress.equals(registeredId)) {
-                    // 5分待機する
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
-                                Notification(context, BLUETOOTH_NOTIFICATION);
-                            }
+                // 5分待機する
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
+                            Notification(context, BLUETOOTH_NOTIFICATION);
                         }
+                    }
 
-                    }, 5 * 60 * 1000); // 5分をミリ秒に変換
-                }
-            } else {
-                Log.d("BT", "Device disconnected");
+                }, 5 * 60 * 1000); // 5分をミリ秒に変換
             }
         }
     };
