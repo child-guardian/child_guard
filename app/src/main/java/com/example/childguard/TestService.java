@@ -50,7 +50,6 @@ public class TestService extends Service {
     }
 
     FirebaseFirestore db;
-    DocumentReference mDocRef;
 
     public static final String TAG = "InspirationQuote";
     private static final String CHANNEL_ID = "child_guard_emergency";
