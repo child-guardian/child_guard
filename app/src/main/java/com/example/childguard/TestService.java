@@ -51,7 +51,9 @@ public class TestService extends Service {
             initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
         }
 
-        Bluetooth_status();
+        if (isNotBluetoothGranted()) return flags;
+
+        registerReceiver(receiver);
         return flags;
     }
 
@@ -96,6 +98,32 @@ public class TestService extends Service {
             Log.d(TAG, "通知が許可されています");
             return false;
         }
+    }
+
+    /**
+     * Bluetoothの権限が許可されているかどうかを確認
+     * @return Bluetoothの権限の有無 true: 許可されていない false: 許可されている
+     */
+    private boolean isNotBluetoothGranted() {
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "Bluetoothの権限が許可されていません");
+            return true;
+        } else {
+            Log.d(TAG, "Bluetoothの権限が許可されています");
+            return false;
+        }
+    }
+
+    /**
+     * ブロードキャストレシーバーを登録
+     * @param receiver ブロードキャストレシーバー
+     */
+    public void registerReceiver(BroadcastReceiver receiver) {
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+
+        registerReceiver(receiver, intentFilter);
     }
 
     private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
@@ -202,21 +230,6 @@ public class TestService extends Service {
         NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
 
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
-    }
-
-
-    public void Bluetooth_status() {
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
-        intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            Log.d("BT", "No permission to connect bluetooth devices");
-            return;
-        } else {
-            Log.d("BT", "Permission to connect bluetooth devices granted");
-        }
-        registerReceiver(receiver, intentFilter);
     }
 
 
