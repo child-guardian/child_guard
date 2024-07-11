@@ -35,10 +35,12 @@ public class TestService extends Service {
     public static class NotificationContent {
         private final String title;
         private final String description;
+        private final String channelId;
 
-        public NotificationContent(String title, String description) {
+        public NotificationContent(String title, String description, String channelId) {
             this.title = title;
             this.description = description;
+            this.channelId = channelId;
         }
 
         public String getTitle() {
@@ -48,19 +50,24 @@ public class TestService extends Service {
         public String getDescription() {
             return description;
         }
+
+        public String getChannelId() {
+            return channelId;
+        }
     }
 
     public static final String TAG = "InspirationQuote";
-    private static final String CHANNEL_ID = "child_guard_emergency";
+    private static final String BT_ALERT_CHANNEL_ID = "child_guard_bt_alert";
+    private static final String REPORTED_CHANNEL_ID = "child_guard_reported";
     private static final String BACKGROUND_CHANNEL_ID = "child_guard_background";
     private static final int REQUEST_CODE = 100;
 //    private static final int NOTIFICATION_DELAY = 5 * 60 * 1000; // 5 minutes
     // DEBUG
     private static final int NOTIFICATION_DELAY = 5 * 1000; // 15 seconds
     private static final NotificationContent REPORTED_NOTIFICATION =
-            new NotificationContent("子供の置き去りをしていませんか？", "第三者からの通報が行われました。");
+            new NotificationContent("子供の置き去りをしていませんか？", "第三者からの通報が行われました。", REPORTED_CHANNEL_ID);
     private static final NotificationContent BLUETOOTH_NOTIFICATION =
-            new NotificationContent("子供の置き去りをしていませんか？", "Bluetoothと車の切断から5分が経過しました");
+            new NotificationContent("子供の置き去りをしていませんか？", "Bluetoothと車の切断から5分が経過しました", BT_ALERT_CHANNEL_ID);
 
     private String userId = null;
 
@@ -96,9 +103,8 @@ public class TestService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (!isNotificationChannelCreated(CHANNEL_ID)) {
-            createAlertNotificationChannel();
-        }
+        if (!isNotificationChannelCreated(BT_ALERT_CHANNEL_ID)) createAlertNotificationChannel(BT_ALERT_CHANNEL_ID);
+        if (!isNotificationChannelCreated(REPORTED_CHANNEL_ID)) createAlertNotificationChannel(REPORTED_CHANNEL_ID);
     }
 
     /**
@@ -113,9 +119,9 @@ public class TestService extends Service {
     /**
      * 通知チャネルの作成
      */
-    private void createAlertNotificationChannel() {
+    private void createAlertNotificationChannel(String channelId) {
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
-        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, "通知", importance);
+        NotificationChannel channel = new NotificationChannel(channelId, "通知", importance);
         channel.setDescription("第三者により置き去りの通報が行われたときに通知します。");
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
@@ -263,7 +269,7 @@ public class TestService extends Service {
 
         vibrateDevice();
 
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, CHANNEL_ID)
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(context, content.getChannelId())
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentTitle(content.getTitle())//通知のタイトル
                 .setContentText(content.getDescription())//通知の内容
