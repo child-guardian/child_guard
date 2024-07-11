@@ -173,7 +173,7 @@ public class TestService extends Service {
                     if (documentSnapshot.getBoolean("isReported")) {
                         //ここスタート（リサイクル）
                         resetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
-                        Notification(getApplicationContext(), REPORTED_NOTIFICATION);//通知を行うメソッド
+                        sendNotification(getApplicationContext(), REPORTED_NOTIFICATION);//通知を行うメソッド
                     }
                 } else {//isReportedがfalse=サイト上で降車状態のとき
                     resetReported();//ResetReported();を処理→FireBaseのisReportedをfalseにする
@@ -213,7 +213,7 @@ public class TestService extends Service {
         }
     }
 
-    public void Notification(Context context, NotificationContent content) {//通知を行うメソッド
+    public void sendNotification(Context context, NotificationContent content) {//通知を行うメソッド
 
         // 権限の保有を確認
         if (isNotNotificationEnabled()) return;
@@ -264,7 +264,7 @@ public class TestService extends Service {
                 // bluetoothが切断されたときに乗車状態のとき
                 notificationRunnable = () -> {
                     // 5分経過した時点でも車に乗っていない場合
-                    Notification(context, BLUETOOTH_NOTIFICATION);
+                    sendNotification(context, BLUETOOTH_NOTIFICATION);
                 };
                 handler.postDelayed(notificationRunnable, 5 * 60 * 1000); // 5分をミリ秒に変換
             } else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
