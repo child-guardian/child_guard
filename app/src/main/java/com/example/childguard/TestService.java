@@ -49,8 +49,6 @@ public class TestService extends Service {
         }
     }
 
-    FirebaseFirestore db;
-
     public static final String TAG = "InspirationQuote";
     private static final String CHANNEL_ID = "child_guard_emergency";
     private static final int REQUEST_CODE = 100;
@@ -195,7 +193,7 @@ public class TestService extends Service {
      * 通報フラグをリセットする
      */
     private void resetReported() {
-        db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
+        FirebaseFirestore db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
         DocumentReference isReported = db.collection("status").document(this.userId);
         //isReportedをfalseに更新
         isReported.update("isReported", false).addOnSuccessListener(unused ->
