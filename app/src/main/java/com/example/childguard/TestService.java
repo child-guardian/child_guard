@@ -161,6 +161,11 @@ public class TestService extends Service {
     }
 
     public void NotificationBluetooth(Context context) {//実際に通知を行うメソッド
+
+        // 権限の保有を確認
+        if (ActivityCompat.checkSelfPermission(this,
+                android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) return;
+
         final String CHANNEL_ID = "my_channel_id";
         // 通知がクリックされたときに送信されるIntent
         Intent intent = new Intent(context, MainActivity.class);
@@ -195,10 +200,6 @@ public class TestService extends Service {
             channel.setLightColor(Color.RED);
             channel.enableVibration(true);
             notificationManager.createNotificationChannel(channel);
-        }
-
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            return;
         }
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
