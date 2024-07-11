@@ -239,10 +239,33 @@ public class TestService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
+
+            // 処理対象か確認 ----------------------------------------
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+            if (device == null) {
+                Log.d("BT", "No device found");
+                return;
+            }
+            String deviceHardwareAddress = device.getAddress(); // MAC address
+            if (deviceHardwareAddress == null) {
+                Log.d("BT", "No device address found");
+                return;
+            }
+            String registeredId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("bluetooth_device_id", null);
+            if (registeredId == null) {
+                Log.d("BT_Judge", "No registered device");
+                return;
+            }
+            if (!registeredId.equals(deviceHardwareAddress)) {
+                Log.d("BT_Judge", "Not registered device");
+                return;
+            }
+            // -----------------------------------------------------
+
             SharedPreferences pref = getSharedPreferences("Bluetooth_situation", MODE_PRIVATE);
             SharedPreferences.Editor e = pref.edit();
             String action = intent.getAction(); // may need to chain this to a recognizing function
-            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
             Boolean isInCar = pref.getBoolean("isInCarPref", false);
 
 
@@ -250,9 +273,8 @@ public class TestService extends Service {
                 Log.d("BT", "No permission to connect bluetooth devices");
                 return;
             }
-            String deviceHardwareAddress = device.getAddress(); // MAC address
 
-            String registeredId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("bluetooth_device_id", "none");
+
 
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
                 //Do something if connected
