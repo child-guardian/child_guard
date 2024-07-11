@@ -266,7 +266,6 @@ public class TestService extends Service {
             // -----------------------------------------------------
 
             SharedPreferences pref = getSharedPreferences("Bluetooth_situation", MODE_PRIVATE);
-            SharedPreferences.Editor e = pref.edit();
             String action = intent.getAction(); // may need to chain this to a recognizing function
             boolean isInCar = pref.getBoolean("isInCarPref", false);
             if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {
