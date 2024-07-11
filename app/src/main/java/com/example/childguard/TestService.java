@@ -123,7 +123,7 @@ public class TestService extends Service {
 
     private void createRunningNotificationChannel() {
         NotificationChannel serviceChannel = new NotificationChannel(
-                CHANNEL_ID,
+                BACKGROUND_CHANNEL_ID,
                 "Foreground Service Channel",
                 NotificationManager.IMPORTANCE_DEFAULT
         );
