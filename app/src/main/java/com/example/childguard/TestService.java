@@ -78,8 +78,8 @@ public class TestService extends Service {
         Intent notificationIntent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, PendingIntent.FLAG_IMMUTABLE);
         Notification notification = new NotificationCompat.Builder(this, BACKGROUND_CHANNEL_ID)
-                .setContentTitle("Test Service Running")
-                .setContentText("This service is running in the foreground")
+                .setContentTitle("ChildGuardバックグラウンドサービス")
+                .setContentText("接続/通報監視サービスがバックグラウンドで実行されています")
                 .setSmallIcon(android.R.drawable.ic_menu_info_details)
                 .setContentIntent(pendingIntent)
                 .build();
