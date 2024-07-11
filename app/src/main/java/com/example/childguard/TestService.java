@@ -28,7 +28,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 
 public class TestService extends Service {
 
-    private Handler handler = new Handler();
+    private final Handler handler = new Handler();
     private Runnable notificationRunnable;
 
     public static class NotificationContent {
