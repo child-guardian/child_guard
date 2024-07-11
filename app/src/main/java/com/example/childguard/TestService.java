@@ -229,7 +229,6 @@ public class TestService extends Service {
      * @param content NotificationContent 通知内容
      */
     private void sendNotification(Context context, NotificationContent content) {//通知を行うメソッド
-
         // 権限の保有を確認
         if (isNotNotificationEnabled()) return;
 
