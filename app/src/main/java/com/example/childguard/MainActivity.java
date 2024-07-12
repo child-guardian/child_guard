@@ -136,6 +136,8 @@ public class MainActivity extends AppCompatActivity {
         }
         registerReceiver(receiver, intentFilter);
 
+        startForegroundService(new Intent(this, TestService.class));
+
     }
 
 
@@ -334,8 +336,8 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onStop() {//アプリをバックグラウンドにした時のメソッド
         super.onStop();
-        Intent intent = new Intent(getApplication(), TestService.class);
-        startService(intent);//TestServiceを起動
+//        Intent intent = new Intent(getApplication(), TestService.class);
+//        startService(intent);//TestServiceを起動
     }
 
     public void NotificationBluetooth(Context context) {//実際に通知を行うメソッド
