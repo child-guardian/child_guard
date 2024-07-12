@@ -315,10 +315,15 @@ public class TestService extends Service {
                 Log.d("BT_Judge", "Not registered device");
                 return;
             }
-            // -----------------------------------------------------
             String action = intent.getAction(); // may need to chain this to a recognizing function
             boolean isInCar = getSharedPreferences("Bluetooth_situation", MODE_PRIVATE).getBoolean("isInCarPref", false);
-            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && isInCar) {
+            if (!isInCar) {
+                Log.d("BT_Judge", "Not in car");
+                return;
+            }
+            // -----------------------------------------------------
+
+            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
                 // bluetoothが切断されたときに乗車状態のとき
                 notificationRunnable = () -> {
                     // 5分経過した時点でも車に乗っていない場合
