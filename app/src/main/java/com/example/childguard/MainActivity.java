@@ -52,7 +52,6 @@ public class MainActivity extends AppCompatActivity {
     public static final String TAG = "InspirationQuote";
 
 
-
     private final ActivityResultLauncher<ScanOptions> QrLauncher = registerForActivityResult(
             new ScanContract(),
             result -> {
@@ -76,10 +75,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         //Bluetooth接続判定用
-        SharedPreferences pref=PreferenceManager.getDefaultSharedPreferences(this);
-        SharedPreferences.Editor e=pref.edit();
-        e.putBoolean("connection_status",false);
-
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        SharedPreferences.Editor e = pref.edit();
+        e.putBoolean("connection_status", false);
 
 
         if (!hasPermissions()) {
@@ -149,7 +147,7 @@ public class MainActivity extends AppCompatActivity {
         firebaseLink();
     }
 
-        private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
+    private void initNotification(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
         // 共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
 
@@ -187,7 +185,6 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 
     private boolean hasPermissions() {
@@ -229,18 +226,18 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
+    /**
+     * FireBaseのIDの取得
+     */
     public void firebaseLink() {//Firebaseのドキュメントの取得
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        String IdPref = sharedPreferences.getString("ID", null);////アプリに記録されているIDの取得
+        String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
         if (IdPref == null) {//FireBaseのIDがアプリに登録されているとき
             Log.d("onResume", "ID not initialized.");
         } else {
             mDocRef = FirebaseFirestore.getInstance().document("status/" + IdPref);//現在の位置を取得
             initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
-
         }
     }
 
@@ -261,19 +258,20 @@ public class MainActivity extends AppCompatActivity {
         //共有プリファレンス 書き込みの準備
         SharedPreferences.Editor E = sharedPreferences.edit();
         String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
-        Boolean change=sharedPreferences.getBoolean("change",false);
+        Boolean change = sharedPreferences.getBoolean("change", false);
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
         DocumentReference isReported = db.collection("status").document(IdPref);//更新するドキュメントとの紐づけ
         Map<String, Boolean> DEFAULT_ITEM = new HashMap<>();//mapの宣言
         if (!change) {
             //isInCarをtrueに更新
-            E.putBoolean("change",true);
-        }else{
-            E.putBoolean("change",false);
+            E.putBoolean("change", true);
+        } else {
+            E.putBoolean("change", false);
         }
         isReported.update("isInCar", change).addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
         E.apply();
     }
+
     public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         //通知チャネルの実装
@@ -380,15 +378,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
-        NotificationManager notificationManager = (NotificationManager)context.getSystemService(context.NOTIFICATION_SERVICE);
+        NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
-
-
-
 
 
     public void Bluetooth_status() {
@@ -413,8 +408,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            SharedPreferences pref=getSharedPreferences("Bluetooth_situation",MODE_PRIVATE);
-            SharedPreferences.Editor e=pref.edit();
+            SharedPreferences pref = getSharedPreferences("Bluetooth_situation", MODE_PRIVATE);
+            SharedPreferences.Editor e = pref.edit();
             String action = intent.getAction(); // may need to chain this to a recognizing function
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             Boolean isInCar = pref.getBoolean("isInCarPref", false);
@@ -437,16 +432,16 @@ public class MainActivity extends AppCompatActivity {
                 if (deviceHardwareAddress.equals(registeredId)) {
                     //登録済みのデバイスだったときの処理
                     Log.d("BT_Judge", "登録済み");
-                    e.putBoolean("connection_status",true);
+                    e.putBoolean("connection_status", true);
 
-                } else{
+                } else {
                     //登録していないデバイスだったときの処理
                     Log.d("BT_Judge", "未登録");
-                    e.putBoolean("connection_status",false);
+                    e.putBoolean("connection_status", false);
                 }
                 e.apply();
 
-            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)&&!isInCar) {//bluetoothが切断されたときに乗車状態のとき
+            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//bluetoothが切断されたときに乗車状態のとき
 
                 //Do something if disconnected
                 //デバイスが切断されたときの処理
@@ -457,20 +452,21 @@ public class MainActivity extends AppCompatActivity {
                     handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)&&!isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
+                            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
                                 NotificationBluetooth(getApplicationContext());//通知を行うメソッド
-                            }}
+                            }
+                        }
 
-                    }, 5 *60*1000); // 5分をミリ秒に変換
+                    }, 5 * 1000); // 5分をミリ秒に変換
                 }
-            }else {
-                Log.d("BT", "Device disconnected");
+            } else {
+                Log.d("BT", " Device disconnected");
             }
         }
     };
 
-    public void changeBluetooth(boolean actual){
-        getSharedPreferences("Bluetooth_situation",MODE_PRIVATE).edit().putBoolean("status",actual).apply();
+    public void changeBluetooth(boolean actual) {
+        getSharedPreferences("Bluetooth_situation", MODE_PRIVATE).edit().putBoolean("status", actual).apply();
     }
 }
 
