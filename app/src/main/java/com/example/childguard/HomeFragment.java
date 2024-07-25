@@ -139,14 +139,17 @@ public class HomeFragment extends Fragment implements OnEventListener {
         return true;
     }
 
+    /**
+     * Bluetoothの接続状態の画面を切り替える
+     */
     private boolean updateBluetoothSituation(Boolean BluetoothConnect) {
         FrameLayout frameLayout;
         TextView textView;
         ImageView imageView;
         try {
-            frameLayout = requireView().findViewById(R.id.situation_bg2);
-            textView = requireView().findViewById(R.id.Bluetoothsituation);
-            imageView = requireView().findViewById(R.id.Bluetoothsituationimage);
+            frameLayout = requireView().findViewById(R.id.situation_bg_bluetooth);
+            textView = requireView().findViewById(R.id.BluetoothSituation);
+            imageView = requireView().findViewById(R.id.BluetoothSituationImage);
         } catch (NullPointerException e) {
             Log.d("HomeFragment", "updateUiState: view is null");
             return false;
@@ -156,17 +159,17 @@ public class HomeFragment extends Fragment implements OnEventListener {
             updateBluetoothSituation(BluetoothConnect);
             return false;
         }
-        String connect = "接続中";
-        String disconnect = "切断中";
+        final String CONNECT = "接続中";
+        final String DISCONNECT = "切断中";
         if (BluetoothConnect) {
             //接続状態にする
             frameLayout.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
-            textView.setText(connect);
+            textView.setText(CONNECT);
             imageView.setVisibility(View.GONE);
         } else {
             //降車状態にする
             frameLayout.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
-            textView.setText(disconnect);
+            textView.setText(DISCONNECT);
             imageView.setVisibility(View.VISIBLE);
         }
 

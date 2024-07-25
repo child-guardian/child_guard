@@ -49,7 +49,7 @@
         </FrameLayout>
 
         <FrameLayout
-            android:id="@+id/situation_bg2"
+            android:id="@+id/situation_bg_bluetooth"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
@@ -58,7 +58,7 @@
             android:background="@drawable/frame_style">
 
             <TextView
-                android:id="@+id/Bluetoothsituation"
+                android:id="@+id/BluetoothSituation"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
@@ -75,7 +75,7 @@
                 android:textAlignment="center" />
 
             <ImageView
-                android:id="@+id/Bluetoothsituationimage"
+                android:id="@+id/BluetoothSituationImage"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_marginTop="50dp"
