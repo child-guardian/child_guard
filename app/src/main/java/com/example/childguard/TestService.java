@@ -27,6 +27,8 @@ import androidx.core.app.NotificationManagerCompat;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
+import org.checkerframework.checker.index.qual.LengthOf;
+
 public class TestService extends Service {
 
     private final Handler handler = new Handler();
@@ -73,7 +75,7 @@ public class TestService extends Service {
     private static final NotificationContent REPORTED_NOTIFICATION =
             new NotificationContent("子供の置き去りをしていませんか？", "第三者からの通報が行われました。", REPORTED_CHANNEL_ID, 2);
     private static final NotificationContent BLUETOOTH_NOTIFICATION =
-            new NotificationContent("子供の置き去りをしていませんか？", "Bluetoothと車の切断から5分が経過しました", BT_ALERT_CHANNEL_ID, 3);
+            new NotificationContent("子供の置き去りをしていませんか？🐈", "Bluetoothと車の切断から5分が経過しました", BT_ALERT_CHANNEL_ID, 3);
 
     private String userId = null;
 
@@ -315,12 +317,17 @@ public class TestService extends Service {
                 Log.d("BT_Judge", "Not registered device");
                 return;
             }
-            boolean isInCar = getSharedPreferences("Bluetooth_situation", MODE_PRIVATE).getBoolean("isInCarPref", false);
+            boolean isInCar = !getSharedPreferences("app_situation", MODE_PRIVATE).getBoolean("change", false);
             if (!isInCar) {
                 Log.d("BT_Judge", "Not in car");
                 return;
             }
             // -----------------------------------------------------
+
+            // debug log
+            Log.d("BT", "Bluetooth device found: " + deviceHardwareAddress);
+            Log.d("BT", "Registered device: " + registeredId);
+            Log.d("BT", "Is in car: " + isInCar);
 
             String action = intent.getAction(); // may need to chain this to a recognizing function
             if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
