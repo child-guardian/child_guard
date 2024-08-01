@@ -167,7 +167,7 @@ public class HomeFragment extends Fragment implements OnEventListener {
             textView.setText(CONNECT);
             imageView.setVisibility(View.GONE);
         } else {
-            //降車状態にする
+            //切断状態にする
             frameLayout.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
             textView.setText(DISCONNECT);
             imageView.setVisibility(View.VISIBLE);

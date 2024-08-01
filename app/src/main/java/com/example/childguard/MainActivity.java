@@ -441,30 +441,33 @@ public class MainActivity extends AppCompatActivity {
                 }
                 e.apply();
 
-            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//bluetoothが切断されたときに乗車状態のとき
-
-                //Do something if disconnected
+            }else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//bluetoothが切断されたときに乗車状態のとき
+//
+//                //Do something if disconnected
                 //デバイスが切断されたときの処理
                 changeBluetooth(false);
-                if (deviceHardwareAddress.equals(registeredId)) {
-                    // 5分待機する
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
-                                NotificationBluetooth(getApplicationContext());//通知を行うメソッド
-                            }
-                        }
-
-                    }, 5 * 1000); // 5分をミリ秒に変換
-                }
-            } else {
-                Log.d("BT", " Device disconnected");
+//                if (deviceHardwareAddress.equals(registeredId)) {
+//                    // 5分待機する
+//                    Handler handler = new Handler();
+//                    handler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
+//                                NotificationBluetooth(getApplicationContext());//通知を行うメソッド
+//                            }
+//                        }
+//
+//                    }, 5 * 1000); // 5分をミリ秒に変換
+//                }
+//            } else {
+//                Log.d("BT", " Device disconnected");
             }
         }
     };
 
+    /**
+     * Bluetoothの接続状態を変更するメソッド
+     */
     public void changeBluetooth(boolean actual) {
         getSharedPreferences("Bluetooth_situation", MODE_PRIVATE).edit().putBoolean("status", actual).apply();
     }
