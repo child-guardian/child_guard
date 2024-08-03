@@ -31,6 +31,9 @@ public class HomeFragment extends Fragment implements OnEventListener {
     private String str_key;
     private String mParam2;
 
+    final String GET_ON = "\n乗車状態";
+    final String GET_OFF = "\n降車状態";
+
 
     public HomeFragment() {
         // Required empty public constructor
@@ -107,6 +110,9 @@ public class HomeFragment extends Fragment implements OnEventListener {
         transaction.commit();
     }
 
+    /**
+     * 乗車状態の画面を切り替える
+     */
     private boolean updateUiState(boolean isInCar) {
         Log.d("HomeFragment", "updateUiState: called");
         // Init
@@ -124,16 +130,15 @@ public class HomeFragment extends Fragment implements OnEventListener {
             updateUiState(isInCar);
             return false;
         }
-        String get_on = "\n乗車状態";
-        String get_off = "\n降車状態";
+
         if (!isInCar) {
             //乗車状態にする
             fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
-            tv.setText(get_on);
+            tv.setText(GET_ON);
         } else {
             //降車状態にする
             fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
-            tv.setText(get_off);
+            tv.setText(GET_OFF);
         }
 
         return true;
@@ -167,7 +172,7 @@ public class HomeFragment extends Fragment implements OnEventListener {
             textView.setText(CONNECT);
             imageView.setVisibility(View.GONE);
         } else {
-            //降車状態にする
+            //切断状態にする
             frameLayout.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style, null));
             textView.setText(DISCONNECT);
             imageView.setVisibility(View.VISIBLE);

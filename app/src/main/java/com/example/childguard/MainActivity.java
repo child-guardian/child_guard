@@ -240,8 +240,10 @@ public class MainActivity extends AppCompatActivity {
             initNotification(mDocRef);//現在の位置を引数に initNotification()を処理
         }
     }
-
-    public void ResetReported() {//FireBaseのisReportedをfalseに初期化するメソッド
+    /**
+     * FireBaseのisReportedをfalseに初期化するメソッド
+     */
+    public void ResetReported() {
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("app_situation", MODE_PRIVATE);
         String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
@@ -252,6 +254,9 @@ public class MainActivity extends AppCompatActivity {
         isReported.update("isReported", false).addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
     }
 
+    /**
+     * 乗車状態の変更
+     */
     public void changeIsInCar() {
         //共有プリファレンス全体の準備
         SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("app_situation", MODE_PRIVATE);
@@ -272,6 +277,9 @@ public class MainActivity extends AppCompatActivity {
         E.apply();
     }
 
+    /**
+     * 第三者通知に関する設定のメソッド
+     */
     public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
         int importance = NotificationManager.IMPORTANCE_DEFAULT;
         //通知チャネルの実装
@@ -280,9 +288,11 @@ public class MainActivity extends AppCompatActivity {
 
         NotificationManager notificationManager = getSystemService(NotificationManager.class);
         notificationManager.createNotificationChannel(channel);
-
     }
 
+    /**
+     * 第三者通知を行うメソッド
+     */
     public void Notification(Context context) {//実際に通知を行うメソッド
         final String CHANNEL_ID = "my_channel_id";
         // 通知がクリックされたときに送信されるIntent
@@ -441,30 +451,33 @@ public class MainActivity extends AppCompatActivity {
                 }
                 e.apply();
 
-            } else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//bluetoothが切断されたときに乗車状態のとき
-
-                //Do something if disconnected
+            }else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//bluetoothが切断されたときに乗車状態のとき
+//
+//                //Do something if disconnected
                 //デバイスが切断されたときの処理
                 changeBluetooth(false);
-                if (deviceHardwareAddress.equals(registeredId)) {
-                    // 5分待機する
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
-                                NotificationBluetooth(getApplicationContext());//通知を行うメソッド
-                            }
-                        }
-
-                    }, 5 * 1000); // 5分をミリ秒に変換
-                }
-            } else {
-                Log.d("BT", " Device disconnected");
+//                if (deviceHardwareAddress.equals(registeredId)) {
+//                    // 5分待機する
+//                    Handler handler = new Handler();
+//                    handler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
+//                                NotificationBluetooth(getApplicationContext());//通知を行うメソッド
+//                            }
+//                        }
+//
+//                    }, 5 * 1000); // 5分をミリ秒に変換
+//                }
+//            } else {
+//                Log.d("BT", " Device disconnected");
             }
         }
     };
 
+    /**
+     * Bluetoothの接続状態を変更するメソッド
+     */
     public void changeBluetooth(boolean actual) {
         getSharedPreferences("Bluetooth_situation", MODE_PRIVATE).edit().putBoolean("status", actual).apply();
     }
