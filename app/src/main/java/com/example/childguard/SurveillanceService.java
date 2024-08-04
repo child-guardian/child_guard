@@ -27,9 +27,7 @@ import androidx.core.app.NotificationManagerCompat;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import org.checkerframework.checker.index.qual.LengthOf;
-
-public class TestService extends Service {
+public class SurveillanceService extends Service {
 
     private final Handler handler = new Handler();
     private Runnable notificationRunnable;
@@ -81,6 +79,7 @@ public class TestService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCommand: ");
         this.userId = getSharedPreferences("app_situation", MODE_PRIVATE).getString("ID", null);
         if (this.userId == null) {
             Log.d("onResume", "ID not initialized.");
@@ -256,7 +255,7 @@ public class TestService extends Service {
     private PendingIntent getPendingIntent(Context context) {
         Intent intent = new Intent(context, MainActivity.class);
         intent.setAction("OPEN_ACTIVITY");
-        return PendingIntent.getActivity(context, TestService.REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE);
+        return PendingIntent.getActivity(context, SurveillanceService.REQUEST_CODE, intent, PendingIntent.FLAG_IMMUTABLE);
     }
 
     /**
