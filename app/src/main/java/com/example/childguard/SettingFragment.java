@@ -3,6 +3,8 @@ package com.example.childguard;
 import static android.content.ContentValues.TAG;
 import static android.content.Context.MODE_PRIVATE;
 
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -95,6 +97,7 @@ public class SettingFragment extends Fragment {
                             SharedPreferences.Editor editor = sharedPreferences1.edit();
                             editor.putString("ID", documentReference.getId());
                             editor.apply();
+                            startTestService();
 
                             Toast.makeText(getActivity(), "初回登録", Toast.LENGTH_SHORT).show();
                             getParentFragmentManager().beginTransaction().addToBackStack(null).replace(R.id.fragmentContainerView, GenerateQrFragment.newInstance(documentReference.getId())).commit();
@@ -105,5 +108,12 @@ public class SettingFragment extends Fragment {
                         });
             }
         });
+    }
+    private void startTestService() {
+        Context context = getContext();
+        if (context != null) {
+            Intent serviceIntent = new Intent(context, SurveillanceService.class);
+            context.startForegroundService(serviceIntent);
+        }
     }
 }

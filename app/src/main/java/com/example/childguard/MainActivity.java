@@ -14,7 +14,6 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.Vibrator;
 import android.preference.PreferenceManager;
 import android.util.Log;
@@ -134,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         }
         registerReceiver(receiver, intentFilter);
 
-        startForegroundService(new Intent(this, TestService.class));
+        startForegroundService(new Intent(this, SurveillanceService.class));
 
     }
 
