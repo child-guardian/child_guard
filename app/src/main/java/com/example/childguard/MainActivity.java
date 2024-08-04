@@ -339,60 +339,52 @@ public class MainActivity extends AppCompatActivity {
         notificationManager.notify(R.string.app_name, builder.build());//通知の表示
     }
 
-
-    @Override
-    public void onStop() {//アプリをバックグラウンドにした時のメソッド
-        super.onStop();
-//        Intent intent = new Intent(getApplication(), TestService.class);
-//        startService(intent);//TestServiceを起動
-    }
-
-    public void NotificationBluetooth(Context context) {//実際に通知を行うメソッド
-        final String CHANNEL_ID = "my_channel_id";
-        // 通知がクリックされたときに送信されるIntent
-        Intent intent = new Intent(context, MainActivity.class);
-        intent.setAction("OPEN_ACTIVITY");
-        // PendingIntentの作成
-        int requestCode = 100;
-        int flags = 0;
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
-
-        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(2000);//バイブレーション
-
-        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
-                .setSmallIcon(android.R.drawable.ic_menu_info_details)
-                .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
-                .setContentText("Bluetoothと車の切断から5分が経過しました")//通知の本文
-                .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
-                .setAutoCancel(true)//通知をタップすると削除する
-                .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
-
-        // NotificationChannelの作成（Android 8.0以降）
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
-            if (notificationManager != null) {
-                NotificationChannel channel = new NotificationChannel(
-                        CHANNEL_ID,
-                        "Channel Name",
-                        NotificationManager.IMPORTANCE_HIGH
-                );
-
-                channel.setDescription("Channel Description");
-                channel.enableLights(true);
-                channel.setLightColor(Color.RED);
-                channel.enableVibration(true);
-                notificationManager.createNotificationChannel(channel);
-            }
-        }
-
-
-        NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-        notificationManager.notify(R.string.app_name, builder.build());//通知の表示
-    }
+//    public void NotificationBluetooth(Context context) {//実際に通知を行うメソッド
+//        final String CHANNEL_ID = "my_channel_id";
+//        // 通知がクリックされたときに送信されるIntent
+//        Intent intent = new Intent(context, MainActivity.class);
+//        intent.setAction("OPEN_ACTIVITY");
+//        // PendingIntentの作成
+//        int requestCode = 100;
+//        int flags = 0;
+//        PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
+//
+//        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(2000);//バイブレーション
+//
+//        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
+//                .setSmallIcon(android.R.drawable.ic_menu_info_details)
+//                .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
+//                .setContentText("Bluetoothと車の切断から5分が経過しました")//通知の本文
+//                .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
+//                .setAutoCancel(true)//通知をタップすると削除する
+//                .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
+//                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
+//
+//        // NotificationChannelの作成（Android 8.0以降）
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
+//            if (notificationManager != null) {
+//                NotificationChannel channel = new NotificationChannel(
+//                        CHANNEL_ID,
+//                        "Channel Name",
+//                        NotificationManager.IMPORTANCE_HIGH
+//                );
+//
+//                channel.setDescription("Channel Description");
+//                channel.enableLights(true);
+//                channel.setLightColor(Color.RED);
+//                channel.enableVibration(true);
+//                notificationManager.createNotificationChannel(channel);
+//            }
+//        }
+//
+//
+//        NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
+//        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+//            return;
+//        }
+//        notificationManager.notify(R.string.app_name, builder.build());//通知の表示
+//    }
 
 
     public void Bluetooth_status() {
@@ -431,9 +423,7 @@ public class MainActivity extends AppCompatActivity {
             String registeredId = PreferenceManager.getDefaultSharedPreferences(getApplicationContext()).getString("bluetooth_device_id", "none");
 
             if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
-                //Do something if connected
                 //Bluetoothデバイスが接続されたときの処理
-                changeBluetooth(true);
                 Log.d("BT", "Device connected");
 
                 Log.d("BT_Judge", "Registered: " + registeredId);
@@ -441,6 +431,7 @@ public class MainActivity extends AppCompatActivity {
                 if (deviceHardwareAddress.equals(registeredId)) {
                     //登録済みのデバイスだったときの処理
                     Log.d("BT_Judge", "登録済み");
+                    changeBluetooth(true);
                     e.putBoolean("connection_status", true);
 
                 } else {
@@ -450,26 +441,9 @@ public class MainActivity extends AppCompatActivity {
                 }
                 e.apply();
 
-            }else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//bluetoothが切断されたときに乗車状態のとき
-//
-//                //Do something if disconnected
-                //デバイスが切断されたときの処理
+            }else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+                //bluetoothデバイスが切断されたときの処理
                 changeBluetooth(false);
-//                if (deviceHardwareAddress.equals(registeredId)) {
-//                    // 5分待機する
-//                    Handler handler = new Handler();
-//                    handler.postDelayed(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action) && !isInCar) {//その後bluetoothを再接続したり降車状態になったりしていない＝置き去りが発生した可能性大
-//                                NotificationBluetooth(getApplicationContext());//通知を行うメソッド
-//                            }
-//                        }
-//
-//                    }, 5 * 1000); // 5分をミリ秒に変換
-//                }
-//            } else {
-//                Log.d("BT", " Device disconnected");
             }
         }
     };
