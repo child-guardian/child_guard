@@ -19,7 +19,7 @@
         app:layout_constraintTop_toTopOf="parent">
 
         <FrameLayout
-            android:id="@+id/situation_bg"
+            android:id="@+id/car_situation_bg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
@@ -37,7 +37,7 @@
                 android:textSize="25dp" />
 
             <TextView
-                android:id="@+id/situation"
+                android:id="@+id/car_situation"
                 android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:layout_marginTop="10dp"

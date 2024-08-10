@@ -83,6 +83,7 @@ public class HomeFragment extends Fragment implements OnEventListener {
         super.onResume();
         Log.d("HomeFragment", "onResume: called");
         this.updateUiState(getIsInCarLocal());
+        Log.d("isIncar", "onResume: " + getIsInCarLocal());
         this.updateBluetoothSituation(isBluetoothConnected());
     }
 
@@ -93,7 +94,9 @@ public class HomeFragment extends Fragment implements OnEventListener {
 
     private boolean getIsInCarLocal() {
         SharedPreferences pref = requireActivity().getSharedPreferences("app_situation", requireActivity().MODE_PRIVATE);
-        return pref.getBoolean("isInCar", false);
+        Boolean isInCar = pref.getBoolean("isInCarPref", false);
+        Log.d("isInCarPref","isInCar"+ isInCar);
+        return pref.getBoolean("isInCarPref", false);
     }
 
     //画面遷移メソッド
@@ -119,8 +122,8 @@ public class HomeFragment extends Fragment implements OnEventListener {
         TextView tv;
         FrameLayout fl;
         try {
-            tv = requireView().findViewById(R.id.situation);
-            fl = requireView().findViewById(R.id.situation_bg);
+            tv = requireView().findViewById(R.id.car_situation);
+            fl = requireView().findViewById(R.id.car_situation_bg);
         } catch (NullPointerException e) {
             Log.d("HomeFragment", "updateUiState: view is null");
             return false;
