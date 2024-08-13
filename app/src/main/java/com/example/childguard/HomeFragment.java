@@ -99,20 +99,6 @@ public class HomeFragment extends Fragment  {
         return isInCar;
     }
 
-    //画面遷移メソッド
-    private void replaceFragment(Fragment fragment) {
-        // フラグメントマネージャーの取得
-        FragmentManager manager = getParentFragmentManager(); // アクティビティではgetSupportFragmentManager()?
-        // フラグメントトランザクションの開始
-        FragmentTransaction transaction = manager.beginTransaction();
-        // レイアウトをfragmentに置き換え（追加）
-        transaction.replace(R.id.fragmentContainerView, fragment);
-        // 置き換えのトランザクションをバックスタックに保存する
-        transaction.addToBackStack(null);
-        // フラグメントトランザクションをコミット
-        transaction.commit();
-    }
-
     /**
      * 乗車状態の画面を切り替える
      */
@@ -185,12 +171,5 @@ public class HomeFragment extends Fragment  {
         return true;
     }
 
-
-//    @Override
-//    public boolean onEvent(boolean isInCar) {//乗車状態と降車状態の変更を受け取ってupdateUiState()に渡す
-//        Log.d("HomeFragment", "onEvent: called");
-//
-//        return updateUiState(isInCar);
-//    }
 }
 

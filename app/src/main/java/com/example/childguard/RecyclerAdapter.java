@@ -53,15 +53,15 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ItemVi
                     .setMessage("このデバイスを登録しますか？")
                     .setPositiveButton(android.R.string.ok, (dialog, which) -> {
                         // OK button pressed
-                        Toast.makeText(v.getContext(), "OK button clicked", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(v.getContext(), "OK button clicked", Toast.LENGTH_SHORT).show();
                         //共有プリファレンスに保存
                         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this.applicationContext);
                         sharedPreferences.edit().putString("bluetooth_device_id", deviceList.get(position)[1]).apply();
                         sharedPreferences.edit().putString("bluetooth_device_name", deviceList.get(position)[0]).apply();
-                        Toast.makeText(v.getContext(), PreferenceManager.getDefaultSharedPreferences(this.applicationContext).getString("bluetooth_device_id", "none"), Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(v.getContext(), PreferenceManager.getDefaultSharedPreferences(this.applicationContext).getString("bluetooth_device_id", "none"), Toast.LENGTH_SHORT).show();
 
                         TextView textView = this.parentView.findViewById(R.id.registered_device);
-                        textView.setText(PreferenceManager.getDefaultSharedPreferences(this.applicationContext).getString("bluetooth_device_name", "none"));
+                        textView.setText(PreferenceManager.getDefaultSharedPreferences(this.applicationContext).getString("bluetooth_device_name", "登録されていません"));
 
 
                     })
