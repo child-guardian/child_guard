@@ -20,7 +20,7 @@ import androidx.fragment.app.FragmentTransaction;
  * Use the {@link HomeFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class HomeFragment extends Fragment implements OnEventListener {
+public class HomeFragment extends Fragment  {
 
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
@@ -82,8 +82,8 @@ public class HomeFragment extends Fragment implements OnEventListener {
     public void onResume() {
         super.onResume();
         Log.d("HomeFragment", "onResume: called");
-        this.updateUiState(getIsInCarLocal());
         Log.d("isIncar", "onResume: " + getIsInCarLocal());
+        this.updateUiState(getIsInCarLocal());
         this.updateBluetoothSituation(isBluetoothConnected());
     }
 
@@ -96,7 +96,7 @@ public class HomeFragment extends Fragment implements OnEventListener {
         SharedPreferences pref = requireActivity().getSharedPreferences("app_situation", requireActivity().MODE_PRIVATE);
         Boolean isInCar = pref.getBoolean("isInCarPref", false);
         Log.d("isInCarPref","isInCar"+ isInCar);
-        return pref.getBoolean("isInCarPref", false);
+        return isInCar;
     }
 
     //画面遷移メソッド
@@ -118,6 +118,7 @@ public class HomeFragment extends Fragment implements OnEventListener {
      */
     private boolean updateUiState(boolean isInCar) {
         Log.d("HomeFragment", "updateUiState: called");
+        Log.d("HomeFragment", "updateUiState:"+isInCar);
         // Init
         TextView tv;
         FrameLayout fl;
@@ -134,7 +135,7 @@ public class HomeFragment extends Fragment implements OnEventListener {
             return false;
         }
 
-        if (!isInCar) {
+        if (isInCar) {
             //乗車状態にする
             fl.setBackground(ResourcesCompat.getDrawable(getResources(), R.drawable.frame_style_orange, null));
             tv.setText(GET_ON);
@@ -150,7 +151,7 @@ public class HomeFragment extends Fragment implements OnEventListener {
     /**
      * Bluetoothの接続状態の画面を切り替える
      */
-    private boolean updateBluetoothSituation(Boolean BluetoothConnect) {
+    boolean updateBluetoothSituation(Boolean BluetoothConnect) {
         FrameLayout frameLayout;
         TextView textView;
         ImageView imageView;
@@ -185,11 +186,11 @@ public class HomeFragment extends Fragment implements OnEventListener {
     }
 
 
-    @Override
-    public boolean onEvent(boolean isInCar) {//乗車状態と降車状態の変更を受け取ってupdateUiState()に渡す
-        Log.d("HomeFragment", "onEvent: called");
-
-        return updateUiState(isInCar);
-    }
+//    @Override
+//    public boolean onEvent(boolean isInCar) {//乗車状態と降車状態の変更を受け取ってupdateUiState()に渡す
+//        Log.d("HomeFragment", "onEvent: called");
+//
+//        return updateUiState(isInCar);
+//    }
 }
 
