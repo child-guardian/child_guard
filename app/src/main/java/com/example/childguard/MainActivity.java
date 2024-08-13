@@ -71,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        Log.d(TAG, "onCreate: called");
         //Bluetooth接続判定用
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         SharedPreferences.Editor e = pref.edit();
@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
         }
         registerReceiver(receiver, intentFilter);
 
-        startForegroundService(new Intent(this, SurveillanceService.class));
+        //startForegroundService(new Intent(this, SurveillanceService.class));
 
     }
 
@@ -184,46 +184,7 @@ public class MainActivity extends AppCompatActivity {
         E2.apply();
     }
 
-    private void updateIsInCarPref(DocumentReference mDocRef) {//サイト上で押されたボタンの管理
-        // 共有プリファレンス全体の準備
-        SharedPreferences sharedPreferences = getSharedPreferences("app_situation", MODE_PRIVATE);
-        Log.d("MainActivity", "updateIsInCarPref: called");
 
-        mDocRef.addSnapshotListener(this, (documentSnapshot, e) -> {
-
-            Log.d("nt", "イベント開始");
-            //共有プリファレンス 書き込みの準備
-            SharedPreferences.Editor E = sharedPreferences.edit();
-            //車の乗り降りを管理するtrue=乗車、false=降車
-            if (documentSnapshot.exists()) {//exists()でdocumentSnapshotの中のファイルの存在の確認
-//                Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.fragmentContainerView);
-//                Boolean isInCar = sharedPreferences.getBoolean("isInCarPref", false);//現在の乗降状態を保存する共有プリファレンス
-                E.putBoolean("isInCarPref", documentSnapshot.getBoolean("isInCar"));//乗降状態の更新
-                E.apply();//確定処理
-                Log.d("nt", "レスポンスを検知しました1");
-                //FireBaseで更新された情報の判定
-//                if (!documentSnapshot.getBoolean("isReported")) {//isReportedがfalseのとき=サイト上で保護者ボタンが押されたとき
-//                    if (fragment instanceof HomeFragment) {//fragmentがHomeFragmentのインスタンスかの判定
-////                        changes-situation();//  changes-situation()メソッドを処理→アプリ側の乗降状態を変化
-////                        ((HomeFragment) fragment).onEvent(!isInCar);
-//                    }
-//                } else if (isInCar) {//第三者ボタンが押されたときにisInCarがtrueのとき＝乗車状態のとき→いたずら防止
-//                    int importance = NotificationManager.IMPORTANCE_DEFAULT;
-//                    NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通報通知", importance);
-//                    channel.setDescription("第3者からの通報を検知しました");
-//                    NotificationManager notificationManager = getSystemService(NotificationManager.class);
-//                    notificationManager.createNotificationChannel(channel);
-//                    Log.d("nt", "レスポンスを検知しました2");
-//                    NotificationSetting();//通知に関する設定のメソッド
-//                    Notification(getApplicationContext());//通知を行うメソッド
-//                    ResetReported();// ResetReported();メソッドを処理→FireBaseのisReportedをfalseにする
-//                } else {//第三者ボタンが押されたときにisInCarがfalseのとき=降車状態のとき
-//                    ResetReported();// ResetReported();を処理→FireBaseのisReportedをfalseにする
-//                    Log.d("nt", "何もなし");
-//                }
-            }
-        });
-    }
 
     private boolean hasPermissions() {
         return ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED &&
@@ -279,132 +240,6 @@ public class MainActivity extends AppCompatActivity {
             //updateIsInCarPref(mDocRef);//現在の位置を引数に initNotification()を処理
         }
     }
-    /**
-     * FireBaseのisReportedをfalseに初期化するメソッド
-     */
-//    public void ResetReported() {
-//        //共有プリファレンス全体の準備
-//        SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences("app_situation", MODE_PRIVATE);
-//        String IdPref = sharedPreferences.getString("ID", null);//アプリに記録されているIDの取得
-//        db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
-//        DocumentReference isReported = db.collection("status").document(IdPref);//更新するドキュメントとの紐づけ
-//        Map<String, Boolean> DEFAULT_ITEM = new HashMap<>();//mapの宣言
-//        //isReportedをfalseに更新
-//        isReported.update("isReported", false).addOnSuccessListener(unused -> Log.d(TAG, "DocumentSnapshot successfully updated!")).addOnFailureListener(e -> Log.w(TAG, "Error updating document", e));
-//    }
-
-
-
-    /**
-     * 第三者通知に関する設定のメソッド
-     */
-//    public void NotificationSetting() {//通知に関する設定の処理を行うメソッド
-//        int importance = NotificationManager.IMPORTANCE_DEFAULT;
-//        //通知チャネルの実装
-//        NotificationChannel channel = new NotificationChannel("CHANNEL_ID", "通知", importance);
-//        channel.setDescription("第三者により置き去りの通報が行われたときに通知します。");
-//
-//        NotificationManager notificationManager = getSystemService(NotificationManager.class);
-//        notificationManager.createNotificationChannel(channel);
-//    }
-
-    /**
-     * 第三者通知を行うメソッド
-     */
-//    public void Notification(Context context) {//実際に通知を行うメソッド
-//        final String CHANNEL_ID = "my_channel_id";
-//        // 通知がクリックされたときに送信されるIntent
-//        Intent intent = new Intent(context, MainActivity.class);
-//        intent.setAction("OPEN_ACTIVITY");
-//        // PendingIntentの作成
-//        int requestCode = 100;
-//        int flags = 0;
-//        PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
-//
-//        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(2000);//バイブレーション
-//
-//        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
-//                .setSmallIcon(android.R.drawable.ic_menu_info_details)
-//                .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
-//                .setContentText("第三者からの通報が行われました。")//通知の本文
-//                .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
-//                .setAutoCancel(true)//通知をタップすると削除する
-//                .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
-//                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
-//
-//        // NotificationChannelの作成（Android 8.0以降）
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
-//            if (notificationManager != null) {
-//                NotificationChannel channel = new NotificationChannel(
-//                        CHANNEL_ID,
-//                        "Channel Name",
-//                        NotificationManager.IMPORTANCE_HIGH
-//                );
-//
-//                channel.setDescription("Channel Description");
-//                channel.enableLights(true);
-//                channel.setLightColor(Color.RED);
-//                channel.enableVibration(true);
-//                notificationManager.createNotificationChannel(channel);
-//            }
-//        }
-//
-//
-//        NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
-//        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-//            return;
-//        }
-//        notificationManager.notify(R.string.app_name, builder.build());//通知の表示
-//    }
-
-//    public void NotificationBluetooth(Context context) {//実際に通知を行うメソッド
-//        final String CHANNEL_ID = "my_channel_id";
-//        // 通知がクリックされたときに送信されるIntent
-//        Intent intent = new Intent(context, MainActivity.class);
-//        intent.setAction("OPEN_ACTIVITY");
-//        // PendingIntentの作成
-//        int requestCode = 100;
-//        int flags = 0;
-//        PendingIntent pendingIntent = PendingIntent.getActivity(context, requestCode, intent, flags | PendingIntent.FLAG_IMMUTABLE);
-//
-//        ((Vibrator) getSystemService(Context.VIBRATOR_SERVICE)).vibrate(2000);//バイブレーション
-//
-//        @SuppressLint("NotificationTrampoline") NotificationCompat.Builder builder = new NotificationCompat.Builder(context, "CHANNEL_ID")
-//                .setSmallIcon(android.R.drawable.ic_menu_info_details)
-//                .setContentTitle("子供の置き去りをしていませんか？")//通知のタイトル
-//                .setContentText("Bluetoothと車の切断から5分が経過しました")//通知の本文
-//                .setContentIntent(pendingIntent)//通知をタップするとActivityへ移動する
-//                .setAutoCancel(true)//通知をタップすると削除する
-//                .setPriority(NotificationCompat.PRIORITY_HIGH) // プライオリティを高く設定
-//                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC); // ロック画面に表示する
-//
-//        // NotificationChannelの作成（Android 8.0以降）
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            NotificationManager notificationManager = context.getSystemService(NotificationManager.class);
-//            if (notificationManager != null) {
-//                NotificationChannel channel = new NotificationChannel(
-//                        CHANNEL_ID,
-//                        "Channel Name",
-//                        NotificationManager.IMPORTANCE_HIGH
-//                );
-//
-//                channel.setDescription("Channel Description");
-//                channel.enableLights(true);
-//                channel.setLightColor(Color.RED);
-//                channel.enableVibration(true);
-//                notificationManager.createNotificationChannel(channel);
-//            }
-//        }
-//
-//
-//        NotificationManager notificationManager = (NotificationManager) context.getSystemService(context.NOTIFICATION_SERVICE);
-//        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-//            return;
-//        }
-//        notificationManager.notify(R.string.app_name, builder.build());//通知の表示
-//    }
-
 
     public void Bluetooth_status() {
         IntentFilter intentFilter = new IntentFilter();
@@ -422,10 +257,6 @@ public class MainActivity extends AppCompatActivity {
 
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
-
-
-        //PreferenceManager.getDefaultSharedPreferences("myPreferences",Context.MODE_PRIVATE);
-
         @Override
         public void onReceive(Context context, Intent intent) {
             SharedPreferences pref = getSharedPreferences("Bluetooth_situation", MODE_PRIVATE);
@@ -452,14 +283,9 @@ public class MainActivity extends AppCompatActivity {
                     Log.d("BT_Judge", "登録済み");
                     changeBluetooth(true);
                     e.putBoolean("connection_status", true);
-                    if(homeFragment == null ){
-                        Log.d("bluetooth", "homeFragment: null");
-                    }
-
                     if(homeFragment != null && homeFragment.isVisible()){
                         homeFragment.updateBluetoothSituation(true);
                     }
-
                 } else {
                     //登録していないデバイスだったときの処理
                     Log.d("BT_Judge", "未登録");
@@ -470,7 +296,6 @@ public class MainActivity extends AppCompatActivity {
             }else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
                 //bluetoothデバイスが切断されたときの処理
                 changeBluetooth(false);
-                Log.d("bluetooth", "homeFragment: "+homeFragment);
                 if(homeFragment != null && homeFragment.isVisible()){
                     homeFragment.updateBluetoothSituation(false);
                 }
