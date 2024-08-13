@@ -220,8 +220,9 @@ public class SurveillanceService extends Service {
                 editor.apply();
 
                 Log.d("nt", "レスポンスを検知しました1");
+                Log.d("SurveillanceService", "Bluetooth: "+sharedPreferences.getBoolean("BluetoothStatusLocal", false));
 
-                if (isInCar) {
+                if (isInCar&&!sharedPreferences.getBoolean("BluetoothStatusLocal", false)) {
                     if (Boolean.TRUE.equals(documentSnapshot.getBoolean("isReported"))) {
                         resetReported();
                         sendNotification(getApplicationContext(), REPORTED_NOTIFICATION);
@@ -316,27 +317,32 @@ public class SurveillanceService extends Service {
                 Log.d("BT_Judge", "Not registered device");
                 return;
             }
-            boolean isInCar = !getSharedPreferences("app_situation", MODE_PRIVATE).getBoolean("change", false);
-            if (!isInCar) {
-                Log.d("BT_Judge", "Not in car");
-                return;
-            }
+            boolean isInCar = getSharedPreferences("app_situation", MODE_PRIVATE).getBoolean("change", false);
+//            if (!isInCar) {
+//                Log.d("BT_Judge", "Not in car");
+//                return;
+//            }
             // -----------------------------------------------------
 
             // debug log
             Log.d("BT", "Bluetooth device found: " + deviceHardwareAddress);
             Log.d("BT", "Registered device: " + registeredId);
             Log.d("BT", "Is in car: " + isInCar);
-
+            SharedPreferences sharedPreferences = SurveillanceService.this.getSharedPreferences("app_situation", MODE_PRIVATE);
+            SharedPreferences.Editor E = sharedPreferences.edit();
             String action = intent.getAction(); // may need to chain this to a recognizing function
             if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)) {
+                E.putBoolean("BluetoothStatusLocal", false);
                 // bluetoothが切断されたときに乗車状態のとき
-                notificationRunnable = () -> {
-                    // 5分経過した時点でも車に乗っていない場合
-                    sendNotification(context, BLUETOOTH_NOTIFICATION);
-                };
+                if (isInCar) {
+                    notificationRunnable = () -> {
+                        // 5分経過した時点でも車に乗っていない場合
+                        sendNotification(context, BLUETOOTH_NOTIFICATION);
+                    };
+                }
                 handler.postDelayed(notificationRunnable, NOTIFICATION_DELAY);
             } else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)) {
+                E.putBoolean("BluetoothStatusLocal", true);
                 // 再接続された場合、通知をキャンセルする
                 if (notificationRunnable != null) {
                     handler.removeCallbacks(notificationRunnable);
@@ -344,6 +350,8 @@ public class SurveillanceService extends Service {
                     Log.d("BT", "Notification canceled due to reconnection");
                 }
             }
+            E.apply();
+            Log.d("SurveillanceService:BT", "Bluetooth status: " + sharedPreferences.getBoolean("BluetoothStatusLocal", false));
         }
     };
 
