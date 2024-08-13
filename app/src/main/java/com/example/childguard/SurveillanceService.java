@@ -67,9 +67,9 @@ public class SurveillanceService extends Service {
     private static final String REPORTED_CHANNEL_ID = "child_guard_reported";
     private static final String BACKGROUND_CHANNEL_ID = "child_guard_background";
     private static final int REQUEST_CODE = 100;
-//    private static final int NOTIFICATION_DELAY = 5 * 60 * 1000; // 5 minutes
-    // DEBUG
-    private static final int NOTIFICATION_DELAY = 5 * 1000; // 15 seconds
+    private static final int NOTIFICATION_DELAY = 5 * 60 * 1000; // 5 minutes
+
+
     private static final NotificationContent REPORTED_NOTIFICATION =
             new NotificationContent("子供の置き去りをしていませんか？", "第三者からの通報が行われました。", REPORTED_CHANNEL_ID, 2);
     private static final NotificationContent BLUETOOTH_NOTIFICATION =
