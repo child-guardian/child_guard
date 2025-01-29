@@ -124,9 +124,8 @@ public class MainActivity extends AppCompatActivity {
 
         db = FirebaseFirestore.getInstance();//Firebaseとの紐づけ
 
-        // Check before registering receiver
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
-                != PackageManager.PERMISSION_GRANTED) {
+        String btPermission = getBluetoothConnectPermission();
+        if (ActivityCompat.checkSelfPermission(this, btPermission) != PackageManager.PERMISSION_GRANTED) {
             Log.d("BT", "No permission to connect bluetooth devices");
             return;
         } else {
@@ -143,6 +142,13 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         Log.d("MainActivity onResume", "called");
         firebaseLink();
+    }
+
+    // 権限チェック用ヘルパーメソッドを追加
+    private String getBluetoothConnectPermission() {
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) ?
+                Manifest.permission.BLUETOOTH_CONNECT :
+                Manifest.permission.BLUETOOTH;
     }
 
     /**
