@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.core.app.ActivityCompat;
@@ -23,6 +24,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -91,15 +93,36 @@ public class bluetooth_setupFragment extends Fragment {
         }
 
 
-        if (ActivityCompat.checkSelfPermission(requireActivity().getApplicationContext(), android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            return view;
+//        if (ActivityCompat.checkSelfPermission(requireActivity().getApplicationContext(), android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+//            // TODO: Consider calling
+//            //    ActivityCompat#requestPermissions
+//            // here to request the missing permissions, and then overriding
+//            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+//            //                                          int[] grantResults)
+//            // to handle the case where the user grants the permission. See the documentation
+//            // for ActivityCompat#requestPermissions for more details.
+//            return view;
+//        }
+
+        // >= Android 12
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+            if (ActivityCompat.checkSelfPermission(requireActivity().getApplicationContext(), android.Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
+                Log.w("Bluetooth", "Permission not granted(Android 12-)");
+                // show toast then force close the app (Workaround)
+                Toast.makeText(requireActivity().getApplicationContext(), "Bluetoothの権限が必須です!", Toast.LENGTH_SHORT).show();
+                requireActivity().finish();
+            } else {
+                Log.w("Bluetooth", "Permission granted(Android 12-)");
+            }
+        } else {
+            if (ActivityCompat.checkSelfPermission(requireActivity().getApplicationContext(), android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+                Log.w("Bluetooth", "Permission not granted(Android 12+)");
+                // show toast then force close the app (Workaround)
+                Toast.makeText(requireActivity().getApplicationContext(), "Bluetoothの権限が必須です!", Toast.LENGTH_SHORT).show();
+                requireActivity().finish();
+            } else {
+                Log.w("Bluetooth", "Permission granted(Android 12+)");
+            }
         }
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
 

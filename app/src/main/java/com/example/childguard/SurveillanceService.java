@@ -1,5 +1,6 @@
 package com.example.childguard;
 
+import android.Manifest;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -12,6 +13,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.VibrationEffect;
@@ -169,7 +171,8 @@ public class SurveillanceService extends Service {
      * @return Bluetoothの権限の有無 true: 許可されていない false: 許可されている
      */
     private boolean isNotBluetoothGranted() {
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
+        String btPermission = getBluetoothConnectPermission();
+        if (ActivityCompat.checkSelfPermission(this, btPermission) != PackageManager.PERMISSION_GRANTED) {
             Log.d(TAG, "Bluetoothの権限が許可されていません");
             return true;
         } else {
@@ -188,6 +191,16 @@ public class SurveillanceService extends Service {
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
 
         registerReceiver(receiver, intentFilter);
+    }
+
+    /**
+     * Bluetoothの接続権限を取得
+     * @return Bluetoothの接続権限
+     */
+    private String getBluetoothConnectPermission() {
+        return (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) ?
+                android.Manifest.permission.BLUETOOTH_CONNECT :
+                Manifest.permission.BLUETOOTH;
     }
 
     /**
