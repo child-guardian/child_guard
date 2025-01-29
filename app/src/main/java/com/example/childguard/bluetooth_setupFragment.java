@@ -108,7 +108,7 @@ public class bluetooth_setupFragment extends Fragment {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
             if (ActivityCompat.checkSelfPermission(requireActivity().getApplicationContext(), android.Manifest.permission.BLUETOOTH) != PackageManager.PERMISSION_GRANTED) {
                 Log.w("Bluetooth", "Permission not granted(Android 12-)");
-                // show toast then force close the app
+                // show toast then force close the app (Workaround)
                 Toast.makeText(requireActivity().getApplicationContext(), "Bluetoothの権限が必須です!", Toast.LENGTH_SHORT).show();
                 requireActivity().finish();
             } else {
@@ -117,7 +117,7 @@ public class bluetooth_setupFragment extends Fragment {
         } else {
             if (ActivityCompat.checkSelfPermission(requireActivity().getApplicationContext(), android.Manifest.permission.BLUETOOTH_CONNECT) != PackageManager.PERMISSION_GRANTED) {
                 Log.w("Bluetooth", "Permission not granted(Android 12+)");
-                // show toast then force close the app
+                // show toast then force close the app (Workaround)
                 Toast.makeText(requireActivity().getApplicationContext(), "Bluetoothの権限が必須です!", Toast.LENGTH_SHORT).show();
                 requireActivity().finish();
             } else {
