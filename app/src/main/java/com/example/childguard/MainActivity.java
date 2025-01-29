@@ -130,10 +130,11 @@ public class MainActivity extends AppCompatActivity {
             return;
         } else {
             Log.d("BT", "Permission to connect bluetooth devices granted");
-        }
-        registerReceiver(receiver, intentFilter);
 
-        startForegroundService(new Intent(this, SurveillanceService.class));
+            registerReceiver(receiver, intentFilter);
+
+            startForegroundService(new Intent(this, SurveillanceService.class));
+        }
     }
 
 
