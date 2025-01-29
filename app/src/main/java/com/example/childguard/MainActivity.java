@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity {
         }
         registerReceiver(receiver, intentFilter);
 
-        //startForegroundService(new Intent(this, SurveillanceService.class));
+        startForegroundService(new Intent(this, SurveillanceService.class));
     }
 
 
