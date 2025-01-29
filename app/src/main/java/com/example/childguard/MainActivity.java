@@ -292,8 +292,8 @@ public class MainActivity extends AppCompatActivity {
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
         intentFilter.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
 
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.BLUETOOTH_CONNECT)
-                != PackageManager.PERMISSION_GRANTED) {
+        String btPermission = getBluetoothConnectPermission();
+        if (ActivityCompat.checkSelfPermission(this, btPermission) != PackageManager.PERMISSION_GRANTED) {
             Log.d("BT", "No permission to connect bluetooth devices");
             return;
         } else {
@@ -310,8 +310,8 @@ public class MainActivity extends AppCompatActivity {
             String action = intent.getAction();
             BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
             boolean isInCar = pref.getBoolean("isInCarPref", false);
-            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT)
-                    != PackageManager.PERMISSION_GRANTED) {
+            String btPermission = getBluetoothConnectPermission();
+            if (ActivityCompat.checkSelfPermission(context, btPermission) != PackageManager.PERMISSION_GRANTED) {
                 Log.d("BT", "No permission to connect bluetooth devices");
                 return;
             }
