@@ -65,6 +65,7 @@
         android:layout_height="wrap_content"
         android:text="QRコードは株式会社デンソーウェーブの登録商標です"
         android:textColor="@color/black"
+        android:textSize="12sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
